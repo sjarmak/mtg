@@ -23,6 +23,18 @@
  * them new ids. Before the second change in `Hand.ts` it scrolled to its last
  * arrival like a draw; now it starts at its first card, as the deal does.
  *
+ * Cards leaving give the scroll back. On the live lab a draw scrolled the row
+ * to its seventh card, that card was played, and the row kept its 83px because
+ * the empty slots after the hand keep it as wide as it was: six cards that fit
+ * unscrolled were drawn with the first one cut to its last 9px. Here the eighth
+ * card is drawn and three are played:
+ *
+ *     1024x768   before: five held, row still scrolled, first card out of view
+ *                after:  row back to 0, all five in view
+ *
+ * And when three leave and one is drawn in the same render, the row settles
+ * before it reveals, so it keeps no scroll past the new last card.
+ *
  * The page is a live React mount (`./live-hand-draw-entry.ts`) because the
  * subject is an effect, which static markup never runs. No art, and the neutral
  * example set, so the verdict is about the repository (`AGENTS.md`).
@@ -51,6 +63,7 @@ const READ_ROW = `(() => {
     firstInView: slots.length > 0 && visible(slots[0]),
     lastInView: slots.length > 0 && visible(slots[slots.length - 1]),
     pageScrollY: window.scrollY,
+    pastLast: slots.length === 0 ? 0 : frame.right - slots[slots.length - 1].getBoundingClientRect().right,
   };
 })()`;
 
@@ -64,6 +77,8 @@ interface Row {
   readonly firstInView: boolean;
   readonly lastInView: boolean;
   readonly pageScrollY: number;
+  /** Row width in view after the last held card: scroll past the hand when the row is scrolled. */
+  readonly pastLast: number;
 }
 
 /**
@@ -81,7 +96,7 @@ const VIEWPORTS = [
 async function measure(
   chrome: Awaited<ReturnType<typeof launchChrome>>,
   directory: string,
-  which: 'draw' | 'mulligan',
+  which: 'draw' | 'mulligan' | 'play' | 'swap',
   viewport: (typeof VIEWPORTS)[number],
 ): Promise<{ readonly before: Row; readonly after: Row }> {
   const file = join(directory, `${which}.html`);
@@ -108,7 +123,7 @@ async function measure(
 
 describe('a card drawn into an overflowing hand is scrolled into view', () => {
   browserIt(
-    'scrolls the row to the drawn card, and not on an opening hand or a mulligan',
+    'scrolls the row to the drawn card, not on an opening hand or a mulligan, and back as cards leave',
     async () => {
       const directory = await mkdtemp(join(tmpdir(), 'mtg-hand-draw-'));
       let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
@@ -142,6 +157,33 @@ describe('a card drawn into an overflowing hand is scrolled into view', () => {
           expect(mulligan.after.held, where).toBe(7);
           expect(mulligan.after.scrollLeft, `${where}: the mulligan scrolled like a draw`).toBe(0);
           expect(mulligan.after.firstInView, where).toBe(true);
+
+          // Three cards played after the draw: five held, all of which fit, so
+          // the row gives back what the draw took.
+          const played = await measure(chrome, directory, 'play', viewport);
+          expect(played.before.held, where).toBe(8);
+          expect(played.after.held, where).toBe(5);
+          expect(played.after.firstInView, `${where}: cards left and the row kept its scroll`).toBe(true);
+          expect(played.after.lastInView, where).toBe(true);
+          if (viewport.overflows) {
+            expect(played.before.scrollLeft, `${where}: the draw left nothing to give back`).toBeGreaterThan(
+              0,
+            );
+          }
+
+          // Three gone and one drawn in one render: the new card is in view and
+          // the row keeps no scroll past it.
+          const swapped = await measure(chrome, directory, 'swap', viewport);
+          expect(swapped.after.held, where).toBe(6);
+          expect(swapped.after.lastInView, `${where}: the card drawn with the discard is out of view`).toBe(
+            true,
+          );
+          if (swapped.after.scrollLeft > 0) {
+            expect(
+              swapped.after.pastLast,
+              `${where}: the row kept scroll past its last card`,
+            ).toBeLessThanOrEqual(1);
+          }
         }
       } catch (error: unknown) {
         bodyError = error;

@@ -1,0 +1,161 @@
+{
+  "key": "088dce74b1fd436a3985b0e2a29fa17f",
+  "recordedAt": "2026-11-22T22:26:42.575Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Cogworker's Puzzleknot\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, create a 1/1 colorless Servo artifact creature token.\\n{1}{W}, Sacrifice this artifact: Create a 1/1 colorless Servo artifact creature token.\"},{\"id\":2,\"name\":\"Consulate Skygate\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Wall\",\"text\":\"Defender\\nReach (This creature can block creatures with flying.)\"},{\"id\":3,\"name\":\"Cultivator's Caravan\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"{T}: Add one mana of any color.\\nCrew 3 (Tap any number of creatures you control with total power 3 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":4,\"name\":\"Deadlock Trap\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters tapped.\\nWhen this artifact enters, you get {E}{E} (two energy counters).\\n{T}, Pay {E}: Tap target creature or planeswalker. Its activated abilities can't be activated this turn.\"},{\"id\":5,\"name\":\"Decoction Module\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature you control enters, you get {E} (an energy counter).\\n{4}, {T}: Return target creature you control to its owner's hand.\"},{\"id\":6,\"name\":\"Demolition Stomper\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"This Vehicle can't be blocked by creatures with power 2 or less.\\nCrew 5 (Tap any number of creatures you control with total power 5 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":7,\"name\":\"Dukhara Peafowl\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Bird\",\"text\":\"{U}: This creature gains flying until end of turn.\"},{\"id\":8,\"name\":\"Dynavolt Tower\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast an instant or sorcery spell, you get {E}{E} (two energy counters).\\n{T}, Pay {E}{E}{E}{E}{E}: This artifact deals 3 damage to any target.\"},{\"id\":9,\"name\":\"Eager Construct\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature enters, each player may scry 1. (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\"},{\"id\":10,\"name\":\"Electrostatic Pummeler\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature enters, you get {E}{E}{E} (three energy counters).\\nPay {E}{E}{E}: This creature gets +X/+X until end of turn, where X is its power.\"},{\"id\":11,\"name\":\"Fabrication Module\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you get one or more {E} (energy counters), put a +1/+1 counter on target creature you control.\\n{4}, {T}: You get {E}.\"},{\"id\":12,\"name\":\"Filigree Familiar\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Fox\",\"text\":\"When this creature enters, you gain 2 life.\\nWhen this creature dies, draw a card.\"},{\"id\":13,\"name\":\"Fireforger's Puzzleknot\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, it deals 1 damage to any target.\\n{2}{R}, Sacrifice this artifact: It deals 1 damage to any target.\"},{\"id\":14,\"name\":\"Fleetwheel Cruiser\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Trample, haste\\nWhen this Vehicle enters, it becomes an artifact creature until end of turn.\\nCrew 2 (Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":15,\"name\":\"Foundry Inspector\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Artifact spells you cast cost {1} less to cast.\"},{\"id\":16,\"name\":\"Ghirapur Orrery\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Each player may play an additional land on each of their turns.\\nAt the beginning of each player's upkeep, if that player has no cards in hand, that player draws three cards.\"},{\"id\":17,\"name\":\"Glassblower's Puzzleknot\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, scry 2, then you get {E}{E}. (You get two energy counters. To scry 2, look at the top two cards of your library, then put any number of them on the bottom and the rest on top in any order.)\\n{2}{U}, Sacrifice this artifact: Scry 2, then you get {E}{E}.\"},{\"id\":18,\"name\":\"Inventor's Goggles\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+2.\\nWhenever an Artificer you control enters, you may attach this Equipment to it.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":19,\"name\":\"Iron League Steed\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Haste\\nFabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":20,\"name\":\"Key to the City\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Discard a card: Up to one target creature can't be blocked this turn.\\nWhenever this artifact becomes untapped, you may pay {2}. If you do, draw a card.\"},{\"id\":21,\"name\":\"Metalspinner's Puzzleknot\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, you draw a card and you lose 1 life.\\n{2}{B}, Sacrifice this artifact: You draw a card and you lose 1 life.\"},{\"id\":22,\"name\":\"Metalwork Colossus\",\"manaCost\":\"{11}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This spell costs {X} less to cast, where X is the total mana value of noncreature artifacts you control.\\nSacrifice two artifacts: Return this card from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Multiform Wonder\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature enters, you get {E}{E}{E} (three energy counters).\\nPay {E}: This creature gains your choice of flying, vigilance, or lifelink until end of turn.\\nPay {E}: This creature gets +2/-2 or -2/+2 until end of turn.\"},{\"id\":24,\"name\":\"Narnam Cobra\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Snake\",\"text\":\"{G}: This creature gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":25,\"name\":\"Ovalchase Dragster\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Trample, haste\\nCrew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"fixing\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1316,
+      "cacheCreationInputTokens": 32839,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776729,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776729,
+      "pricedUsd": 0.776729,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776729 and its own usage prices at $0.776729"
+    }
+  }
+}

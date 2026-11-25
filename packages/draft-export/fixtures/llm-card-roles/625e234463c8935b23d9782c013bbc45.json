@@ -1,0 +1,161 @@
+{
+  "key": "625e234463c8935b23d9782c013bbc45",
+  "recordedAt": "2026-11-22T21:56:27.606Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Indulgent Tormentor\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nAt the beginning of your upkeep, draw a card unless target opponent sacrifices a creature of their choice or pays 3 life.\"},{\"id\":2,\"name\":\"Leeching Sliver\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Whenever a Sliver you control attacks, defending player loses 1 life.\"},{\"id\":3,\"name\":\"Liliana Vess\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Target player discards a card.\\n−2: Search your library for a card, then shuffle and put that card on top.\\n−8: Put all creature cards from all graveyards onto the battlefield under your control.\"},{\"id\":4,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"},{\"id\":5,\"name\":\"Necrobite\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains deathtouch until end of turn. Regenerate it. (The next time that creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":6,\"name\":\"Necrogen Scudder\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Flying\\nWhen this creature enters, you lose 3 life.\"},{\"id\":7,\"name\":\"Necromancer's Assistant\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, mill three cards.\"},{\"id\":8,\"name\":\"Necromancer's Stockpile\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}{B}, Discard a creature card: Draw a card. If the discarded card was a Zombie card, create a tapped 2/2 black Zombie creature token.\"},{\"id\":9,\"name\":\"Nightfire Giant\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"This creature gets +1/+1 as long as you control a Mountain.\\n{4}{R}: This creature deals 2 damage to any target.\"},{\"id\":10,\"name\":\"Ob Nixilis, Unshackled\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying, trample\\nWhenever an opponent searches their library, that player sacrifices a creature of their choice and loses 10 life.\\nWhenever another creature dies, put a +1/+1 counter on Ob Nixilis.\"},{\"id\":11,\"name\":\"Paragon of Open Graves\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Skeleton Warrior\",\"text\":\"Other black creatures you control get +1/+1.\\n{2}{B}, {T}: Another target black creature you control gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":12,\"name\":\"Rotfeaster Maggot\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"When this creature enters, exile target creature card from a graveyard. You gain life equal to that card's toughness.\"},{\"id\":13,\"name\":\"Shadowcloak Vampire\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Pay 2 life: This creature gains flying until end of turn. (It can't be blocked except by creatures with flying or reach.)\"},{\"id\":14,\"name\":\"Sign in Blood\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws two cards and loses 2 life.\"},{\"id\":15,\"name\":\"Soul of Innistrad\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Deathtouch\\n{3}{B}{B}: Return up to three target creature cards from your graveyard to your hand.\\n{3}{B}{B}, Exile this card from your graveyard: Return up to three target creature cards from your graveyard to your hand.\"},{\"id\":16,\"name\":\"Stab Wound\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-2.\\nAt the beginning of the upkeep of enchanted creature's controller, that player loses 2 life.\"},{\"id\":17,\"name\":\"Stain the Mind\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nChoose a nonland card name. Search target player's graveyard, hand, and library for any number of cards with that name and exile them. Then that player shuffles.\"},{\"id\":18,\"name\":\"Typhoid Rats\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":19,\"name\":\"Ulcerate\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -3/-3 until end of turn. You lose 3 life.\"},{\"id\":20,\"name\":\"Unmake the Graves\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nReturn up to two target creature cards from your graveyard to your hand.\"},{\"id\":21,\"name\":\"Wall of Limbs\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Wall\",\"text\":\"Defender (This creature can't attack.)\\nWhenever you gain life, put a +1/+1 counter on this creature.\\n{5}{B}{B}, Sacrifice this creature: Target player loses X life, where X is this creature's power.\"},{\"id\":22,\"name\":\"Waste Not\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent discards a creature card, create a 2/2 black Zombie creature token.\\nWhenever an opponent discards a land card, add {B}{B}.\\nWhenever an opponent discards a noncreature, nonland card, draw a card.\"},{\"id\":23,\"name\":\"Witch's Familiar\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Frog\",\"text\":\"\"},{\"id\":24,\"name\":\"Xathrid Slyblade\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\n{3}{B}: Until end of turn, this creature loses hexproof and gains first strike and deathtouch. (It deals combat damage before creatures without first strike. Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":25,\"name\":\"Zof Shade\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"{2}{B}: This creature gets +2/+2 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1988,
+      "cacheCreationInputTokens": 32679,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.8071290000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.8071290000000001,
+      "pricedUsd": 0.807129,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.807129 and its own usage prices at $0.807129"
+    }
+  }
+}

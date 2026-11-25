@@ -1,0 +1,161 @@
+{
+  "key": "994b17ad8d7b6d8d0186470cf72c44cf",
+  "recordedAt": "2026-11-22T21:41:07.847Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Armament Master\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"Other Kor creatures you control get +2/+2 for each Equipment attached to this creature.\"},{\"id\":2,\"name\":\"Arrow Volley Trap\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If four or more creatures are attacking, you may pay {1}{W} rather than pay this spell's mana cost.\\nArrow Volley Trap deals 5 damage divided as you choose among any number of target attacking creatures.\"},{\"id\":3,\"name\":\"Bold Defense\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {3}{W} (You may pay an additional {3}{W} as you cast this spell.)\\nCreatures you control get +1/+1 until end of turn. If this spell was kicked, instead creatures you control get +2/+2 and gain first strike until end of turn.\"},{\"id\":4,\"name\":\"Brave the Elements\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Choose a color. White creatures you control gain protection from the chosen color until end of turn.\"},{\"id\":5,\"name\":\"Caravan Hurda\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":6,\"name\":\"Celestial Mantle\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+3.\\nWhenever enchanted creature deals combat damage to a player, double its controller's life total.\"},{\"id\":7,\"name\":\"Cliff Threader\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kor Scout\",\"text\":\"Mountainwalk (This creature can't be blocked as long as defending player controls a Mountain.)\"},{\"id\":8,\"name\":\"Conqueror's Pledge\",\"manaCost\":\"{2}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker {6} (You may pay an additional {6} as you cast this spell.)\\nCreate six 1/1 white Kor Soldier creature tokens. If this spell was kicked, create twelve of those tokens instead.\"},{\"id\":9,\"name\":\"Day of Judgment\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures.\"},{\"id\":10,\"name\":\"Devout Lightcaster\",\"manaCost\":\"{W}{W}{W}\",\"typeLine\":\"Creature — Kor Cleric\",\"text\":\"Protection from black\\nWhen this creature enters, exile target black permanent.\"},{\"id\":11,\"name\":\"Emeria Angel\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nLandfall — Whenever a land you control enters, you may create a 1/1 white Bird creature token with flying.\"},{\"id\":12,\"name\":\"Felidar Sovereign\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Cat Beast\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\\nAt the beginning of your upkeep, if you have 40 or more life, you win the game.\"},{\"id\":13,\"name\":\"Iona, Shield of Emeria\",\"manaCost\":\"{6}{W}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying\\nAs Iona enters, choose a color.\\nYour opponents can't cast spells of the chosen color.\"},{\"id\":14,\"name\":\"Journey to Nowhere\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile target creature.\\nWhen this enchantment leaves the battlefield, return the exiled card to the battlefield under its owner's control.\"},{\"id\":15,\"name\":\"Kabira Evangel\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may choose a color. If you do, Allies you control gain protection from the chosen color until end of turn.\"},{\"id\":16,\"name\":\"Kazandu Blademaster\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier Ally\",\"text\":\"First strike, vigilance\\nWhenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":17,\"name\":\"Kor Aeronaut\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"Kicker {1}{W} (You may pay an additional {1}{W} as you cast this spell.)\\nFlying\\nWhen this creature enters, if it was kicked, target creature gains flying until end of turn.\"},{\"id\":18,\"name\":\"Kor Cartographer\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Kor Scout\",\"text\":\"When this creature enters, you may search your library for a Plains card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":19,\"name\":\"Kor Duelist\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"As long as this creature is equipped, it has double strike. (It deals both first-strike and regular combat damage.)\"},{\"id\":20,\"name\":\"Kor Hookmaster\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"When this creature enters, tap target creature an opponent controls. That creature doesn't untap during its controller's next untap step.\"},{\"id\":21,\"name\":\"Kor Outfitter\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"When this creature enters, you may attach target Equipment you control to target creature you control.\"},{\"id\":22,\"name\":\"Kor Sanctifiers\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Kor Cleric\",\"text\":\"Kicker {W} (You may pay an additional {W} as you cast this spell.)\\nWhen this creature enters, if it was kicked, destroy target artifact or enchantment.\"},{\"id\":23,\"name\":\"Kor Skyfisher\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"Flying\\nWhen this creature enters, return a permanent you control to its owner's hand.\"},{\"id\":24,\"name\":\"Landbind Ritual\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"You gain 2 life for each Plains you control.\"},{\"id\":25,\"name\":\"Luminarch Ascension\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each opponent's end step, if you didn't lose life this turn, you may put a quest counter on this enchantment. (Damage causes loss of life.)\\n{1}{W}: Create a 4/4 white Angel creature token with flying. Activate only if this enchantment has four or more quest counters on it.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1401,
+      "cacheCreationInputTokens": 32639,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7769790000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7769790000000001,
+      "pricedUsd": 0.776979,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776979 and its own usage prices at $0.776979"
+    }
+  }
+}

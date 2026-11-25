@@ -1,0 +1,161 @@
+{
+  "key": "8cc636f91f9f7df17f24399cdd7e01e6",
+  "recordedAt": "2026-11-22T22:25:37.293Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Syndicate Trafficker\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Aetherborn Rogue\",\"text\":\"{1}, Sacrifice an artifact: Put a +1/+1 counter on this creature. It gains indestructible until end of turn.\"},{\"id\":2,\"name\":\"Thriving Rats\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":3,\"name\":\"Tidy Conclusion\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature. You gain 1 life for each artifact you control.\"},{\"id\":4,\"name\":\"Underhanded Designs\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an artifact you control enters, you may pay {1}. If you do, each opponent loses 1 life and you gain 1 life.\\n{1}{B}, Sacrifice this enchantment: Destroy target creature. Activate only if you control two or more artifacts.\"},{\"id\":5,\"name\":\"Weaponcraft Enthusiast\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Aetherborn Artificer\",\"text\":\"Fabricate 2 (When this creature enters, put two +1/+1 counters on it or create two 1/1 colorless Servo artifact creature tokens.)\"},{\"id\":6,\"name\":\"Aethertorch Renegade\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"When this creature enters, you get {E}{E}{E}{E} (four energy counters).\\n{T}, Pay {E}{E}: This creature deals 1 damage to target creature.\\n{T}, Pay eight {E}: This creature deals 6 damage to target player or planeswalker.\"},{\"id\":7,\"name\":\"Brazen Scourge\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":8,\"name\":\"Built to Smash\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target attacking creature gets +3/+3 until end of turn. If it's an artifact creature, it gains trample until end of turn.\"},{\"id\":9,\"name\":\"Cathartic Reunion\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, discard two cards.\\nDraw three cards.\"},{\"id\":10,\"name\":\"Chandra, Torch of Defiance\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Exile the top card of your library. You may cast that card. If you don't, Chandra deals 2 damage to each opponent.\\n+1: Add {R}{R}.\\n−3: Chandra deals 4 damage to target creature.\\n−7: You get an emblem with \\\"Whenever you cast a spell, this emblem deals 5 damage to any target.\\\"\"},{\"id\":11,\"name\":\"Chandra's Pyrohelix\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Chandra's Pyrohelix deals 2 damage divided as you choose among one or two targets.\"},{\"id\":12,\"name\":\"Combustible Gearhulk\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"First strike\\nWhen this creature enters, target opponent may have you draw three cards. If the player doesn't, you mill three cards, then this creature deals damage to that player equal to the total mana value of those cards.\"},{\"id\":13,\"name\":\"Demolish\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\"},{\"id\":14,\"name\":\"Fateful Showdown\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Fateful Showdown deals damage to any target equal to the number of cards in your hand. Discard all the cards in your hand, then draw that many cards.\"},{\"id\":15,\"name\":\"Furious Reprisal\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Furious Reprisal deals 2 damage to each of two targets.\"},{\"id\":16,\"name\":\"Giant Spectacle\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+1 and has menace.\"},{\"id\":17,\"name\":\"Harnessed Lightning\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose target creature. You get {E}{E}{E} (three energy counters), then you may pay any amount of {E}. Harnessed Lightning deals that much damage to that creature.\"},{\"id\":18,\"name\":\"Hijack\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target artifact or creature until end of turn. Untap it. It gains haste until end of turn.\"},{\"id\":19,\"name\":\"Incendiary Sabotage\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice an artifact.\\nIncendiary Sabotage deals 3 damage to each creature.\"},{\"id\":20,\"name\":\"Inventor's Apprentice\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"This creature gets +1/+1 as long as you control an artifact.\"},{\"id\":21,\"name\":\"Lathnu Hellion\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Hellion\",\"text\":\"Haste\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nAt the beginning of your end step, sacrifice this creature unless you pay {E}{E}.\"},{\"id\":22,\"name\":\"Madcap Experiment\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal cards from the top of your library until you reveal an artifact card. Put that card onto the battlefield and the rest on the bottom of your library in a random order. Madcap Experiment deals damage to you equal to the number of cards revealed this way.\"},{\"id\":23,\"name\":\"Maulfist Doorbuster\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}. If you do, target creature can't block this turn.\"},{\"id\":24,\"name\":\"Pia Nalaar\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Legendary Creature — Human Artificer\",\"text\":\"When Pia Nalaar enters, create a 1/1 colorless Thopter artifact creature token with flying.\\n{1}{R}: Target artifact creature gets +1/+0 until end of turn.\\n{1}, Sacrifice an artifact: Target creature can't block this turn.\"},{\"id\":25,\"name\":\"Quicksmith Genius\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever an artifact you control enters, you may discard a card. If you do, draw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\",\"draw\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1412,
+      "cacheCreationInputTokens": 32713,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779009,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779009,
+      "pricedUsd": 0.779009,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779009 and its own usage prices at $0.779009"
+    }
+  }
+}

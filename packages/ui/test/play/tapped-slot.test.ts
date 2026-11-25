@@ -240,34 +240,27 @@ describe('a tapped permanent on the played table', () => {
   /**
    * This one proves no pixel, and it cannot: jsdom performs no layout, so
    * `getBoundingClientRect` is all zeros and no test in this file can say where
-   * a badge landed. It also cannot read the sheet through `getComputedStyle`
-   * any more, because both branches below sit inside `@supports` and jsdom's
-   * cascade does not enter one. What it checks is that the sheet still declares
-   * both branches and that neither is the other's leftovers.
+   * a badge landed, and jsdom's cascade does not implement anchor positioning.
+   * What it checks is that the sheet declares the anchored geometry and that no
+   * tapped-slot pull is left beside it (mtg-9edk.1 retired that fallback once
+   * every target browser shipped anchor-scope).
    *
    * The pixels are in `packages/ui/tools/corner-marks.ts`, driven in
    * chrome-headless-shell 151 over the flagship set: with the badges anchored to
    * the picture, a tapped board of eight a side at 1440x900 goes from 98 covered
    * letters across sixteen faces to none.
    */
-  it('anchors the corner badges to the picture, and keeps the old pull for a browser that cannot', () => {
+  it('anchors the corner badges to the picture, with no slot-corner fallback', () => {
     const sheet = uiStyleSheet();
     // The badges no longer care that the card turned: an anchor rectangle is the
     // anchor's box in the containing block's own axes, so a rotated window hands
     // back an upright box and the row lands on the near corner of the picture.
-    expect(sheet).toContain('@supports (anchor-scope: --mtg-art-anchor) {');
     expect(sheet).toContain('position-anchor: --mtg-art-anchor;');
     expect(sheet).toContain('inset-block-start: anchor(start); inset-inline-start: anchor(start);');
-    // And the arithmetic that browser needs instead, which is what every browser
-    // drew before `mtg-9edk`: half the slot's height less half the card's, spent
-    // across two axes because a percentage inset resolves against the containing
-    // block's height and a percentage margin against its width. Left as one
-    // number the badge drifts off the card by exactly what the row shrank the
-    // slot — 4.4px at 1440x900 and 21px at 1024x768, measured.
-    expect(sheet).toContain('@supports not (anchor-scope: --mtg-art-anchor) {');
-    expect(sheet).toMatch(
-      /@supports not \(anchor-scope: --mtg-art-anchor\) \{[\s\S]*?inset-block-start: 50%;\s*\n\s*margin-block-start: calc\(var\(--mtg-space-1\) - [\d.]+%\);/,
-    );
+    // The retired branch pulled a tapped slot's row down by half the card's
+    // height through a negative percentage margin; nothing may still do that.
+    expect(sheet).not.toMatch(/\.mtg-slot\[data-tapped='true'\] > \.mtg-slot__marks/);
+    expect(sheet).not.toMatch(/margin-block-start: calc\(var\(--mtg-space-1\) - [\d.]+%\)/);
   });
 
   it('holds the badges to the picture they sit on rather than to the slot', () => {

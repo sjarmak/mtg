@@ -16,11 +16,14 @@ const scriptsDirectory = new URL('../../../tools/forge/dist/res/tokenscripts/', 
 
 /**
  * Token scripts the cube's cards name that no installed printing witnesses.
- * None today: Wurmcoil Engine's two Wurms (TSOM 8 and 9) and Living Weapon's
- * Germ (TMBS 1) bind through stated aliases in `token-printings.ts` (`mtg-9ggmy`).
+ * Wurmcoil Engine's two Wurms (TSOM 8 and 9) and Living Weapon's Germ (TMBS 1)
+ * bind through stated aliases in `token-printings.ts` (`mtg-9ggmy`). The Clue
+ * that Thraben Inspector, Tireless Tracker and Hard Evidence investigate for
+ * has no row because the scanner could not see Investigate when the sheet was
+ * built (#311); it stays named here until the cube's sheet is rebuilt.
  * Add a row here, with why, the day a script is left unbound.
  */
-const LEFT_OUT: readonly string[] = [];
+const LEFT_OUT: readonly string[] = ['c_a_clue_draw'];
 
 describe('catalogTokenScriptReferences', () => {
   it('reads every TokenScript$ reference once, including comma lists', () => {
@@ -57,6 +60,21 @@ describe('catalogTokenScriptReferences', () => {
       'b_0_0_phyrexian_germ',
     ]);
   });
+
+  it('reads the tokens Amass, Afterlife and Investigate create, which no card script names (#311)', () => {
+    const archive = readForgeScriptArchive();
+    // The amassed type names the script: Lazotep Sliver amasses Slivers, Dreadhorde Invasion Zombies.
+    expect(
+      catalogTokenScriptReferences(['l/lazotep_sliver.txt', 'd/dreadhorde_invasion.txt'], archive),
+    ).toEqual(['b_0_0_sliver_army', 'b_0_0_zombie_army']);
+    expect(catalogTokenScriptReferences(['m/ministrant_of_obligation.txt'], archive)).toEqual([
+      'wb_1_1_spirit_flying',
+    ]);
+    expect(catalogTokenScriptReferences(['t/thraben_inspector.txt'], archive)).toEqual(['c_a_clue_draw']);
+    // A deck-building hint names the ability without the card performing it.
+    const hintOnly = new Map([['h/hint.txt', Buffer.from('Name:Hint\nDeckHints:Ability$Investigate\n')]]);
+    expect(catalogTokenScriptReferences(['h/hint.txt'], hintOnly)).toEqual([]);
+  }, 180_000);
 
   it('refuses a catalog script the archive does not hold', () => {
     const archive = new Map([['a/a.txt', Buffer.from('SVar:X:DB$ Token | TokenScript$ b_1_1')]]);

@@ -1,0 +1,161 @@
+{
+  "key": "fc6483944499fa65ccf40436bdcda6ad",
+  "recordedAt": "2026-11-22T22:28:52.984Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ribbons of Night\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Ribbons of Night deals 4 damage to target creature and you gain 4 life. If {U} was spent to cast this spell, draw a card.\"},{\"id\":2,\"name\":\"Roofstalker Wight\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"{1}{U}: This creature gains flying until end of turn.\"},{\"id\":3,\"name\":\"Sadistic Augermage\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature dies, each player puts a card from their hand on top of their library.\"},{\"id\":4,\"name\":\"Sewerdreg\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\\nSacrifice this creature: Exile target card from a graveyard.\"},{\"id\":5,\"name\":\"Shred Memory\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile up to four target cards from a single graveyard.\\nTransmute {1}{B}{B} ({1}{B}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":6,\"name\":\"Sins of the Past\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, you may cast target instant or sorcery card from your graveyard without paying its mana cost. If that spell would be put into your graveyard, exile it instead. Exile Sins of the Past.\"},{\"id\":7,\"name\":\"Stinkweed Imp\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a creature, destroy that creature.\\nDredge 5 (If you would draw a card, you may mill five cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":8,\"name\":\"Strands of Undeath\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, target player discards two cards.\\n{B}: Regenerate enchanted creature.\"},{\"id\":9,\"name\":\"Thoughtpicker Witch\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}, Sacrifice a creature: Look at the top two cards of target opponent's library, then exile one of them.\"},{\"id\":10,\"name\":\"Undercity Shade\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\n{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":11,\"name\":\"Vigor Mortis\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to the battlefield. If {G} was spent to cast this spell, that creature enters with an additional +1/+1 counter on it.\"},{\"id\":12,\"name\":\"Vindictive Mob\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"When this creature enters, sacrifice a creature.\\nThis creature can't be blocked by Saprolings.\"},{\"id\":13,\"name\":\"Woebringer Demon\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nAt the beginning of each player's upkeep, that player sacrifices a creature of their choice. If the player can't, sacrifice this creature.\"},{\"id\":14,\"name\":\"Barbarian Riftcutter\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Barbarian\",\"text\":\"{R}, Sacrifice this creature: Destroy target land.\"},{\"id\":15,\"name\":\"Blockbuster\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}{R}, Sacrifice this enchantment: It deals 3 damage to each tapped creature and each player.\"},{\"id\":16,\"name\":\"Breath of Fury\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nWhen enchanted creature deals combat damage to a player, sacrifice it and attach this Aura to a creature you control. If you do, untap all creatures you control and after this phase, there is an additional combat phase.\"},{\"id\":17,\"name\":\"Char\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Char deals 4 damage to any target and 2 damage to you.\"},{\"id\":18,\"name\":\"Cleansing Beam\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Cleansing Beam deals 2 damage to target creature and each other creature that shares a color with it.\"},{\"id\":19,\"name\":\"Coalhauler Swine\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Boar Beast\",\"text\":\"Whenever this creature is dealt damage, it deals that much damage to each player.\"},{\"id\":20,\"name\":\"Dogpile\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Dogpile deals damage to any target equal to the number of attacking creatures you control.\"},{\"id\":21,\"name\":\"Excruciator\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Damage that would be dealt by this creature can't be prevented.\"},{\"id\":22,\"name\":\"Fiery Conclusion\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nFiery Conclusion deals 5 damage to target creature.\"},{\"id\":23,\"name\":\"Flame Fusillade\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, permanents you control gain \\\"{T}: This permanent deals 1 damage to any target.\\\"\"},{\"id\":24,\"name\":\"Flash Conscription\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature and gain control of it until end of turn. That creature gains haste until end of turn. If {W} was spent to cast this spell, the creature gains \\\"Whenever this creature deals combat damage, you gain that much life\\\" until end of turn.\"},{\"id\":25,\"name\":\"Frenzied Goblin\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Whenever this creature attacks, you may pay {R}. If you do, target creature can't block this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1702,
+      "cacheCreationInputTokens": 32511,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.789469,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.789469,
+      "pricedUsd": 0.789469,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.789469 and its own usage prices at $0.789469"
+    }
+  }
+}

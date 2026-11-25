@@ -51,7 +51,7 @@ describe('Zendikar printed format sources', () => {
   }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v15/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))
@@ -94,7 +94,7 @@ describe('Zendikar printed format sources', () => {
       }[];
     };
     expect(registry.formats.find((entry) => entry.id === 'zen')).toMatchObject({
-      admissionDirectory: 'play-admission-v15',
+      admissionDirectory: 'play-admission',
       constructedFormatFile: 'zen-constructed-format-v1.json',
       displayMetadataFile: 'zen-display-metadata-v1.json',
       tokenPrintingsFile: 'zen-token-printings-v1.json',
@@ -104,7 +104,7 @@ describe('Zendikar printed format sources', () => {
   it('ships only exact legal Forge-admitted constructed pilot decks', () => {
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('zen-constructed-format-v1.json')));
     const printings = new Map(catalog.cards.map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v15/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(

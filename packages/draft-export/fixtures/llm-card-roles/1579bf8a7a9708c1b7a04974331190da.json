@@ -1,0 +1,149 @@
+{
+  "key": "1579bf8a7a9708c1b7a04974331190da",
+  "recordedAt": "2026-11-22T21:23:14.242Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":2,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":3,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":4,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"},{\"id\":5,\"name\":\"Gideon, Martial Paragon\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Legendary Planeswalker — Gideon\",\"text\":\"+2: Untap all creatures you control. Those creatures get +1/+1 until end of turn.\\n0: Until end of turn, Gideon becomes a 5/5 Human Soldier creature with indestructible that's still a planeswalker. Prevent all damage that would be dealt to him this turn.\\n−10: Creatures you control get +2/+2 until end of turn. Tap all creatures your opponents control.\"},{\"id\":6,\"name\":\"Companion of the Trials\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird Soldier\",\"text\":\"Flying\\n{1}{W}: Untap target creature. Activate only if you control a Gideon planeswalker.\"},{\"id\":7,\"name\":\"Gideon's Resolve\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, you may search your library and/or graveyard for a card named Gideon, Martial Paragon, reveal it, and put it into your hand. If you search your library this way, shuffle.\\nCreatures you control get +1/+1.\"},{\"id\":8,\"name\":\"Graceful Cat\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Whenever this creature attacks, it gets +1/+1 until end of turn.\"},{\"id\":9,\"name\":\"Stone Quarry\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {W}.\"},{\"id\":10,\"name\":\"Liliana, Death Wielder\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+2: Put a -1/-1 counter on up to one target creature.\\n−3: Destroy target creature with a -1/-1 counter on it.\\n−10: Return all creature cards from your graveyard to the battlefield.\"},{\"id\":11,\"name\":\"Desiccated Naga\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Snake\",\"text\":\"{3}{B}: Target opponent loses 2 life and you gain 2 life. Activate only if you control a Liliana planeswalker.\"},{\"id\":12,\"name\":\"Liliana's Influence\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a -1/-1 counter on each creature you don't control. You may search your library and/or graveyard for a card named Liliana, Death Wielder, reveal it, and put it into your hand. If you search your library this way, shuffle.\"},{\"id\":13,\"name\":\"Tattered Mummy\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Jackal\",\"text\":\"When this creature dies, each opponent loses 2 life.\"},{\"id\":14,\"name\":\"Foul Orchard\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {G}.\"},{\"id\":15,\"name\":\"Cinder Barrens\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {R}.\"},{\"id\":16,\"name\":\"Forsaken Sanctuary\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {B}.\"},{\"id\":17,\"name\":\"Highland Lake\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {R}.\"},{\"id\":18,\"name\":\"Meandering River\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {U}.\"},{\"id\":19,\"name\":\"Submerged Boneyard\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {B}.\"},{\"id\":20,\"name\":\"Timber Gorge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {G}.\"},{\"id\":21,\"name\":\"Tranquil Expanse\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {W}.\"},{\"id\":22,\"name\":\"Woodland Stream\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {U}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\",\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1253,
+      "cacheCreationInputTokens": 31904,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.754879,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.754879,
+      "pricedUsd": 0.754879,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.754879 and its own usage prices at $0.754879"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "ce6e6242a5819edfe91cb252635c6c68",
+  "recordedAt": "2026-11-22T21:40:40.617Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Nest Invader\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Eldrazi Drone\",\"text\":\"When this creature enters, create a 0/1 colorless Eldrazi Spawn creature token. It has \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":2,\"name\":\"Ondu Giant\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Giant Druid\",\"text\":\"When this creature enters, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":3,\"name\":\"Overgrown Battlement\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\n{T}: Add {G} for each creature you control with defender.\"},{\"id\":4,\"name\":\"Pelakka Wurm\",\"manaCost\":\"{4}{G}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nWhen this creature enters, you gain 7 life.\\nWhen this creature dies, draw a card.\"},{\"id\":5,\"name\":\"Prey's Vengeance\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":6,\"name\":\"Realms Uncharted\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Search your library for up to four land cards with different names and reveal them. An opponent chooses two of those cards. Put the chosen cards into your graveyard and the rest into your hand. Then shuffle.\"},{\"id\":7,\"name\":\"Snake Umbra\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has \\\"Whenever this creature deals damage to an opponent, you may draw a card.\\\"\\nUmbra armor (If enchanted creature would be destroyed, instead remove all damage from it and destroy this Aura.)\"},{\"id\":8,\"name\":\"Spider Umbra\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has reach. (It can block creatures with flying.)\\nUmbra armor (If enchanted creature would be destroyed, instead remove all damage from it and destroy this Aura.)\"},{\"id\":9,\"name\":\"Sporecap Spider\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\"},{\"id\":10,\"name\":\"Stomper Cub\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\"},{\"id\":11,\"name\":\"Tajuru Preserver\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"Spells and abilities your opponents control can't cause you to sacrifice permanents.\"},{\"id\":12,\"name\":\"Vengevine\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Haste\\nWhenever you cast a spell, if it's the second creature spell you cast this turn, you may return this card from your graveyard to the battlefield.\"},{\"id\":13,\"name\":\"Wildheart Invoker\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{8}: Target creature gets +5/+5 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":14,\"name\":\"Sarkhan the Mad\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Legendary Planeswalker — Sarkhan\",\"text\":\"0: Reveal the top card of your library and put it into your hand. Sarkhan deals damage to himself equal to that card's mana value.\\n−2: Target creature's controller sacrifices it, then that player creates a 5/5 red Dragon creature token with flying.\\n−4: Each Dragon creature you control deals damage equal to its power to target player or planeswalker.\"},{\"id\":15,\"name\":\"Angelheart Vial\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you're dealt damage, you may put that many charge counters on this artifact.\\n{2}, {T}, Remove four charge counters from this artifact: You gain 2 life and draw a card.\"},{\"id\":16,\"name\":\"Dreamstone Hedron\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {C}{C}{C}.\\n{3}, {T}, Sacrifice this artifact: Draw three cards.\"},{\"id\":17,\"name\":\"Enatu Golem\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"When this creature dies, you gain 4 life.\"},{\"id\":18,\"name\":\"Hedron Matrix\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +X/+X, where X is its mana value.\\nEquip {4}\"},{\"id\":19,\"name\":\"Keening Stone\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"{5}, {T}: Target player mills X cards, where X is the number of cards in that player's graveyard.\"},{\"id\":20,\"name\":\"Ogre's Cleaver\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +5/+0.\\nEquip {5}\"},{\"id\":21,\"name\":\"Pennon Blade\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 for each creature you control.\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":22,\"name\":\"Prophetic Prism\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, draw a card.\\n{1}, {T}: Add one mana of any color.\"},{\"id\":23,\"name\":\"Reinforced Bulwark\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Wall\",\"text\":\"Defender\\n{T}: Prevent the next 1 damage that would be dealt to you this turn.\"},{\"id\":24,\"name\":\"Runed Servitor\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature dies, each player draws a card.\"},{\"id\":25,\"name\":\"Sphinx-Bone Wand\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast an instant or sorcery spell, you may put a charge counter on this artifact. If you do, this artifact deals damage equal to the number of charge counters on it to any target.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 409,
+      "cacheCreationInputTokens": 32560,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.725799,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.725799,
+      "pricedUsd": 0.725799,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.725799 and its own usage prices at $0.725799"
+    }
+  }
+}

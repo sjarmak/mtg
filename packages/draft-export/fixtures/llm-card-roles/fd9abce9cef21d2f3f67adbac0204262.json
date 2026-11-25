@@ -1,0 +1,161 @@
+{
+  "key": "fd9abce9cef21d2f3f67adbac0204262",
+  "recordedAt": "2026-11-22T22:12:09.330Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Scourge of Fleets\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Kraken\",\"text\":\"When this creature enters, return each creature your opponents control with toughness X or less to its owner's hand, where X is the number of Islands you control.\"},{\"id\":2,\"name\":\"Sigiled Starfish\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Starfish\",\"text\":\"{T}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":3,\"name\":\"Thassa's Devourer\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment Creature — Elemental\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, target player mills two cards.\"},{\"id\":4,\"name\":\"Thassa's Ire\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment\",\"text\":\"{3}{U}: You may tap or untap target creature.\"},{\"id\":5,\"name\":\"Triton Cavalry\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, you may return target enchantment to its owner's hand.\"},{\"id\":6,\"name\":\"Triton Shorestalker\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"This creature can't be blocked.\"},{\"id\":7,\"name\":\"War-Wing Siren\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Siren Soldier\",\"text\":\"Flying\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":8,\"name\":\"Whitewater Naiads\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, target creature can't be blocked this turn.\"},{\"id\":9,\"name\":\"Agent of Erebos\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment Creature — Zombie\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, exile target player's graveyard.\"},{\"id\":10,\"name\":\"Aspect of Gorgon\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+3 and has deathtouch. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":11,\"name\":\"Bloodcrazed Hoplite\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on it.\\nWhenever a +1/+1 counter is put on this creature, remove a +1/+1 counter from target creature an opponent controls.\"},{\"id\":12,\"name\":\"Brain Maggot\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment Creature — Insect\",\"text\":\"When this creature enters, target opponent reveals their hand and you choose a nonland card from it. Exile that card until this creature leaves the battlefield.\"},{\"id\":13,\"name\":\"Cast into Darkness\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-0 and can't block.\"},{\"id\":14,\"name\":\"Cruel Feeding\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{B} more to cast for each target beyond the first.\\nAny number of target creatures each get +1/+0 and gain lifelink until end of turn. (Damage dealt by a creature with lifelink also causes its controller to gain that much life.)\"},{\"id\":15,\"name\":\"Dictate of Erebos\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Flash\\nWhenever a creature you control dies, each opponent sacrifices a creature of their choice.\"},{\"id\":16,\"name\":\"Doomwake Giant\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment Creature — Giant\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, creatures your opponents control get -1/-1 until end of turn.\"},{\"id\":17,\"name\":\"Dreadbringer Lampads\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, target creature gains intimidate until end of turn. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":18,\"name\":\"Extinguish All Hope\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all nonenchantment creatures.\"},{\"id\":19,\"name\":\"Feast of Dreams\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchanted creature or enchantment creature.\"},{\"id\":20,\"name\":\"Felhide Petrifier\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Deathtouch\\nOther Minotaur creatures you control have deathtouch.\"},{\"id\":21,\"name\":\"Font of Return\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"{3}{B}, Sacrifice this enchantment: Return up to three target creature cards from your graveyard to your hand.\"},{\"id\":22,\"name\":\"Gnarled Scarhide\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment Creature — Minotaur\",\"text\":\"Bestow {3}{B} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature can't block.\\nEnchanted creature gets +2/+1 and can't block.\"},{\"id\":23,\"name\":\"Grim Guardian\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment Creature — Zombie\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, each opponent loses 1 life.\"},{\"id\":24,\"name\":\"King Macar, the Gold-Cursed\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Legendary Creature — Human Noble\",\"text\":\"Inspired — Whenever King Macar becomes untapped, you may exile target creature. If you do, create a Gold token. (It's an artifact with \\\"Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":25,\"name\":\"Master of the Feast\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Enchantment Creature — Demon\",\"text\":\"Flying\\nAt the beginning of your upkeep, each opponent draws a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1401,
+      "cacheCreationInputTokens": 32543,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7750589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7750589999999999,
+      "pricedUsd": 0.775059,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.775059 and its own usage prices at $0.775059"
+    }
+  }
+}

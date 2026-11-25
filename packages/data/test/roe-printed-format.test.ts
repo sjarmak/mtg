@@ -79,7 +79,7 @@ describe('Rise of the Eldrazi printed format sources', () => {
   }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v26/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

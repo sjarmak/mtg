@@ -1,0 +1,161 @@
+{
+  "key": "c2310c71ca3d578a2679ddbc9eaf346c",
+  "recordedAt": "2026-11-22T22:27:37.728Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Auratouched Mage\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, search your library for an Aura card that could enchant it. If this creature is still on the battlefield, put that Aura card onto the battlefield attached to it. Otherwise, reveal the Aura card and put it into your hand. Then shuffle.\"},{\"id\":2,\"name\":\"Bathe in Light\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Choose a color. Target creature and each other creature that shares a color with it gain protection from the chosen color until end of turn.\"},{\"id\":3,\"name\":\"Benevolent Ancestor\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\n{T}: Prevent the next 1 damage that would be dealt to any target this turn.\"},{\"id\":4,\"name\":\"Blazing Archon\",\"manaCost\":\"{6}{W}{W}{W}\",\"typeLine\":\"Creature — Archon\",\"text\":\"Flying\\nCreatures can't attack you.\"},{\"id\":5,\"name\":\"Boros Fury-Shield\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt by target attacking or blocking creature this turn. If {R} was spent to cast this spell, Boros Fury-Shield deals damage to that creature's controller equal to the creature's power.\"},{\"id\":6,\"name\":\"Caregiver\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{W}, Sacrifice a creature: Prevent the next 1 damage that would be dealt to any target this turn.\"},{\"id\":7,\"name\":\"Chant of Vitu-Ghazi\",\"manaCost\":\"{6}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nPrevent all damage that would be dealt by creatures this turn. You gain life equal to the damage prevented this way.\"},{\"id\":8,\"name\":\"Concerted Effort\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each upkeep, creatures you control gain flying until end of turn if a creature you control has flying. The same is true for fear, first strike, double strike, landwalk, protection, trample, and vigilance.\"},{\"id\":9,\"name\":\"Conclave Equenaut\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nFlying\"},{\"id\":10,\"name\":\"Conclave Phalanx\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nWhen this creature enters, you gain 1 life for each creature you control.\"},{\"id\":11,\"name\":\"Conclave's Blessing\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nEnchant creature\\nEnchanted creature gets +0/+2 for each other creature you control.\"},{\"id\":12,\"name\":\"Courier Hawk\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying, vigilance\"},{\"id\":13,\"name\":\"Devouring Light\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nExile target attacking or blocking creature.\"},{\"id\":14,\"name\":\"Divebomber Griffin\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\n{T}, Sacrifice this creature: It deals 3 damage to target attacking or blocking creature.\"},{\"id\":15,\"name\":\"Dromad Purebred\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Camel Beast\",\"text\":\"Whenever this creature is dealt damage, you gain 1 life.\"},{\"id\":16,\"name\":\"Faith's Fetters\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant permanent\\nWhen this Aura enters, you gain 4 life.\\nEnchanted permanent can't attack or block, and its activated abilities can't be activated unless they're mana abilities.\"},{\"id\":17,\"name\":\"Festival of the Guildpact\",\"manaCost\":\"{X}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent the next X damage that would be dealt to you this turn.\\nDraw a card.\"},{\"id\":18,\"name\":\"Flickerform\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\n{2}{W}{W}: Exile enchanted creature and all Auras attached to it. At the beginning of the next end step, return that card to the battlefield under its owner's control. If you do, return the other cards exiled this way to the battlefield under their owners' control attached to that creature.\"},{\"id\":19,\"name\":\"Gate Hound\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"Creatures you control have vigilance as long as this creature is enchanted.\"},{\"id\":20,\"name\":\"Ghosts of the Innocent\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"If a source would deal damage to a permanent or player, it deals half that damage, rounded down, to that permanent or player instead.\"},{\"id\":21,\"name\":\"Hour of Reckoning\",\"manaCost\":\"{4}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nDestroy all nontoken creatures.\"},{\"id\":22,\"name\":\"Hunted Lammasu\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Lammasu\",\"text\":\"Flying\\nWhen this creature enters, target opponent creates a 4/4 black Horror creature token.\"},{\"id\":23,\"name\":\"Leave No Trace\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Destroy target enchantment and each other enchantment that shares a color with it.\"},{\"id\":24,\"name\":\"Light of Sanction\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Prevent all damage that would be dealt to creatures you control by sources you control.\"},{\"id\":25,\"name\":\"Loxodon Gatekeeper\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Elephant Soldier\",\"text\":\"Artifacts, creatures, and lands your opponents control enter tapped.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1499,
+      "cacheCreationInputTokens": 32658,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7822589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7822589999999999,
+      "pricedUsd": 0.782259,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.782259 and its own usage prices at $0.782259"
+    }
+  }
+}

@@ -2,9 +2,18 @@
 import { botEvidenceSha256 } from '@mtg/bot-evidence';
 import type { DeckRef } from '@mtg/engine';
 import type { StageStrengthCampaignPlan } from '@mtg/metrics';
-import { PRINTED_LIMITED_CONSTRUCTION_FEATURES } from './printed-limited-construction-campaign';
+import {
+  PRINTED_LIMITED_CONSTRUCTION_FEATURES,
+  type PrintedLimitedComparison,
+} from './printed-limited-construction-campaign';
 
 export const ISD_CONSTRUCTION_HOLDOUT_ID = 'isd-limited-construction-holdout-v11';
+/** Each comparison draws its own held-out pools; the roles holdouts (issue 305) are fresh. */
+export const ISD_CONSTRUCTION_HOLDOUT_IDS: Readonly<Record<PrintedLimitedComparison, string>> = {
+  'structural-vs-ranked': ISD_CONSTRUCTION_HOLDOUT_ID,
+  'structural-vs-roles': 'isd-limited-construction-structural-roles-holdout-v1',
+  'ranked-vs-roles': 'isd-limited-construction-ranked-roles-holdout-v1',
+};
 const INDEPENDENT_POOLS = 50;
 
 type Runtime = StageStrengthCampaignPlan['runtime'];
@@ -20,6 +29,8 @@ export interface IsdLimitedConstructionPlanInputs {
   readonly gameplayPolicy: Policy;
   readonly opponentPolicy: Policy;
   readonly opponents: ReadonlyMap<string, DeckRef>;
+  /** Defaults to `structural-vs-ranked`; must match how `builderPolicies` was built. */
+  readonly comparison?: PrintedLimitedComparison;
 }
 
 export function buildIsdLimitedConstructionPlan(
@@ -31,9 +42,10 @@ export function buildIsdLimitedConstructionPlan(
   }));
   if (inputs.subject.id !== 'isd') throw new Error('ISD holdout requires the isd printed subject');
   if (opponents.length !== 2) throw new Error('ISD holdout requires exactly two frozen opponents');
+  const id = ISD_CONSTRUCTION_HOLDOUT_IDS[inputs.comparison ?? 'structural-vs-ranked'];
   return {
     version: 'stage-strength-campaign-plan/v1',
-    id: ISD_CONSTRUCTION_HOLDOUT_ID,
+    id,
     split: 'holdout',
     stage: 'limited-construction',
     evidenceStage: 'deckbuilding',
@@ -71,14 +83,14 @@ export function buildIsdLimitedConstructionPlan(
       return {
         unitId: unit,
         subjectId: 'isd',
-        seed: `${ISD_CONSTRUCTION_HOLDOUT_ID}/${unit}/sealed`,
+        seed: `${id}/${unit}/sealed`,
         evidenceSeed: null,
-        outcomeSchedule: opponents.flatMap(({ id }) =>
+        outcomeSchedule: opponents.flatMap(({ id: opponentId }) =>
           ([0, 1] as const).map((focalSeat) => ({
-            gameId: `${unit}/${id}/seat-${String(focalSeat)}`,
-            seed: `${ISD_CONSTRUCTION_HOLDOUT_ID}/${unit}/${id}/game`,
+            gameId: `${unit}/${opponentId}/seat-${String(focalSeat)}`,
+            seed: `${id}/${unit}/${opponentId}/game`,
             focalSeat,
-            opponentId: id,
+            opponentId,
           })),
         ),
         segments: { format: 'isd' },

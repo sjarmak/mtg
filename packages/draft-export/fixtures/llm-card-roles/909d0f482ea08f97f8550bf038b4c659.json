@@ -1,0 +1,161 @@
+{
+  "key": "909d0f482ea08f97f8550bf038b4c659",
+  "recordedAt": "2026-11-22T22:01:57.253Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Korozda Guildmage\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{1}{B}{G}: Target creature gets +1/+1 and gains intimidate until end of turn. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\n{2}{B}{G}, Sacrifice a nontoken creature: Create X 1/1 green Saproling creature tokens, where X is the sacrificed creature's toughness.\"},{\"id\":2,\"name\":\"Lotleth Troll\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Creature — Zombie Troll\",\"text\":\"Trample\\nDiscard a creature card: Put a +1/+1 counter on this creature.\\n{B}: Regenerate this creature.\"},{\"id\":3,\"name\":\"Loxodon Smiter\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Creature — Elephant Soldier\",\"text\":\"This spell can't be countered.\\nIf a spell or ability an opponent controls causes you to discard this card, put it onto the battlefield instead of putting it into your graveyard.\"},{\"id\":4,\"name\":\"Lyev Skyknight\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying\\nWhen this creature enters, detain target nonland permanent an opponent controls. (Until your next turn, that permanent can't attack or block and its activated abilities can't be activated.)\"},{\"id\":5,\"name\":\"Mercurial Chemister\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{U}, {T}: Draw two cards.\\n{R}, {T}, Discard a card: This creature deals damage to target creature equal to the discarded card's mana value.\"},{\"id\":6,\"name\":\"New Prahv Guildmage\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{W}{U}: Target creature gains flying until end of turn.\\n{3}{W}{U}: Detain target nonland permanent an opponent controls. (Until your next turn, that permanent can't attack or block and its activated abilities can't be activated.)\"},{\"id\":7,\"name\":\"Nivix Guildmage\",\"manaCost\":\"{U}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}{U}{R}: Draw a card, then discard a card.\\n{2}{U}{R}: Copy target instant or sorcery spell you control. You may choose new targets for the copy.\"},{\"id\":8,\"name\":\"Niv-Mizzet, Dracogenius\",\"manaCost\":\"{2}{U}{U}{R}{R}\",\"typeLine\":\"Legendary Creature — Dragon Wizard\",\"text\":\"Flying\\nWhenever Niv-Mizzet deals damage to a player, you may draw a card.\\n{U}{R}: Niv-Mizzet deals 1 damage to any target.\"},{\"id\":9,\"name\":\"Rakdos Charm\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Exile target player's graveyard.\\n• Destroy target artifact.\\n• Each creature deals 1 damage to its controller.\"},{\"id\":10,\"name\":\"Rakdos Ragemutt\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"Lifelink, haste\"},{\"id\":11,\"name\":\"Rakdos Ringleader\",\"manaCost\":\"{4}{B}{R}\",\"typeLine\":\"Creature — Skeleton Warrior\",\"text\":\"First strike\\nWhenever this creature deals combat damage to a player, that player discards a card at random.\\n{B}: Regenerate this creature.\"},{\"id\":12,\"name\":\"Rakdos, Lord of Riots\",\"manaCost\":\"{B}{B}{R}{R}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"You can't cast Rakdos unless an opponent lost life this turn.\\nFlying, trample\\nCreature spells you cast cost {1} less to cast for each 1 life your opponents have lost this turn.\"},{\"id\":13,\"name\":\"Rakdos's Return\",\"manaCost\":\"{X}{B}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Rakdos's Return deals X damage to target opponent or planeswalker. That player or that planeswalker's controller discards X cards.\"},{\"id\":14,\"name\":\"Righteous Authority\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 for each card in its controller's hand.\\nAt the beginning of the draw step of enchanted creature's controller, that player draws an additional card.\"},{\"id\":15,\"name\":\"Risen Sanctuary\",\"manaCost\":\"{5}{G}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Vigilance\"},{\"id\":16,\"name\":\"Rites of Reaping\",\"manaCost\":\"{4}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gets +3/+3 until end of turn. Another target creature gets -3/-3 until end of turn.\"},{\"id\":17,\"name\":\"Rix Maadi Guildmage\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{B}{R}: Target blocking creature gets -1/-1 until end of turn.\\n{B}{R}: Target player who lost life this turn loses 1 life.\"},{\"id\":18,\"name\":\"Search Warrant\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand. You gain life equal to the number of cards in that player's hand.\"},{\"id\":19,\"name\":\"Selesnya Charm\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Target creature gets +2/+2 and gains trample until end of turn.\\n• Exile target creature with power 5 or greater.\\n• Create a 2/2 white Knight creature token with vigilance.\"},{\"id\":20,\"name\":\"Skull Rend\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Skull Rend deals 2 damage to each opponent. Those players each discard two cards at random.\"},{\"id\":21,\"name\":\"Skymark Roc\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhenever this creature attacks, you may return target creature defending player controls with toughness 2 or less to its owner's hand.\"},{\"id\":22,\"name\":\"Slaughter Games\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell can't be countered.\\nChoose a nonland card name. Search target opponent's graveyard, hand, and library for any number of cards with that name and exile them. Then that player shuffles.\"},{\"id\":23,\"name\":\"Sluiceway Scorpion\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Creature — Scorpion\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nScavenge {1}{B}{G} ({1}{B}{G}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":24,\"name\":\"Spawn of Rix Maadi\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Unleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":25,\"name\":\"Sphinx's Revelation\",\"manaCost\":\"{X}{W}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"You gain X life and draw X cards.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\",\"draw\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\",\"draw\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1290,
+      "cacheCreationInputTokens": 32856,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.775769,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.775769,
+      "pricedUsd": 0.775769,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.775769 and its own usage prices at $0.775769"
+    }
+  }
+}

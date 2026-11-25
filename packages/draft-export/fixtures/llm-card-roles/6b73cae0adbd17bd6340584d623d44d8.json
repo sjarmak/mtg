@@ -1,0 +1,161 @@
+{
+  "key": "6b73cae0adbd17bd6340584d623d44d8",
+  "recordedAt": "2026-11-22T22:33:55.917Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Utvara Scalper\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Scout\",\"text\":\"Flying\\nThis creature attacks each combat if able.\"},{\"id\":2,\"name\":\"War's Toll\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent taps a land for mana, tap all lands that player controls.\\nIf a creature an opponent controls attacks, all creatures that opponent controls attack if able.\"},{\"id\":3,\"name\":\"Weight of Spires\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Weight of Spires deals damage to target creature equal to the number of nonbasic lands that creature's controller controls.\"},{\"id\":4,\"name\":\"Whiptail Moloch\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"When this creature enters, it deals 3 damage to target creature you control.\"},{\"id\":5,\"name\":\"Aquastrand Spider\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Spider Mutant\",\"text\":\"Graft 2 (This creature enters with two +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{G}: Target creature with a +1/+1 counter on it gains reach until end of turn. (It can block creatures with flying.)\"},{\"id\":6,\"name\":\"Cytoplast Root-Kin\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elemental Mutant\",\"text\":\"Graft 4 (This creature enters with four +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\nWhen this creature enters, put a +1/+1 counter on each other creature you control with a +1/+1 counter on it.\\n{2}: Move a +1/+1 counter from target creature you control onto this creature.\"},{\"id\":7,\"name\":\"Cytospawn Shambler\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Elemental Mutant\",\"text\":\"Graft 6 (This creature enters with six +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{G}: Target creature with a +1/+1 counter on it gains trample until end of turn.\"},{\"id\":8,\"name\":\"Elemental Resonance\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant permanent\\nAt the beginning of your first main phase, add mana equal to enchanted permanent's mana cost. (Mana cost includes color. If a mana symbol has multiple colors, choose one.)\"},{\"id\":9,\"name\":\"Fertile Imagination\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose a card type. Target opponent reveals their hand. Create two 1/1 green Saproling creature tokens for each card of the chosen type revealed this way. (Artifact, battle, creature, enchantment, instant, kindred, land, planeswalker, and sorcery are card types.)\"},{\"id\":10,\"name\":\"Flash Foliage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Cast this spell only during combat after blockers are declared.\\nCreate a 1/1 green Saproling creature token that's blocking target creature attacking you.\\nDraw a card.\"},{\"id\":11,\"name\":\"Indrik Stomphowler\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, destroy target artifact or enchantment.\"},{\"id\":12,\"name\":\"Loaming Shaman\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Centaur Shaman\",\"text\":\"When this creature enters, target player shuffles any number of target cards from their graveyard into their library.\"},{\"id\":13,\"name\":\"Might of the Nephilim\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn for each of its colors.\"},{\"id\":14,\"name\":\"Patagia Viper\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Flying\\nWhen this creature enters, create two 1/1 green and blue Snake creature tokens.\\nWhen this creature enters, sacrifice it unless {U} was spent to cast it.\"},{\"id\":15,\"name\":\"Protean Hulk\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature dies, search your library for any number of creature cards with total mana value 6 or less, put them onto the battlefield, then shuffle.\"},{\"id\":16,\"name\":\"Simic Basilisk\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Basilisk Mutant\",\"text\":\"Graft 3 (This creature enters with three +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{1}{G}: Until end of turn, target creature with a +1/+1 counter on it gains \\\"Whenever this creature deals combat damage to a creature, destroy that creature at end of combat.\\\"\"},{\"id\":17,\"name\":\"Simic Initiate\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Mutant\",\"text\":\"Graft 1 (This creature enters with a +1/+1 counter on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\"},{\"id\":18,\"name\":\"Simic Ragworm\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Worm\",\"text\":\"{U}: Untap this creature.\"},{\"id\":19,\"name\":\"Sporeback Troll\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Troll Mutant\",\"text\":\"Graft 2 (This creature enters with two +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{1}{G}: Regenerate target creature with a +1/+1 counter on it.\"},{\"id\":20,\"name\":\"Sprouting Phytohydra\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Plant Hydra\",\"text\":\"Defender (This creature can't attack.)\\nWhenever this creature is dealt damage, you may create a token that's a copy of this creature.\"},{\"id\":21,\"name\":\"Stomp and Howl\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact and target enchantment.\"},{\"id\":22,\"name\":\"Street Savvy\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +0/+2 and can block creatures with landwalk abilities as though they didn't have those abilities.\"},{\"id\":23,\"name\":\"Thrive\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on each of X target creatures.\"},{\"id\":24,\"name\":\"Utopia Sprawl\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant Forest\\nAs this Aura enters, choose a color.\\nWhenever enchanted Forest is tapped for mana, its controller adds an additional one mana of the chosen color.\"},{\"id\":25,\"name\":\"Verdant Eidolon\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{G}, Sacrifice this creature: Add three mana of any one color.\\nWhenever you cast a multicolored spell, you may return this card from your graveyard to your hand.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"draw\",\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw", "fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1576,
+      "cacheCreationInputTokens": 32805,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.789049,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.789049,
+      "pricedUsd": 0.789049,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.789049 and its own usage prices at $0.789049"
+    }
+  }
+}

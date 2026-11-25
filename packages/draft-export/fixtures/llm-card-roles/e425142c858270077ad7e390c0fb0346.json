@@ -1,0 +1,161 @@
+{
+  "key": "e425142c858270077ad7e390c0fb0346",
+  "recordedAt": "2026-11-22T22:36:55.048Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Boggart Birth Rite\",\"manaCost\":\"{B}\",\"typeLine\":\"Kindred Sorcery — Goblin\",\"text\":\"Return target Goblin card from your graveyard to your hand.\"},{\"id\":2,\"name\":\"Boggart Harbinger\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature enters, you may search your library for a Goblin card, reveal it, then shuffle and put that card on top.\"},{\"id\":3,\"name\":\"Boggart Loggers\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\\n{2}{B}, Sacrifice this creature: Destroy target Treefolk or Forest.\"},{\"id\":4,\"name\":\"Boggart Mob\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Champion a Goblin (When this enters, sacrifice it unless you exile another Goblin you control. When this leaves the battlefield, that card returns to the battlefield.)\\nWhenever a Goblin you control deals combat damage to a player, you may create a 1/1 black Goblin Rogue creature token.\"},{\"id\":5,\"name\":\"Cairn Wanderer\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nAs long as a creature card with flying is in a graveyard, this creature has flying. The same is true for fear, first strike, double strike, deathtouch, haste, landwalk, lifelink, protection, reach, trample, shroud, and vigilance.\"},{\"id\":6,\"name\":\"Colfenor's Plans\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile the top seven cards of your library face down.\\nYou may look at the cards exiled with this enchantment, and you may play lands and cast spells from among those cards.\\nSkip your draw step.\\nYou can't cast more than one spell each turn.\"},{\"id\":7,\"name\":\"Dread\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Elemental Incarnation\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\nWhenever a creature deals damage to you, destroy it.\\nWhen Dread is put into a graveyard from anywhere, shuffle it into its owner's library.\"},{\"id\":8,\"name\":\"Dreamspoiler Witches\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flying\\nWhenever you cast a spell during an opponent's turn, you may have target creature get -1/-1 until end of turn.\"},{\"id\":9,\"name\":\"Exiled Boggart\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"When this creature dies, discard a card.\"},{\"id\":10,\"name\":\"Eyeblight's Ending\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Kindred Instant — Elf\",\"text\":\"Destroy target non-Elf creature.\"},{\"id\":11,\"name\":\"Facevaulter\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{B}, Sacrifice a Goblin: This creature gets +2/+2 until end of turn.\"},{\"id\":12,\"name\":\"Faerie Tauntings\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Kindred Enchantment — Faerie\",\"text\":\"Whenever you cast a spell during an opponent's turn, you may have each opponent lose 1 life.\"},{\"id\":13,\"name\":\"Final Revels\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• All creatures get +2/+0 until end of turn.\\n• All creatures get -0/-2 until end of turn.\"},{\"id\":14,\"name\":\"Fodder Launch\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Kindred Sorcery — Goblin\",\"text\":\"As an additional cost to cast this spell, sacrifice a Goblin.\\nTarget creature gets -5/-5 until end of turn. Fodder Launch deals 5 damage to that creature's controller.\"},{\"id\":15,\"name\":\"Footbottom Feast\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Put any number of target creature cards from your graveyard on top of your library.\\nDraw a card.\"},{\"id\":16,\"name\":\"Ghostly Changeling\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\n{1}{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":17,\"name\":\"Hoarder's Greed\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"You lose 2 life and draw two cards, then clash with an opponent. If you win, repeat this process. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":18,\"name\":\"Hornet Harasser\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature dies, target creature gets -2/-2 until end of turn.\"},{\"id\":19,\"name\":\"Hunter of Eyeblights\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Elf Assassin\",\"text\":\"When this creature enters, put a +1/+1 counter on target creature you don't control.\\n{2}{B}, {T}: Destroy target creature with a counter on it.\"},{\"id\":20,\"name\":\"Knucklebone Witch\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Whenever a Goblin you control is put into a graveyard from the battlefield, you may put a +1/+1 counter on this creature.\"},{\"id\":21,\"name\":\"Liliana Vess\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Target player discards a card.\\n−2: Search your library for a card, then shuffle and put that card on top.\\n−8: Put all creature cards from all graveyards onto the battlefield under your control.\"},{\"id\":22,\"name\":\"Lys Alana Scarblade\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Elf Assassin\",\"text\":\"{T}, Discard an Elf card: Target creature gets -X/-X until end of turn, where X is the number of Elves you control.\"},{\"id\":23,\"name\":\"Mad Auntie\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Other Goblin creatures you control get +1/+1.\\n{T}: Regenerate another target Goblin.\"},{\"id\":24,\"name\":\"Makeshift Mannequin\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature card from your graveyard to the battlefield with a mannequin counter on it. For as long as that creature has a mannequin counter on it, it has \\\"When this creature becomes the target of a spell or ability, sacrifice it.\\\"\"},{\"id\":25,\"name\":\"Marsh Flitter\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\nWhen this creature enters, create two 1/1 black Goblin Rogue creature tokens.\\nSacrifice a Goblin: This creature has base power and toughness 3/3 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 429,
+      "cacheCreationInputTokens": 32803,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.731659,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.731659,
+      "pricedUsd": 0.731659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.731659 and its own usage prices at $0.731659"
+    }
+  }
+}

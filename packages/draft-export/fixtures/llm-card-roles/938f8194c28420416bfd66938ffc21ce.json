@@ -1,0 +1,161 @@
+{
+  "key": "938f8194c28420416bfd66938ffc21ce",
+  "recordedAt": "2026-11-22T22:21:30.676Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ranging Raptors\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":2,\"name\":\"Ravenous Daggertooth\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, you gain 2 life.\"},{\"id\":3,\"name\":\"Ripjaw Raptor\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, draw a card.\"},{\"id\":4,\"name\":\"River Heralds' Boon\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Put a +1/+1 counter on target creature and a +1/+1 counter on up to one target Merfolk.\"},{\"id\":5,\"name\":\"Savage Stomp\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell costs {2} less to cast if it targets a Dinosaur you control.\\nPut a +1/+1 counter on target creature you control. Then that creature fights target creature you don't control. (Each deals damage equal to its power to the other.)\"},{\"id\":6,\"name\":\"Shapers' Sanctuary\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control becomes the target of a spell or ability an opponent controls, you may draw a card.\"},{\"id\":7,\"name\":\"Slice in Twain\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\\nDraw a card.\"},{\"id\":8,\"name\":\"Snapping Sailback\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Flash\\nEnrage — Whenever this creature is dealt damage, put a +1/+1 counter on it. (It must survive the damage to get the counter.)\"},{\"id\":9,\"name\":\"Spike-Tailed Ceratops\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"This creature can block an additional creature each combat.\"},{\"id\":10,\"name\":\"Thundering Spineback\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Other Dinosaurs you control get +1/+1.\\n{5}{G}: Create a 3/3 green Dinosaur creature token with trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":11,\"name\":\"Tishana's Wayfinder\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"When this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":12,\"name\":\"Verdant Rebirth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature gains \\\"When this creature dies, return it to its owner's hand.\\\"\\nDraw a card.\"},{\"id\":13,\"name\":\"Verdant Sun's Avatar\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Dinosaur Avatar\",\"text\":\"Whenever this creature or another creature you control enters, you gain life equal to that creature's toughness.\"},{\"id\":14,\"name\":\"Vineshaper Mystic\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Merfolk Shaman\",\"text\":\"When this creature enters, put a +1/+1 counter on each of up to two target Merfolk you control.\"},{\"id\":15,\"name\":\"Waker of the Wilds\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Merfolk Shaman\",\"text\":\"{X}{G}{G}: Put X +1/+1 counters on target land you control. That land becomes a 0/0 Elemental creature with haste. It's still a land.\"},{\"id\":16,\"name\":\"Wildgrowth Walker\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Whenever a creature you control explores, put a +1/+1 counter on this creature and you gain 3 life.\"},{\"id\":17,\"name\":\"Admiral Beckett Brass\",\"manaCost\":\"{1}{U}{B}{R}\",\"typeLine\":\"Legendary Creature — Human Pirate\",\"text\":\"Other Pirates you control get +1/+1.\\nAt the beginning of your end step, gain control of target nonland permanent controlled by a player who was dealt combat damage by three or more Pirates this turn.\"},{\"id\":18,\"name\":\"Belligerent Brontodon\",\"manaCost\":\"{5}{G}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Each creature you control assigns combat damage equal to its toughness rather than its power.\"},{\"id\":19,\"name\":\"Call to the Feast\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Create three 1/1 white Vampire creature tokens with lifelink.\"},{\"id\":20,\"name\":\"Deadeye Plunderers\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"This creature gets +1/+1 for each artifact you control.\\n{2}{U}{B}: Create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":21,\"name\":\"Dire Fleet Captain\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Creature — Orc Pirate\",\"text\":\"Whenever this creature attacks, it gets +1/+1 until end of turn for each other attacking Pirate.\"},{\"id\":22,\"name\":\"Gishath, Sun's Avatar\",\"manaCost\":\"{5}{R}{G}{W}\",\"typeLine\":\"Legendary Creature — Dinosaur Avatar\",\"text\":\"Vigilance, trample, haste\\nWhenever Gishath deals combat damage to a player, reveal that many cards from the top of your library. Put any number of Dinosaur creature cards from among them onto the battlefield and the rest on the bottom of your library in a random order.\"},{\"id\":23,\"name\":\"Hostage Taker\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature enters, exile another target creature or artifact until this creature leaves the battlefield. You may cast that card for as long as it remains exiled, and mana of any type can be spent to cast that spell.\"},{\"id\":24,\"name\":\"Huatli, Warrior Poet\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Legendary Planeswalker — Huatli\",\"text\":\"+2: You gain life equal to the greatest power among creatures you control.\\n0: Create a 3/3 green Dinosaur creature token with trample.\\n−X: Huatli deals X damage divided as you choose among any number of target creatures. Creatures dealt damage this way can't block this turn.\"},{\"id\":25,\"name\":\"Marauding Looter\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Raid — At the beginning of your end step, if you attacked this turn, you may draw a card. If you do, discard a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1025,
+      "cacheCreationInputTokens": 32731,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7600190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7600190000000001,
+      "pricedUsd": 0.760019,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.760019 and its own usage prices at $0.760019"
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "key": "7bd4896eaaedb34fa2974e93389cd654",
+  "recordedAt": "2026-11-22T22:32:15.842Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Gruul War Plow\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Creatures you control have trample.\\n{1}{R}{G}: This artifact becomes a 4/4 Juggernaut artifact creature until end of turn.\"},{\"id\":2,\"name\":\"Izzet Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {U}{R}.\"},{\"id\":3,\"name\":\"Mizzium Transreliquat\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{3}: This artifact becomes a copy of target artifact until end of turn.\\n{1}{U}{R}: This artifact becomes a copy of target artifact, except it has this ability.\"},{\"id\":4,\"name\":\"Moratorium Stone\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Exile target card from a graveyard.\\n{2}{W}{B}, {T}, Sacrifice this artifact: Exile target nonland card from a graveyard, all other cards from graveyards with the same name as that card, and all permanents with that name.\"},{\"id\":5,\"name\":\"Orzhov Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {W}{B}.\"},{\"id\":6,\"name\":\"Sword of the Paruns\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"As long as equipped creature is tapped, tapped creatures you control get +2/+0.\\nAs long as equipped creature is untapped, untapped creatures you control get +0/+2.\\n{3}: You may tap or untap equipped creature.\\nEquip {3}\"},{\"id\":7,\"name\":\"Godless Shrine\",\"manaCost\":\"\",\"typeLine\":\"Land — Plains Swamp\",\"text\":\"({T}: Add {W} or {B}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":8,\"name\":\"Gruul Turf\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, return a land you control to its owner's hand.\\n{T}: Add {R}{G}.\"},{\"id\":9,\"name\":\"Izzet Boilerworks\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, return a land you control to its owner's hand.\\n{T}: Add {U}{R}.\"},{\"id\":10,\"name\":\"Nivix, Aerie of the Firemind\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}{U}{R}, {T}: Exile the top card of your library. Until your next turn, you may cast it if it's an instant or sorcery spell.\"},{\"id\":11,\"name\":\"Orzhov Basilica\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, return a land you control to its owner's hand.\\n{T}: Add {W}{B}.\"},{\"id\":12,\"name\":\"Orzhova, the Church of Deals\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{3}{W}{B}, {T}: Target player loses 1 life and you gain 1 life.\"},{\"id\":13,\"name\":\"Skarrg, the Rage Pits\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{R}{G}, {T}: Target creature gets +1/+1 and gains trample until end of turn.\"},{\"id\":14,\"name\":\"Steam Vents\",\"manaCost\":\"\",\"typeLine\":\"Land — Island Mountain\",\"text\":\"({T}: Add {U} or {R}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":15,\"name\":\"Stomping Ground\",\"manaCost\":\"\",\"typeLine\":\"Land — Mountain Forest\",\"text\":\"({T}: Add {R} or {G}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 864,
+      "cacheCreationInputTokens": 31558,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7285090000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7285090000000001,
+      "pricedUsd": 0.728509,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728509 and its own usage prices at $0.728509"
+    }
+  }
+}

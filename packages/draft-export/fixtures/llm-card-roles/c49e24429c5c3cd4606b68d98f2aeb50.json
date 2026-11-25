@@ -1,0 +1,161 @@
+{
+  "key": "c49e24429c5c3cd4606b68d98f2aeb50",
+  "recordedAt": "2026-11-22T22:09:54.653Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Acolyte's Reward\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent the next X damage that would be dealt to target creature this turn, where X is your devotion to white. If damage is prevented this way, Acolyte's Reward deals that much damage to any target. (Each {W} in the mana costs of permanents you control counts toward your devotion to white.)\"},{\"id\":2,\"name\":\"Akroan Phalanx\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance\\n{2}{R}: Creatures you control get +1/+0 until end of turn.\"},{\"id\":3,\"name\":\"Akroan Skyguard\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Flying\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":4,\"name\":\"Archetype of Courage\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Enchantment Creature — Human Soldier\",\"text\":\"Creatures you control have first strike.\\nCreatures your opponents control lose first strike and can't have or gain first strike.\"},{\"id\":5,\"name\":\"Brimaz, King of Oreskos\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Legendary Creature — Cat Soldier\",\"text\":\"Vigilance\\nWhenever Brimaz attacks, create a 1/1 white Cat Soldier creature token with vigilance that's attacking.\\nWhenever Brimaz blocks a creature, create a 1/1 white Cat Soldier creature token with vigilance that's blocking that creature.\"},{\"id\":6,\"name\":\"Dawn to Dusk\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Return target enchantment card from your graveyard to your hand.\\n• Destroy target enchantment.\"},{\"id\":7,\"name\":\"Eidolon of Countless Battles\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {2}{W}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature and enchanted creature each get +1/+1 for each creature you control and +1/+1 for each Aura you control.\"},{\"id\":8,\"name\":\"Elite Skirmisher\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, you may tap target creature.\"},{\"id\":9,\"name\":\"Ephara's Radiance\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{1}{W}, {T}: You gain 3 life.\\\"\"},{\"id\":10,\"name\":\"Excoriate\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target tapped creature.\"},{\"id\":11,\"name\":\"Fated Retribution\",\"manaCost\":\"{4}{W}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy all creatures and planeswalkers. If it's your turn, scry 2.\"},{\"id\":12,\"name\":\"Ghostblade Eidolon\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {5}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nDouble strike (This creature deals both first-strike and regular combat damage.)\\nEnchanted creature gets +1/+1 and has double strike.\"},{\"id\":13,\"name\":\"Glimpse the Sun God\",\"manaCost\":\"{X}{W}\",\"typeLine\":\"Instant\",\"text\":\"Tap X target creatures. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":14,\"name\":\"God-Favored General\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may pay {2}{W}. If you do, create two 1/1 white Soldier enchantment creature tokens.\"},{\"id\":15,\"name\":\"Great Hart\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Elk\",\"text\":\"\"},{\"id\":16,\"name\":\"Griffin Dreamfinder\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\nWhen this creature enters, return target enchantment card from your graveyard to your hand.\"},{\"id\":17,\"name\":\"Hero of Iroas\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Aura spells you cast cost {1} less to cast.\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":18,\"name\":\"Hold at Bay\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent the next 7 damage that would be dealt to any target this turn.\"},{\"id\":19,\"name\":\"Loyal Pegasus\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Pegasus\",\"text\":\"Flying\\nThis creature can't attack or block alone.\"},{\"id\":20,\"name\":\"Mortal's Ardor\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains lifelink until end of turn. (Damage dealt by the creature also causes its controller to gain that much life.)\"},{\"id\":21,\"name\":\"Nyxborn Shieldmate\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment Creature — Human Soldier\",\"text\":\"Bestow {2}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +1/+2.\"},{\"id\":22,\"name\":\"Oreskos Sun Guide\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Monk\",\"text\":\"Inspired — Whenever this creature becomes untapped, you gain 2 life.\"},{\"id\":23,\"name\":\"Ornitharch\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Archon\",\"text\":\"Flying\\nTribute 2 (As this creature enters, an opponent of your choice may put two +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, create two 1/1 white Bird creature tokens with flying.\"},{\"id\":24,\"name\":\"Plea for Guidance\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to two enchantment cards, reveal them, put them into your hand, then shuffle.\"},{\"id\":25,\"name\":\"Revoke Existence\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target artifact or enchantment.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\",\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1210,
+      "cacheCreationInputTokens": 32632,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767289,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767289,
+      "pricedUsd": 0.767289,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767289 and its own usage prices at $0.767289"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "5ee702665c992c6f001cf62cad50af34",
+  "recordedAt": "2026-11-22T21:42:48.033Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Torch Slinger\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Kicker {1}{R} (You may pay an additional {1}{R} as you cast this spell.)\\nWhen this creature enters, if it was kicked, it deals 2 damage to target creature.\"},{\"id\":2,\"name\":\"Tuktuk Grunts\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Goblin Warrior Ally\",\"text\":\"Haste\\nWhenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":3,\"name\":\"Unstable Footing\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {3}{R} (You may pay an additional {3}{R} as you cast this spell.)\\nDamage can't be prevented this turn. If this spell was kicked, it deals 5 damage to target player or planeswalker.\"},{\"id\":4,\"name\":\"Warren Instigator\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Double strike\\nWhenever this creature deals damage to an opponent, you may put a Goblin creature card from your hand onto the battlefield.\"},{\"id\":5,\"name\":\"Zektar Shrine Expedition\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: Create a 7/1 red Elemental creature token with trample and haste. Exile it at the beginning of the next end step.\"},{\"id\":6,\"name\":\"Baloth Cage Trap\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent had an artifact enter the battlefield under their control this turn, you may pay {1}{G} rather than pay this spell's mana cost.\\nCreate a 4/4 green Beast creature token.\"},{\"id\":7,\"name\":\"Baloth Woodcrasher\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Landfall — Whenever a land you control enters, this creature gets +4/+4 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":8,\"name\":\"Beast Hunt\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top three cards of your library. Put all creature cards revealed this way into your hand and the rest into your graveyard.\"},{\"id\":9,\"name\":\"Beastmaster Ascension\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control attacks, you may put a quest counter on this enchantment.\\nAs long as this enchantment has seven or more quest counters on it, creatures you control get +5/+5.\"},{\"id\":10,\"name\":\"Cobra Trap\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If a noncreature permanent under your control was destroyed this turn by a spell or ability an opponent controlled, you may pay {G} rather than pay this spell's mana cost.\\nCreate four 1/1 green Snake creature tokens.\"},{\"id\":11,\"name\":\"Frontier Guide\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"{3}{G}, {T}: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":12,\"name\":\"Gigantiform\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Kicker {4}\\nEnchant creature\\nEnchanted creature has base power and toughness 8/8 and has trample.\\nWhen this Aura enters, if it was kicked, you may search your library for a card named Gigantiform, put it onto the battlefield, then shuffle.\"},{\"id\":13,\"name\":\"Grazing Gladehart\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Antelope\",\"text\":\"Landfall — Whenever a land you control enters, you may gain 2 life.\"},{\"id\":14,\"name\":\"Greenweaver Druid\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}{G}.\"},{\"id\":15,\"name\":\"Harrow\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a land.\\nSearch your library for up to two basic land cards, put them onto the battlefield, then shuffle.\"},{\"id\":16,\"name\":\"Joraga Bard\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Rogue Bard Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have Ally creatures you control gain vigilance until end of turn.\"},{\"id\":17,\"name\":\"Khalni Heart Expedition\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: Search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":18,\"name\":\"Lotus Cobra\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Landfall — Whenever a land you control enters, add one mana of any color.\"},{\"id\":19,\"name\":\"Mold Shambler\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Fungus Beast\",\"text\":\"Kicker {1}{G} (You may pay an additional {1}{G} as you cast this spell.)\\nWhen this creature enters, if it was kicked, destroy target noncreature permanent.\"},{\"id\":20,\"name\":\"Nissa Revane\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+1: Search your library for a card named Nissa's Chosen, put it onto the battlefield, then shuffle.\\n+1: You gain 2 life for each Elf you control.\\n−7: Search your library for any number of Elf creature cards, put them onto the battlefield, then shuffle.\"},{\"id\":21,\"name\":\"Nissa's Chosen\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"If this creature would die, put it on the bottom of its owner's library instead.\"},{\"id\":22,\"name\":\"Oracle of Mul Daya\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"You may play an additional land on each of your turns.\\nPlay with the top card of your library revealed.\\nYou may play lands from the top of your library.\"},{\"id\":23,\"name\":\"Oran-Rief Recluse\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Kicker {2}{G} (You may pay an additional {2}{G} as you cast this spell.)\\nReach (This creature can block creatures with flying.)\\nWhen this creature enters, if it was kicked, destroy target creature with flying.\"},{\"id\":24,\"name\":\"Oran-Rief Survivalist\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Warrior Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":25,\"name\":\"Predatory Urge\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: This creature deals damage equal to its power to target creature. That creature deals damage equal to its power to this creature.\\\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1150,
+      "cacheCreationInputTokens": 32874,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7691290000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7691290000000001,
+      "pricedUsd": 0.769129,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.769129 and its own usage prices at $0.769129"
+    }
+  }
+}

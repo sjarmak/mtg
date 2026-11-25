@@ -176,6 +176,34 @@ describe('rollout look-ahead', () => {
     expect(targetOf(rollout)).toBe(bear);
   });
 
+  it('refines only the decision kinds its config names', () => {
+    const state = contested('sim/rollout/delayed-payoff');
+    const bear = named(state, 'Runeclaw Bear');
+    let rollouts = 0;
+    const view: RolloutAgentView = {
+      ...baseView(state),
+      rollout(action, request) {
+        rollouts += 1;
+        return futureObservation(request.seed, targetOf(action) === bear);
+      },
+    };
+    expect(view.decision.kind).toBe('priority');
+    const greedy = decideGreedy(view, DEFAULT_GREEDY_CONFIG);
+
+    const combatOnly = decideRollout(
+      view,
+      { ...CONFIG, decisionKinds: ['declareAttackers'] },
+      'game-seed',
+      9,
+    );
+    expect(combatOnly).toEqual(greedy);
+    expect(rollouts).toBe(0);
+
+    const listed = decideRollout(view, { ...CONFIG, decisionKinds: ['priority'] }, 'game-seed', 9);
+    expect(targetOf(listed)).toBe(bear);
+    expect(rollouts).toBeGreaterThan(0);
+  });
+
   it('rejects a config whose declared work exceeds its per-decision cap', () => {
     const state = contested('sim/rollout/cap');
     const view: RolloutAgentView = {

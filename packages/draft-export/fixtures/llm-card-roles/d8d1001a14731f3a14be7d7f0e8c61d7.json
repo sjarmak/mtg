@@ -1,0 +1,117 @@
+{
+  "key": "d8d1001a14731f3a14be7d7f0e8c61d7",
+  "recordedAt": "2026-11-22T22:27:00.065Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":2,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":3,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":4,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"},{\"id\":5,\"name\":\"Chandra, Pyrogenius\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+2: Chandra deals 2 damage to each opponent.\\n−3: Chandra deals 4 damage to target creature.\\n−10: Chandra deals 6 damage to target player or planeswalker and each creature that player or that planeswalker's controller controls.\"},{\"id\":6,\"name\":\"Flame Lash\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Flame Lash deals 4 damage to any target.\"},{\"id\":7,\"name\":\"Liberating Combustion\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Liberating Combustion deals 6 damage to target creature. You may search your library and/or graveyard for a card named Chandra, Pyrogenius, reveal it, and put it into your hand. If you search your library this way, shuffle.\"},{\"id\":8,\"name\":\"Renegade Firebrand\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"As long as you control a Chandra planeswalker, this creature gets +1/+0 and has first strike. (It deals combat damage before creatures without first strike.)\"},{\"id\":9,\"name\":\"Stone Quarry\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {W}.\"},{\"id\":10,\"name\":\"Nissa, Nature's Artisan\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+3: You gain 3 life.\\n−4: Reveal the top two cards of your library. Put all land cards from among them onto the battlefield and the rest into your hand.\\n−12: Creatures you control get +5/+5 and gain trample until end of turn.\"},{\"id\":11,\"name\":\"Guardian of the Great Conduit\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Reach (This creature can block creatures with flying.)\\nAs long as you control a Nissa planeswalker, this creature gets +2/+0 and has vigilance. (Attacking doesn't cause it to tap.)\"},{\"id\":12,\"name\":\"Terrain Elemental\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"\"},{\"id\":13,\"name\":\"Verdant Crescendo\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card and put it onto the battlefield tapped. Search your library and graveyard for a card named Nissa, Nature's Artisan, reveal it, put it into your hand, then shuffle.\"},{\"id\":14,\"name\":\"Woodland Stream\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {U}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\",\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\",\"fixing\"]},{\"id\":14,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 831,
+      "cacheCreationInputTokens": 31379,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7232789999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7232789999999999,
+      "pricedUsd": 0.723279,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723279 and its own usage prices at $0.723279"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "774a5720519399f995684298af7d21c8",
+  "recordedAt": "2026-11-22T22:30:08.017Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Searing Meditation\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you gain life, you may pay {2}. If you do, this enchantment deals 2 damage to any target.\"},{\"id\":2,\"name\":\"Seeds of Strength\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 until end of turn.\\nTarget creature gets +1/+1 until end of turn.\\nTarget creature gets +1/+1 until end of turn.\"},{\"id\":3,\"name\":\"Selesnya Evangel\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{1}, {T}, Tap an untapped creature you control: Create a 1/1 green Saproling creature token.\"},{\"id\":4,\"name\":\"Selesnya Sagittars\",\"manaCost\":\"{3}{G}{W}\",\"typeLine\":\"Creature — Elf Archer\",\"text\":\"Reach (This creature can block creatures with flying.)\\nThis creature can block an additional creature each combat.\"},{\"id\":5,\"name\":\"Shambling Shell\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Creature — Plant Zombie\",\"text\":\"Sacrifice this creature: Put a +1/+1 counter on target creature.\\nDredge 3 (If you would draw a card, you may mill three cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":6,\"name\":\"Sisters of Stone Death\",\"manaCost\":\"{4}{B}{B}{G}{G}\",\"typeLine\":\"Legendary Creature — Gorgon\",\"text\":\"{G}: Target creature blocks Sisters of Stone Death this turn if able.\\n{B}{G}: Exile target creature blocking or blocked by Sisters of Stone Death.\\n{2}{B}: Put a creature card exiled with Sisters of Stone Death onto the battlefield under your control.\"},{\"id\":7,\"name\":\"Skyknight Legionnaire\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying, haste\"},{\"id\":8,\"name\":\"Sunhome Enforcer\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Creature — Giant Soldier\",\"text\":\"Whenever this creature deals combat damage, you gain that much life.\\n{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":9,\"name\":\"Szadek, Lord of Secrets\",\"manaCost\":\"{3}{U}{U}{B}{B}\",\"typeLine\":\"Legendary Creature — Vampire\",\"text\":\"Flying\\nIf Szadek would deal combat damage to a player, instead put that many +1/+1 counters on Szadek and that player mills that many cards.\"},{\"id\":10,\"name\":\"Thundersong Trumpeter\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"{T}: Target creature can't attack or block this turn.\"},{\"id\":11,\"name\":\"Tolsimir Wolfblood\",\"manaCost\":\"{4}{G}{W}\",\"typeLine\":\"Legendary Creature — Elf Warrior\",\"text\":\"Other green creatures you control get +1/+1.\\nOther white creatures you control get +1/+1.\\n{T}: Create Voja, a legendary 2/2 green and white Wolf creature token.\"},{\"id\":12,\"name\":\"Twisted Justice\",\"manaCost\":\"{4}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player sacrifices a creature of their choice. You draw cards equal to that creature's power.\"},{\"id\":13,\"name\":\"Vulturous Zombie\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Creature — Plant Zombie\",\"text\":\"Flying\\nWhenever a card is put into an opponent's graveyard from anywhere, put a +1/+1 counter on this creature.\"},{\"id\":14,\"name\":\"Watchwolf\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"\"},{\"id\":15,\"name\":\"Woodwraith Corrupter\",\"manaCost\":\"{3}{B}{B}{G}\",\"typeLine\":\"Creature — Elemental Horror\",\"text\":\"{1}{B}{G}, {T}: Target Forest becomes a 4/4 black and green Elemental Horror creature. It's still a land.\"},{\"id\":16,\"name\":\"Woodwraith Strangler\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Creature — Plant Zombie\",\"text\":\"Exile a creature card from your graveyard: Regenerate this creature.\"},{\"id\":17,\"name\":\"Boros Guildmage\",\"manaCost\":\"{R/W}{R/W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}{R}: Target creature gains haste until end of turn.\\n{1}{W}: Target creature gains first strike until end of turn.\"},{\"id\":18,\"name\":\"Boros Recruit\",\"manaCost\":\"{R/W}\",\"typeLine\":\"Creature — Goblin Soldier\",\"text\":\"({R/W} can be paid with either {R} or {W}.)\\nFirst strike\"},{\"id\":19,\"name\":\"Centaur Safeguard\",\"manaCost\":\"{2}{G/W}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"({G/W} can be paid with either {G} or {W}.)\\nWhen this creature dies, you may gain 3 life.\"},{\"id\":20,\"name\":\"Dimir Guildmage\",\"manaCost\":\"{U/B}{U/B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"({U/B} can be paid with either {U} or {B}.)\\n{3}{U}: Target player draws a card. Activate only as a sorcery.\\n{3}{B}: Target player discards a card. Activate only as a sorcery.\"},{\"id\":21,\"name\":\"Gaze of the Gorgon\",\"manaCost\":\"{3}{B/G}\",\"typeLine\":\"Instant\",\"text\":\"({B/G} can be paid with either {B} or {G}.)\\nRegenerate target creature. At this turn's next end of combat, destroy all creatures that blocked or were blocked by it this turn.\"},{\"id\":22,\"name\":\"Gleancrawler\",\"manaCost\":\"{3}{B/G}{B/G}{B/G}\",\"typeLine\":\"Creature — Insect Horror\",\"text\":\"({B/G} can be paid with either {B} or {G}.)\\nTrample\\nAt the beginning of your end step, return to your hand all creature cards in your graveyard that were put there from the battlefield this turn.\"},{\"id\":23,\"name\":\"Golgari Guildmage\",\"manaCost\":\"{B/G}{B/G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{4}{B}, Sacrifice a creature: Return target creature card from your graveyard to your hand.\\n{4}{G}: Put a +1/+1 counter on target creature.\"},{\"id\":24,\"name\":\"Lurking Informant\",\"manaCost\":\"{1}{U/B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"({U/B} can be paid with either {U} or {B}.)\\n{2}, {T}: Look at the top card of target player's library. You may put that card into that player's graveyard.\"},{\"id\":25,\"name\":\"Master Warcraft\",\"manaCost\":\"{2}{R/W}{R/W}\",\"typeLine\":\"Instant\",\"text\":\"Cast this spell only before attackers are declared.\\nYou choose which creatures attack this turn.\\nYou choose which creatures block this turn and how those creatures block.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\",\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 411,
+      "cacheCreationInputTokens": 32733,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.729359,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.729359,
+      "pricedUsd": 0.729359,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.729359 and its own usage prices at $0.729359"
+    }
+  }
+}

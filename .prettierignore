@@ -17,7 +17,7 @@ packages/decklab/fixtures/
 # Installed play admissions are content-addressed evidence. Their parent
 # manifests bind the exact bytes of qualification and probe receipts, so a
 # source formatter must not rewrite them after verification.
-packages/data/data/*/play-admission-*/
+packages/data/data/*/play-admission/
 
 # Run outputs.
 out/

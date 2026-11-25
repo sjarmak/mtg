@@ -1,0 +1,161 @@
+{
+  "key": "23564ee81a8e1096583302f8759aa1da",
+  "recordedAt": "2026-11-22T22:25:01.694Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Hightide Hermit\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Crab\",\"text\":\"Defender\\nWhen this creature enters, you get {E}{E}{E}{E} (four energy counters).\\nPay {E}{E}: This creature can attack this turn as though it didn't have defender.\"},{\"id\":2,\"name\":\"Insidious Will\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Counter target spell.\\n• You may choose new targets for target spell.\\n• Copy target instant or sorcery spell. You may choose new targets for the copy.\"},{\"id\":3,\"name\":\"Janjeet Sentry\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Soldier\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\n{T}, Pay {E}{E}: You may tap or untap target artifact or creature.\"},{\"id\":4,\"name\":\"Long-Finned Skywhale\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Whale\",\"text\":\"Flying\\nThis creature can block only creatures with flying.\"},{\"id\":5,\"name\":\"Malfunction\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant artifact or creature\\nWhen this Aura enters, tap enchanted permanent.\\nEnchanted permanent doesn't untap during its controller's untap step.\"},{\"id\":6,\"name\":\"Metallurgic Summonings\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast an instant or sorcery spell, create an X/X colorless Construct artifact creature token, where X is that spell's mana value.\\n{3}{U}{U}, Exile this enchantment: Return all instant and sorcery cards from your graveyard to your hand. Activate only if you control six or more artifacts.\"},{\"id\":7,\"name\":\"Minister of Inquiries\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Vedalken Advisor\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\n{T}, Pay {E}: Target player mills three cards.\"},{\"id\":8,\"name\":\"Nimble Innovator\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Vedalken Artificer\",\"text\":\"When this creature enters, draw a card.\"},{\"id\":9,\"name\":\"Padeem, Consul of Innovation\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Legendary Creature — Vedalken Artificer\",\"text\":\"Artifacts you control have hexproof. (They can't be the targets of spells or abilities your opponents control.)\\nAt the beginning of your upkeep, if you control the artifact with the greatest mana value or tied for the greatest mana value, draw a card.\"},{\"id\":10,\"name\":\"Paradoxical Outcome\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return any number of target nonland, nontoken permanents you control to their owners' hands. Draw a card for each card returned to your hand this way.\"},{\"id\":11,\"name\":\"Revolutionary Rebuff\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target nonartifact spell unless its controller pays {2}.\"},{\"id\":12,\"name\":\"Saheeli's Artistry\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Create a token that's a copy of target artifact.\\n• Create a token that's a copy of target creature, except it's an artifact in addition to its other types.\"},{\"id\":13,\"name\":\"Select for Inspection\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target tapped creature to its owner's hand. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":14,\"name\":\"Shrewd Negotiation\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Exchange control of target artifact you control and target artifact or creature you don't control.\"},{\"id\":15,\"name\":\"Tezzeret's Ambition\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw three cards. If you control no artifacts, discard a card.\"},{\"id\":16,\"name\":\"Thriving Turtle\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Turtle\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":17,\"name\":\"Torrential Gearhulk\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Flash\\nWhen this creature enters, you may cast target instant card from your graveyard without paying its mana cost. If that spell would be put into your graveyard, exile it instead.\"},{\"id\":18,\"name\":\"Vedalken Blademaster\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Soldier\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":19,\"name\":\"Weldfast Wingsmith\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever an artifact you control enters, this creature gains flying until end of turn.\"},{\"id\":20,\"name\":\"Wind Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\"},{\"id\":21,\"name\":\"Aetherborn Marauder\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Aetherborn Rogue\",\"text\":\"Flying, lifelink\\nWhen this creature enters, move any number of +1/+1 counters from other permanents you control onto this creature.\"},{\"id\":22,\"name\":\"Ambitious Aetherborn\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Aetherborn Artificer\",\"text\":\"Fabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":23,\"name\":\"Demon of Dark Schemes\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nWhen this creature enters, all other creatures get -2/-2 until end of turn.\\nWhenever another creature dies, you get {E} (an energy counter).\\n{2}{B}, Pay {E}{E}{E}{E}: Put target creature card from a graveyard onto the battlefield under your control tapped.\"},{\"id\":24,\"name\":\"Dhund Operative\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"As long as you control an artifact, this creature gets +1/+0 and has deathtouch.\"},{\"id\":25,\"name\":\"Diabolic Tutor\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a card, put that card into your hand, then shuffle.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1447,
+      "cacheCreationInputTokens": 32631,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779119,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779119,
+      "pricedUsd": 0.779119,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779119 and its own usage prices at $0.779119"
+    }
+  }
+}

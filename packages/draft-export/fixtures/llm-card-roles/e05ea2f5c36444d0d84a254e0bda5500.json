@@ -1,0 +1,161 @@
+{
+  "key": "e05ea2f5c36444d0d84a254e0bda5500",
+  "recordedAt": "2026-11-22T21:40:01.028Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Consuming Vapors\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player sacrifices a creature of their choice. You gain life equal to that creature's toughness.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":2,\"name\":\"Contaminated Ground\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land is a Swamp.\\nWhenever enchanted land becomes tapped, its controller loses 2 life.\"},{\"id\":3,\"name\":\"Corpsehatch\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target nonblack creature. Create two 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":4,\"name\":\"Curse of Wizardry\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"As this enchantment enters, choose a color.\\nWhenever a player casts a spell of the chosen color, that player loses 1 life.\"},{\"id\":5,\"name\":\"Death Cultist\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Sacrifice this creature: Target player loses 1 life and you gain 1 life.\"},{\"id\":6,\"name\":\"Demonic Appetite\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nEnchanted creature gets +3/+3.\\nAt the beginning of your upkeep, sacrifice a creature.\"},{\"id\":7,\"name\":\"Drana, Kalastria Bloodchief\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Creature — Vampire Shaman\",\"text\":\"Flying\\n{X}{B}{B}: Target creature gets -0/-X until end of turn and Drana gets +X/+0 until end of turn.\"},{\"id\":8,\"name\":\"Dread Drone\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Eldrazi Drone\",\"text\":\"When this creature enters, create two 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":9,\"name\":\"Escaped Null\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Berserker\",\"text\":\"Lifelink\\nWhenever this creature blocks or becomes blocked, it gets +5/+0 until end of turn.\"},{\"id\":10,\"name\":\"Essence Feed\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player loses 3 life. You gain 3 life and create three 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":11,\"name\":\"Gloomhunter\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\"},{\"id\":12,\"name\":\"Guul Draz Assassin\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Vampire Assassin\",\"text\":\"Level up {1}{B} ({1}{B}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 2-3\\n2/2\\n{B}, {T}: Target creature gets -2/-2 until end of turn.\\nLEVEL 4+\\n4/4\\n{B}, {T}: Target creature gets -4/-4 until end of turn.\"},{\"id\":13,\"name\":\"Hellcarver Demon\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, sacrifice all other permanents you control and discard your hand. Exile the top six cards of your library. You may cast any number of spells from among cards exiled this way without paying their mana costs.\"},{\"id\":14,\"name\":\"Induce Despair\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, reveal a creature card from your hand.\\nTarget creature gets -X/-X until end of turn, where X is the revealed card's mana value.\"},{\"id\":15,\"name\":\"Inquisition of Kozilek\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand. You choose a nonland card from it with mana value 3 or less. That player discards that card.\"},{\"id\":16,\"name\":\"Last Kiss\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Last Kiss deals 2 damage to target creature and you gain 2 life.\"},{\"id\":17,\"name\":\"Mortician Beetle\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Whenever a player sacrifices a creature, you may put a +1/+1 counter on this creature.\"},{\"id\":18,\"name\":\"Nighthaze\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gains swampwalk until end of turn. (It can't be blocked as long as defending player controls a Swamp.)\\nDraw a card.\"},{\"id\":19,\"name\":\"Nirkana Cutthroat\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire Warrior\",\"text\":\"Level up {2}{B} ({2}{B}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-2\\n4/3\\nDeathtouch\\nLEVEL 3+\\n5/4\\nFirst strike, deathtouch\"},{\"id\":20,\"name\":\"Nirkana Revenant\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Vampire Shade\",\"text\":\"Whenever you tap a Swamp for mana, add an additional {B}.\\n{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":21,\"name\":\"Null Champion\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Warrior\",\"text\":\"Level up {3} ({3}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-3\\n4/2\\nLEVEL 4+\\n7/3\\n{B}: Regenerate this creature.\"},{\"id\":22,\"name\":\"Pawn of Ulamog\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Whenever this creature or another nontoken creature you control dies, you may create a 0/1 colorless Eldrazi Spawn creature token. It has \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":23,\"name\":\"Perish the Thought\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a card from it. That player shuffles that card into their library.\"},{\"id\":24,\"name\":\"Pestilence Demon\",\"manaCost\":\"{5}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\n{B}: This creature deals 1 damage to each creature and each player.\"},{\"id\":25,\"name\":\"Repay in Kind\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player's life total becomes the lowest life total among all players.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1363,
+      "cacheCreationInputTokens": 32734,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776979,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776979,
+      "pricedUsd": 0.776979,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776979 and its own usage prices at $0.776979"
+    }
+  }
+}

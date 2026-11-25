@@ -1,0 +1,161 @@
+{
+  "key": "1b1eddec01db11823669000665a05066",
+  "recordedAt": "2026-11-22T22:34:48.614Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Rain of Gore\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"If a spell or ability would cause its controller to gain life, that player loses that much life instead.\"},{\"id\":2,\"name\":\"Rakdos Augermage\",\"manaCost\":\"{B}{B}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"First strike\\n{T}: Reveal your hand and discard a card of target opponent's choice. Then that player reveals their hand and discards a card of your choice. Activate only as a sorcery.\"},{\"id\":3,\"name\":\"Rakdos Ickspitter\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"{T}: This creature deals 1 damage to target creature and that creature's controller loses 1 life.\"},{\"id\":4,\"name\":\"Rakdos the Defiler\",\"manaCost\":\"{2}{B}{B}{R}{R}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying, trample\\nWhenever Rakdos attacks, sacrifice half the non-Demon permanents you control, rounded up.\\nWhenever Rakdos deals combat damage to a player, that player sacrifices half the non-Demon permanents they control of their choice, rounded up.\"},{\"id\":5,\"name\":\"Simic Sky Swallower\",\"manaCost\":\"{5}{G}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Flying, trample\\nShroud (This creature can't be the target of spells or abilities.)\"},{\"id\":6,\"name\":\"Sky Hussar\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying\\nWhen this creature enters, untap all creatures you control.\\nForecast — Tap two untapped white and/or blue creatures you control, Reveal this card from your hand: Draw a card. (Activate only during your upkeep and only once each turn.)\"},{\"id\":7,\"name\":\"Swift Silence\",\"manaCost\":\"{2}{W}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter all other spells. Draw a card for each spell countered this way.\"},{\"id\":8,\"name\":\"Trygon Predator\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, you may destroy target artifact or enchantment that player controls.\"},{\"id\":9,\"name\":\"Twinstrike\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Instant\",\"text\":\"Twinstrike deals 2 damage to each of two target creatures.\\nHellbent — Destroy those creatures instead if you have no cards in hand.\"},{\"id\":10,\"name\":\"Vigean Hydropon\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Plant Mutant\",\"text\":\"Graft 5 (This creature enters with five +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\nThis creature can't attack or block.\"},{\"id\":11,\"name\":\"Vigean Intuition\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose a card type, then reveal the top four cards of your library. Put all cards of the chosen type revealed this way into your hand and the rest into your graveyard. (Artifact, battle, creature, enchantment, instant, kindred, land, planeswalker, and sorcery are card types.)\"},{\"id\":12,\"name\":\"Voidslime\",\"manaCost\":\"{G}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell, activated ability, or triggered ability. (Mana abilities can't be targeted.)\"},{\"id\":13,\"name\":\"Windreaver\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\n{W}: This creature gains vigilance until end of turn.\\n{W}: This creature gets +0/+1 until end of turn.\\n{U}: Switch this creature's power and toughness until end of turn.\\n{U}: Return this creature to its owner's hand.\"},{\"id\":14,\"name\":\"Wrecking Ball\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature or land.\"},{\"id\":15,\"name\":\"Avatar of Discord\",\"manaCost\":\"{B/R}{B/R}{B/R}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"({B/R} can be paid with either {B} or {R}.)\\nFlying\\nWhen this creature enters, sacrifice it unless you discard two cards.\"},{\"id\":16,\"name\":\"Azorius Guildmage\",\"manaCost\":\"{W/U}{W/U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"{2}{W}: Tap target creature.\\n{2}{U}: Counter target activated ability. (Mana abilities can't be targeted.)\"},{\"id\":17,\"name\":\"Biomantic Mastery\",\"manaCost\":\"{4}{G/U}{G/U}{G/U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card for each creature target player controls, then draw a card for each creature another target player controls.\"},{\"id\":18,\"name\":\"Dovescape\",\"manaCost\":\"{3}{W/U}{W/U}{W/U}\",\"typeLine\":\"Enchantment\",\"text\":\"({W/U} can be paid with either {W} or {U}.)\\nWhenever a player casts a noncreature spell, counter that spell. That player creates X 1/1 white and blue Bird creature tokens with flying, where X is the spell's mana value.\"},{\"id\":19,\"name\":\"Minister of Impediments\",\"manaCost\":\"{2}{W/U}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"({W/U} can be paid with either {W} or {U}.)\\n{T}: Tap target creature.\"},{\"id\":20,\"name\":\"Rakdos Guildmage\",\"manaCost\":\"{B/R}{B/R}\",\"typeLine\":\"Creature — Zombie Shaman\",\"text\":\"({B/R} can be paid with either {B} or {R}.)\\n{3}{B}, Discard a card: Target creature gets -2/-2 until end of turn.\\n{3}{R}: Create a 2/1 red Goblin creature token with haste. Exile it at the beginning of the next end step.\"},{\"id\":21,\"name\":\"Riot Spikes\",\"manaCost\":\"{B/R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"({B/R} can be paid with either {B} or {R}.)\\nEnchant creature\\nEnchanted creature gets +2/-1.\"},{\"id\":22,\"name\":\"Shielding Plax\",\"manaCost\":\"{2}{G/U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"({G/U} can be paid with either {G} or {U}.)\\nEnchant creature\\nWhen this Aura enters, draw a card.\\nEnchanted creature can't be the target of spells or abilities your opponents control.\"},{\"id\":23,\"name\":\"Simic Guildmage\",\"manaCost\":\"{G/U}{G/U}\",\"typeLine\":\"Creature — Elf Wizard\",\"text\":\"({G/U} can be paid with either {G} or {U}.)\\n{1}{G}: Move a +1/+1 counter from target creature onto another target creature with the same controller.\\n{1}{U}: Attach target Aura attached to a permanent to another permanent with the same controller.\"},{\"id\":24,\"name\":\"Bound // Determined\",\"manaCost\":\"{3}{B}{G} // {G}{U}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Bound\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Instant\",\"text\":\"Sacrifice a creature. Return up to X cards from your graveyard to your hand, where X is the number of colors that creature was. Exile this card.\"},{\"name\":\"Determined\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Other spells you control can't be countered this turn.\\nDraw a card.\"}]},{\"id\":25,\"name\":\"Crime // Punishment\",\"manaCost\":\"{3}{W}{B} // {X}{B}{G}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Crime\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature or enchantment card from an opponent's graveyard onto the battlefield under your control.\"},{\"name\":\"Punishment\",\"manaCost\":\"{X}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy each artifact, creature, and enchantment with mana value X.\"}]}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\",\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\",\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction", "draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1804,
+      "cacheCreationInputTokens": 33103,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.8064089999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.8064089999999999,
+      "pricedUsd": 0.806409,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.806409 and its own usage prices at $0.806409"
+    }
+  }
+}

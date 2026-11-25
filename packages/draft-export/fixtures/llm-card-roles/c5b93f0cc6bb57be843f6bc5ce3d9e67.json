@@ -1,0 +1,161 @@
+{
+  "key": "c5b93f0cc6bb57be843f6bc5ce3d9e67",
+  "recordedAt": "2026-11-22T21:38:40.131Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"All Is Dust\",\"manaCost\":\"{7}\",\"typeLine\":\"Kindred Sorcery — Eldrazi\",\"text\":\"Each player sacrifices all permanents they control that are one or more colors.\"},{\"id\":2,\"name\":\"Artisan of Kozilek\",\"manaCost\":\"{9}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"When you cast this spell, you may return target creature card from your graveyard to the battlefield.\\nAnnihilator 2 (Whenever this creature attacks, defending player sacrifices two permanents of their choice.)\"},{\"id\":3,\"name\":\"Eldrazi Conscription\",\"manaCost\":\"{8}\",\"typeLine\":\"Kindred Enchantment — Eldrazi Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +10/+10 and has trample and annihilator 2. (Whenever it attacks, defending player sacrifices two permanents of their choice.)\"},{\"id\":4,\"name\":\"Emrakul, the Aeons Torn\",\"manaCost\":\"{15}\",\"typeLine\":\"Legendary Creature — Eldrazi\",\"text\":\"This spell can't be countered.\\nWhen you cast this spell, take an extra turn after this one.\\nFlying, protection from spells that are one or more colors, annihilator 6\\nWhen Emrakul is put into a graveyard from anywhere, its owner shuffles their graveyard into their library.\"},{\"id\":5,\"name\":\"Hand of Emrakul\",\"manaCost\":\"{9}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"You may sacrifice four Eldrazi Spawn rather than pay this spell's mana cost.\\nAnnihilator 1 (Whenever this creature attacks, defending player sacrifices a permanent of their choice.)\"},{\"id\":6,\"name\":\"Kozilek, Butcher of Truth\",\"manaCost\":\"{10}\",\"typeLine\":\"Legendary Creature — Eldrazi\",\"text\":\"When you cast this spell, draw four cards.\\nAnnihilator 4 (Whenever this creature attacks, defending player sacrifices four permanents of their choice.)\\nWhen Kozilek is put into a graveyard from anywhere, its owner shuffles their graveyard into their library.\"},{\"id\":7,\"name\":\"It That Betrays\",\"manaCost\":\"{12}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"Annihilator 2 (Whenever this creature attacks, defending player sacrifices two permanents of their choice.)\\nWhenever an opponent sacrifices a nontoken permanent, put that card onto the battlefield under your control.\"},{\"id\":8,\"name\":\"Not of This World\",\"manaCost\":\"{7}\",\"typeLine\":\"Kindred Instant — Eldrazi\",\"text\":\"Counter target spell or ability that targets a permanent you control.\\nThis spell costs {7} less to cast if it targets a spell or ability that targets a creature you control with power 7 or greater.\"},{\"id\":9,\"name\":\"Pathrazer of Ulamog\",\"manaCost\":\"{11}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"Annihilator 3 (Whenever this creature attacks, defending player sacrifices three permanents of their choice.)\\nThis creature can't be blocked except by three or more creatures.\"},{\"id\":10,\"name\":\"Skittering Invasion\",\"manaCost\":\"{7}\",\"typeLine\":\"Kindred Sorcery — Eldrazi\",\"text\":\"Create five 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":11,\"name\":\"Spawnsire of Ulamog\",\"manaCost\":\"{10}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"Annihilator 1 (Whenever this creature attacks, defending player sacrifices a permanent of their choice.)\\n{4}: Create two 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\\n{20}: Cast any number of Eldrazi spells from among cards you own outside the game without paying their mana costs.\"},{\"id\":12,\"name\":\"Ulamog, the Infinite Gyre\",\"manaCost\":\"{11}\",\"typeLine\":\"Legendary Creature — Eldrazi\",\"text\":\"When you cast this spell, destroy target permanent.\\nIndestructible\\nAnnihilator 4 (Whenever this creature attacks, defending player sacrifices four permanents of their choice.)\\nWhen Ulamog is put into a graveyard from anywhere, its owner shuffles their graveyard into their library.\"},{\"id\":13,\"name\":\"Ulamog's Crusher\",\"manaCost\":\"{8}\",\"typeLine\":\"Creature — Eldrazi\",\"text\":\"Annihilator 2 (Whenever this creature attacks, defending player sacrifices two permanents of their choice.)\\nThis creature attacks each combat if able.\"},{\"id\":14,\"name\":\"Affa Guard Hound\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, target creature gets +0/+3 until end of turn.\"},{\"id\":15,\"name\":\"Caravan Escort\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Level up {2} ({2}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-4\\n2/2\\nLEVEL 5+\\n5/5\\nFirst strike\"},{\"id\":16,\"name\":\"Dawnglare Invoker\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Kor Wizard\",\"text\":\"Flying\\n{8}: Tap all creatures target player controls.\"},{\"id\":17,\"name\":\"Deathless Angel\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\n{W}{W}: Target creature gains indestructible until end of turn.\"},{\"id\":18,\"name\":\"Demystify\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment.\"},{\"id\":19,\"name\":\"Eland Umbra\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +0/+4.\\nUmbra armor (If enchanted creature would be destroyed, instead remove all damage from it and destroy this Aura.)\"},{\"id\":20,\"name\":\"Emerge Unscathed\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains protection from the color of your choice until end of turn.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":21,\"name\":\"Gideon Jura\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Gideon\",\"text\":\"+2: During target opponent's next turn, creatures that player controls attack Gideon Jura if able.\\n−2: Destroy target tapped creature.\\n0: Until end of turn, Gideon Jura becomes a 6/6 Human Soldier creature that's still a planeswalker. Prevent all damage that would be dealt to him this turn.\"},{\"id\":22,\"name\":\"Glory Seeker\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"\"},{\"id\":23,\"name\":\"Guard Duty\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has defender.\"},{\"id\":24,\"name\":\"Harmless Assault\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn by attacking creatures.\"},{\"id\":25,\"name\":\"Hedron-Field Purists\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Level up {2}{W} ({2}{W}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-4\\n1/4\\nIf a source would deal damage to you or a creature you control, prevent 1 of that damage.\\nLEVEL 5+\\n2/5\\nIf a source would deal damage to you or a creature you control, prevent 2 of that damage.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1448,
+      "cacheCreationInputTokens": 33033,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.787209,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.787209,
+      "pricedUsd": 0.787209,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.787209 and its own usage prices at $0.787209"
+    }
+  }
+}

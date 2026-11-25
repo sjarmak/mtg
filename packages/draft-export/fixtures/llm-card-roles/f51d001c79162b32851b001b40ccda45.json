@@ -1,0 +1,161 @@
+{
+  "key": "f51d001c79162b32851b001b40ccda45",
+  "recordedAt": "2026-11-22T21:50:30.322Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Garruk's Horde\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nPlay with the top card of your library revealed.\\nYou may cast creature spells from the top of your library. (Do this only any time you could cast that creature spell. You still pay the spell's costs.)\"},{\"id\":2,\"name\":\"Giant Spider\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":3,\"name\":\"Gladecover Scout\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":4,\"name\":\"Greater Basilisk\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Basilisk\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":5,\"name\":\"Hunter's Insight\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose target creature you control. Whenever that creature deals combat damage to a player or planeswalker this turn, draw that many cards.\"},{\"id\":6,\"name\":\"Jade Mage\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{2}{G}: Create a 1/1 green Saproling creature token.\"},{\"id\":7,\"name\":\"Llanowar Elves\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":8,\"name\":\"Lure\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAll creatures able to block enchanted creature do so.\"},{\"id\":9,\"name\":\"Lurking Crocodile\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\nIslandwalk (This creature can't be blocked as long as defending player controls an Island.)\"},{\"id\":10,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":11,\"name\":\"Overrun\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +3/+3 and gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":12,\"name\":\"Plummet\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying.\"},{\"id\":13,\"name\":\"Primeval Titan\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Trample\\nWhenever this creature enters or attacks, you may search your library for up to two land cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":14,\"name\":\"Primordial Hydra\",\"manaCost\":\"{X}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nAt the beginning of your upkeep, double the number of +1/+1 counters on this creature.\\nThis creature has trample as long as it has ten or more +1/+1 counters on it.\"},{\"id\":15,\"name\":\"Rampant Growth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\"},{\"id\":16,\"name\":\"Reclaim\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Put target card from your graveyard on top of your library.\"},{\"id\":17,\"name\":\"Rites of Flourishing\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each player's draw step, that player draws an additional card.\\nEach player may play an additional land on each of their turns.\"},{\"id\":18,\"name\":\"Runeclaw Bear\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"\"},{\"id\":19,\"name\":\"Sacred Wolf\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":20,\"name\":\"Skinshifter\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{G}: Choose one. Activate only once each turn.\\n• Until end of turn, this creature becomes a Rhino with base power and toughness 4/4 and gains trample.\\n• Until end of turn, this creature becomes a Bird with base power and toughness 2/2 and gains flying.\\n• Until end of turn, this creature becomes a Plant with base power and toughness 0/8.\"},{\"id\":21,\"name\":\"Stampeding Rhino\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Rhino\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":22,\"name\":\"Stingerfling Spider\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\\nWhen this creature enters, you may destroy target creature with flying.\"},{\"id\":23,\"name\":\"Titanic Growth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +4/+4 until end of turn.\"},{\"id\":24,\"name\":\"Trollhide\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has \\\"{1}{G}: Regenerate this creature.\\\" (The next time the creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":25,\"name\":\"Vastwood Gorger\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1287,
+      "cacheCreationInputTokens": 32315,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7647990000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7647990000000001,
+      "pricedUsd": 0.764799,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.764799 and its own usage prices at $0.764799"
+    }
+  }
+}

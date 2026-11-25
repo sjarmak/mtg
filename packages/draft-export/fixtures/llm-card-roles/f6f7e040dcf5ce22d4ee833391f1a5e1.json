@@ -1,0 +1,161 @@
+{
+  "key": "f6f7e040dcf5ce22d4ee833391f1a5e1",
+  "recordedAt": "2026-11-22T21:25:12.740Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Struggle // Survive\",\"manaCost\":\"{2}{R} // {1}{G}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Struggle\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Struggle deals damage to target creature equal to the number of lands you control.\"},{\"name\":\"Survive\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nEach player shuffles their graveyard into their library.\"}]},{\"id\":2,\"name\":\"Appeal // Authority\",\"manaCost\":\"{G} // {1}{W}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Appeal\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, target creature gains trample and gets +X/+X, where X is the number of creatures you control.\"},{\"name\":\"Authority\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nTap up to two target creatures your opponents control. Creatures you control gain vigilance until end of turn.\"}]},{\"id\":3,\"name\":\"Leave // Chance\",\"manaCost\":\"{1}{W} // {3}{R}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Leave\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Return any number of target permanents you own to your hand.\"},{\"name\":\"Chance\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nDiscard any number of cards, then draw that many cards.\"}]},{\"id\":4,\"name\":\"Reason // Believe\",\"manaCost\":\"{U} // {4}{G}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Reason\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Scry 3.\"},{\"name\":\"Believe\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nLook at the top card of your library. You may put it onto the battlefield if it's a creature card. If you don't, put it into your hand.\"}]},{\"id\":5,\"name\":\"Grind // Dust\",\"manaCost\":\"{1}{B} // {3}{W}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Grind\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a -1/-1 counter on each of up to two target creatures.\"},{\"name\":\"Dust\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nExile any number of target creatures that have -1/-1 counters on them.\"}]},{\"id\":6,\"name\":\"Refuse // Cooperate\",\"manaCost\":\"{3}{R} // {2}{U}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Refuse\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Refuse deals damage to target spell's controller equal to that spell's mana value.\"},{\"name\":\"Cooperate\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nCopy target instant or sorcery spell. You may choose new targets for the copy.\"}]},{\"id\":7,\"name\":\"Driven // Despair\",\"manaCost\":\"{1}{G} // {1}{B}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Driven\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, creatures you control gain trample and \\\"Whenever this creature deals combat damage to a player, draw a card.\\\"\"},{\"name\":\"Despair\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nUntil end of turn, creatures you control gain menace and \\\"Whenever this creature deals combat damage to a player, that player discards a card.\\\"\"}]},{\"id\":8,\"name\":\"Abandoned Sarcophagus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"You may cast spells that have a cycling ability from your graveyard.\\nIf a card that has a cycling ability would be put into your graveyard from anywhere and it wasn't cycled, exile it instead.\"},{\"id\":9,\"name\":\"Crook of Condemnation\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Exile target card from a graveyard.\\n{1}, Exile this artifact: Exile all graveyards.\"},{\"id\":10,\"name\":\"Dagger of the Worthy\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+0 and has afflict 1. (Whenever it becomes blocked, defending player loses 1 life.)\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":11,\"name\":\"God-Pharaoh's Gift\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of combat on your turn, you may exile a creature card from your graveyard. If you do, create a token that's a copy of that card, except it's a 4/4 black Zombie. It gains haste until end of turn.\"},{\"id\":12,\"name\":\"Graven Abomination\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Horror\",\"text\":\"Whenever this creature attacks, exile target card from defending player's graveyard.\"},{\"id\":13,\"name\":\"Hollow One\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"This spell costs {2} less to cast for each card you've cycled or discarded this turn.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":14,\"name\":\"Manalith\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add one mana of any color.\"},{\"id\":15,\"name\":\"Mirage Mirror\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{2}: This artifact becomes a copy of target artifact, creature, enchantment, or land until end of turn.\"},{\"id\":16,\"name\":\"Sunset Pyramid\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three brick counters on it.\\n{2}, {T}, Remove a brick counter from this artifact: Draw a card.\\n{2}, {T}: Scry 1.\"},{\"id\":17,\"name\":\"Traveler's Amulet\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":18,\"name\":\"Wall of Forgotten Pharaohs\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Wall\",\"text\":\"Defender\\n{T}: This creature deals 1 damage to target player or planeswalker. Activate only if you control a Desert or there is a Desert card in your graveyard.\"},{\"id\":19,\"name\":\"Crypt of the Eternals\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"When this land enters, you gain 1 life.\\n{T}: Add {C}.\\n{1}, {T}: Add {U}, {B}, or {R}.\"},{\"id\":20,\"name\":\"Desert of the Fervent\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"This land enters tapped.\\n{T}: Add {R}.\\nCycling {1}{R} ({1}{R}, Discard this card: Draw a card.)\"},{\"id\":21,\"name\":\"Desert of the Glorified\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"This land enters tapped.\\n{T}: Add {B}.\\nCycling {1}{B} ({1}{B}, Discard this card: Draw a card.)\"},{\"id\":22,\"name\":\"Desert of the Indomitable\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"This land enters tapped.\\n{T}: Add {G}.\\nCycling {1}{G} ({1}{G}, Discard this card: Draw a card.)\"},{\"id\":23,\"name\":\"Desert of the Mindful\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"This land enters tapped.\\n{T}: Add {U}.\\nCycling {1}{U} ({1}{U}, Discard this card: Draw a card.)\"},{\"id\":24,\"name\":\"Desert of the True\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"This land enters tapped.\\n{T}: Add {W}.\\nCycling {1}{W} ({1}{W}, Discard this card: Draw a card.)\"},{\"id\":25,\"name\":\"Dunes of the Dead\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\nWhen this land is put into a graveyard from the battlefield, create a 2/2 black Zombie creature token.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1902,
+      "cacheCreationInputTokens": 33441,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.8180689999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.8180689999999999,
+      "pricedUsd": 0.818069,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.818069 and its own usage prices at $0.818069"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "e579124d37441be72b65ac9bfec9ef24",
+  "recordedAt": "2026-11-22T22:36:48.957Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Mulldrifter\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nWhen this creature enters, draw two cards.\\nEvoke {2}{U} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":2,\"name\":\"Paperfin Rascal\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"When this creature enters, clash with an opponent. If you win, put a +1/+1 counter on this creature. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":3,\"name\":\"Pestermite\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flash\\nFlying\\nWhen this creature enters, you may tap or untap target permanent.\"},{\"id\":4,\"name\":\"Ponder\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of your library, then put them back in any order. You may shuffle.\\nDraw a card.\"},{\"id\":5,\"name\":\"Protective Bubble\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't be blocked and has shroud. (It can't be the target of spells or abilities.)\"},{\"id\":6,\"name\":\"Ringskipper\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flying\\nWhen this creature dies, clash with an opponent. If you win, return this card to its owner's hand. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":7,\"name\":\"Scattering Stroke\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Clash with an opponent. If you win, at the beginning of your next main phase, you may add an amount of {C} equal to that spell's mana value. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":8,\"name\":\"Scion of Oona\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Faerie Soldier\",\"text\":\"Flash\\nFlying\\nOther Faerie creatures you control get +1/+1.\\nOther Faeries you control have shroud. (They can't be the targets of spells or abilities.)\"},{\"id\":9,\"name\":\"Sentinels of Glen Elendra\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Faerie Soldier\",\"text\":\"Flash\\nFlying\"},{\"id\":10,\"name\":\"Shapesharer\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\n{2}{U}: Target Shapeshifter becomes a copy of target creature until your next turn.\"},{\"id\":11,\"name\":\"Silvergill Adept\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"As an additional cost to cast this spell, reveal a Merfolk card from your hand or pay {3}.\\nWhen this creature enters, draw a card.\"},{\"id\":12,\"name\":\"Silvergill Douser\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{T}: Target creature gets -X/-0 until end of turn, where X is the number of Merfolk and/or Faeries you control.\"},{\"id\":13,\"name\":\"Sower of Temptation\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flying\\nWhen this creature enters, gain control of target creature for as long as this creature remains on the battlefield.\"},{\"id\":14,\"name\":\"Spellstutter Sprite\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flash\\nFlying\\nWhen this creature enters, counter target spell with mana value X or less, where X is the number of Faeries you control.\"},{\"id\":15,\"name\":\"Stonybrook Angler\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{1}{U}, {T}: You may tap or untap target creature.\"},{\"id\":16,\"name\":\"Streambed Aquitects\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"{T}: Target Merfolk creature gets +1/+1 and gains islandwalk until end of turn. (It can't be blocked as long as defending player controls an Island.)\\n{T}: Target land becomes an Island until end of turn.\"},{\"id\":17,\"name\":\"Surgespanner\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Whenever this creature becomes tapped, you may pay {1}{U}. If you do, return target permanent to its owner's hand.\"},{\"id\":18,\"name\":\"Tideshaper Mystic\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{T}: Target land becomes the basic land type of your choice until end of turn. Activate only during your turn.\"},{\"id\":19,\"name\":\"Turtleshell Changeling\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\n{1}{U}: Switch this creature's power and toughness until end of turn.\"},{\"id\":20,\"name\":\"Wanderwine Prophets\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Champion a Merfolk (When this enters, sacrifice it unless you exile another Merfolk you control. When this leaves the battlefield, that card returns to the battlefield.)\\nWhenever this creature deals combat damage to a player, you may sacrifice a Merfolk. If you do, take an extra turn after this one.\"},{\"id\":21,\"name\":\"Whirlpool Whelm\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Clash with an opponent, then return target creature to its owner's hand. If you win, you may put that creature on top of its owner's library instead. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":22,\"name\":\"Wings of Velis Vel\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Kindred Instant — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nUntil end of turn, target creature has base power and toughness 4/4, gains all creature types, and gains flying.\"},{\"id\":23,\"name\":\"Zephyr Net\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has defender and flying.\"},{\"id\":24,\"name\":\"Black Poplar Shaman\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Treefolk Shaman\",\"text\":\"{2}{B}: Regenerate target Treefolk.\"},{\"id\":25,\"name\":\"Bog Hoodlums\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"This creature can't block.\\nWhen this creature enters, clash with an opponent. If you win, put a +1/+1 counter on this creature. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1797,
+      "cacheCreationInputTokens": 32856,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.801119,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.801119,
+      "pricedUsd": 0.801119,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.801119 and its own usage prices at $0.801119"
+    }
+  }
+}

@@ -168,6 +168,49 @@ function decideBlocks(view: AgentView, config: GreedyBotConfig): Action {
 }
 
 /**
+ * The attack declaration, kept legal when the kernel is asking for one in stages.
+ *
+ * The same staging as `decideBlocks` above, one creature at a time with the
+ * answered prefix in `combat.attacksSettled`, and the same failure: a freshly
+ * constructed declaration that leaves out an attacker already declared is
+ * refused with "o21 is already attacking and cannot be taken back". Greedy in
+ * both seats answers every stage the same way and never shows it; the first
+ * combat-only rollout pilot on the flagship set died on it within twenty
+ * games, because a rollout that departed from greedy at one stage handed the
+ * next stage back to greedy.
+ *
+ * Off-sequence the constructed declaration is still the answer. Mid-sequence
+ * this picks the offered option nearest the intended one: most intended
+ * attacker-defender pairs, then fewest unintended ones, then kernel order.
+ */
+function decideAttacks(view: AgentView, config: GreedyBotConfig): Action {
+  const me = view.player;
+  const state = view.state;
+  if (view.decision.kind !== 'declareAttackers') throw new Error('greedy bot: not an attack declaration');
+  const intended = chooseAttackers(state, me, view.decision.eligible, config, view.decision.defenders);
+  if (state.combat.attacksSettled === undefined) {
+    return { type: 'declareAttackers', player: me, attackers: intended };
+  }
+  const wanted = new Set(intended.map((attack) => `${attack.oid}>${JSON.stringify(attack.defender)}`));
+  let best: Action | null = null;
+  let bestScore = -Infinity;
+  for (const option of view.decision.options) {
+    if (option.type !== 'declareAttackers') continue;
+    let kept = 0;
+    for (const attack of option.attackers) {
+      if (wanted.has(`${attack.oid}>${JSON.stringify(attack.defender)}`)) kept += 1;
+    }
+    const score = kept * 2 - option.attackers.length;
+    if (score > bestScore) {
+      bestScore = score;
+      best = option;
+    }
+  }
+  if (best === null) throw new Error('greedy bot: a staged attack declaration offered no legal option');
+  return best;
+}
+
+/**
  * Dispatches one decision. Mana abilities are never activated on their own: the
  * kernel auto-taps for a cast, so activating them by hand can only strand mana.
  */
@@ -221,11 +264,7 @@ export function decideGreedy(view: AgentView, config: GreedyBotConfig): Action {
       return chosen;
     }
     case 'declareAttackers':
-      return {
-        type: 'declareAttackers',
-        player: me,
-        attackers: chooseAttackers(state, me, view.decision.eligible, config, view.decision.defenders),
-      };
+      return decideAttacks(view, config);
     case 'declareBlockers':
       return decideBlocks(view, config);
     case 'orderBlockers':

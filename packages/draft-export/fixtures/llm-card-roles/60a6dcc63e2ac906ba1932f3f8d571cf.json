@@ -1,0 +1,161 @@
+{
+  "key": "60a6dcc63e2ac906ba1932f3f8d571cf",
+  "recordedAt": "2026-11-22T22:19:58.556Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Deeproot Waters\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a Merfolk spell, create a 1/1 blue Merfolk creature token with hexproof. (A creature with hexproof can't be the target of spells or abilities your opponents control.)\"},{\"id\":2,\"name\":\"Depths of Desire\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature to its owner's hand. Create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":3,\"name\":\"Dive Down\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +0/+3 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":4,\"name\":\"Dreamcaller Siren\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Siren Pirate\",\"text\":\"Flash\\nFlying\\nThis creature can block only creatures with flying.\\nWhen this creature enters, if you control another Pirate, tap up to two target nonland permanents.\"},{\"id\":5,\"name\":\"Entrancing Melody\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature with mana value X.\"},{\"id\":6,\"name\":\"Favorable Winds\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control with flying get +1/+1.\"},{\"id\":7,\"name\":\"Fleet Swallower\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Fish\",\"text\":\"Whenever this creature attacks, target player mills half their library, rounded up.\"},{\"id\":8,\"name\":\"Headwater Sentries\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Warrior\",\"text\":\"\"},{\"id\":9,\"name\":\"Herald of Secret Streams\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Warrior\",\"text\":\"Creatures you control with +1/+1 counters on them can't be blocked.\"},{\"id\":10,\"name\":\"Jace, Cunning Castaway\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+1: Whenever one or more creatures you control deal combat damage to a player this turn, draw a card, then discard a card.\\n−2: Create a 2/2 blue Illusion creature token with \\\"When this token becomes the target of a spell, sacrifice it.\\\"\\n−5: Create two tokens that are copies of Jace, except they're not legendary.\"},{\"id\":11,\"name\":\"Kopala, Warden of Waves\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Legendary Creature — Merfolk Wizard\",\"text\":\"Spells your opponents cast that target a Merfolk you control cost {2} more to cast.\\nAbilities your opponents activate that target a Merfolk you control cost {2} more to activate.\"},{\"id\":12,\"name\":\"Lookout's Dispersal\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"This spell costs {1} less to cast if you control a Pirate.\\nCounter target spell unless its controller pays {4}.\"},{\"id\":13,\"name\":\"Navigator's Ruin\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Raid — At the beginning of your end step, if you attacked this turn, target opponent mills four cards.\"},{\"id\":14,\"name\":\"One With the Wind\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has flying.\"},{\"id\":15,\"name\":\"Opt\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\\nDraw a card.\"},{\"id\":16,\"name\":\"Overflowing Insight\",\"manaCost\":\"{4}{U}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws seven cards.\"},{\"id\":17,\"name\":\"Perilous Voyage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent you don't control to its owner's hand. If its mana value was 2 or less, scry 2.\"},{\"id\":18,\"name\":\"Pirate's Prize\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards. Create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":19,\"name\":\"Prosperous Pirates\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature enters, create two Treasure tokens. (They're artifacts with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":20,\"name\":\"River Sneak\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Warrior\",\"text\":\"This creature can't be blocked.\\nWhenever another Merfolk you control enters, this creature gets +1/+1 until end of turn.\"},{\"id\":21,\"name\":\"River's Rebuke\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all nonland permanents target player controls to their owner's hand.\"},{\"id\":22,\"name\":\"Run Aground\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Put target artifact or creature on top of its owner's library.\"},{\"id\":23,\"name\":\"Sailor of Means\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature enters, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":24,\"name\":\"Search for Azcanta\",\"manaCost\":null,\"typeLine\":\"Legendary Enchantment // Legendary Land\",\"text\":null,\"faces\":[{\"name\":\"Search for Azcanta\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Legendary Enchantment\",\"text\":\"At the beginning of your upkeep, surveil 1. Then if you have seven or more cards in your graveyard, you may transform Search for Azcanta. (Look at the top card of your library. You may put that card into your graveyard.)\"},{\"name\":\"Azcanta, the Sunken Ruin\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"(Transforms from Search for Azcanta.)\\n{T}: Add {U}.\\n{2}{U}, {T}: Look at the top four cards of your library. You may reveal a noncreature, nonland card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\"}]},{\"id\":25,\"name\":\"Shaper Apprentice\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"This creature has flying as long as you control another Merfolk.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\",\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1264,
+      "cacheCreationInputTokens": 32615,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.769649,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.769649,
+      "pricedUsd": 0.769649,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.769649 and its own usage prices at $0.769649"
+    }
+  }
+}

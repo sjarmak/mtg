@@ -1,0 +1,161 @@
+{
+  "key": "63fc764f29c4720bb36cd26544000d1e",
+  "recordedAt": "2026-11-22T22:04:57.074Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Master Biomancer\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Creature — Elf Wizard\",\"text\":\"Each other creature you control enters with a number of additional +1/+1 counters on it equal to this creature's power and as a Mutant in addition to its other types.\"},{\"id\":2,\"name\":\"Merciless Eviction\",\"manaCost\":\"{4}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Exile all artifacts.\\n• Exile all creatures.\\n• Exile all enchantments.\\n• Exile all planeswalkers.\"},{\"id\":3,\"name\":\"Mind Grind\",\"manaCost\":\"{X}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each opponent reveals cards from the top of their library until they reveal X land cards, then puts all cards revealed this way into their graveyard. X can't be 0.\"},{\"id\":4,\"name\":\"Mortus Strider\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Creature — Skeleton\",\"text\":\"When this creature dies, return it to its owner's hand.\"},{\"id\":5,\"name\":\"Mystic Genesis\",\"manaCost\":\"{2}{G}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Create an X/X green Ooze creature token, where X is that spell's mana value.\"},{\"id\":6,\"name\":\"Nimbus Swimmer\",\"manaCost\":\"{X}{G}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Flying\\nThis creature enters with X +1/+1 counters on it.\"},{\"id\":7,\"name\":\"Obzedat, Ghost Council\",\"manaCost\":\"{1}{W}{W}{B}{B}\",\"typeLine\":\"Legendary Creature — Spirit Advisor\",\"text\":\"When Obzedat enters, target opponent loses 2 life and you gain 2 life.\\nAt the beginning of your end step, you may exile Obzedat. If you do, return it to the battlefield under its owner's control at the beginning of your next upkeep. It gains haste.\"},{\"id\":8,\"name\":\"One Thousand Lashes\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\\nAt the beginning of the upkeep of enchanted creature's controller, that player loses 1 life.\"},{\"id\":9,\"name\":\"Ordruun Veteran\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Creature — Minotaur Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gains double strike until end of turn. (It deals both first-strike and regular combat damage.)\"},{\"id\":10,\"name\":\"Orzhov Charm\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Return target creature you control and all Auras you control attached to it to their owner's hand.\\n• Destroy target creature and you lose life equal to its toughness.\\n• Return target creature card with mana value 1 or less from your graveyard to the battlefield.\"},{\"id\":11,\"name\":\"Paranoid Delusions\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills three cards.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":12,\"name\":\"Primal Visitation\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+3 and has haste.\"},{\"id\":13,\"name\":\"Prime Speaker Zegana\",\"manaCost\":\"{2}{G}{G}{U}{U}\",\"typeLine\":\"Legendary Creature — Merfolk Wizard\",\"text\":\"Prime Speaker Zegana enters with X +1/+1 counters on it, where X is the greatest power among other creatures you control.\\nWhen Prime Speaker Zegana enters, draw cards equal to its power.\"},{\"id\":14,\"name\":\"Psychic Strike\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Its controller mills two cards.\"},{\"id\":15,\"name\":\"Purge the Profane\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent discards two cards and you gain 2 life.\"},{\"id\":16,\"name\":\"Rubblehulk\",\"manaCost\":\"{4}{R}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Rubblehulk's power and toughness are each equal to the number of lands you control.\\nBloodrush — {1}{R}{G}, Discard this card: Target attacking creature gets +X/+X until end of turn, where X is the number of lands you control.\"},{\"id\":17,\"name\":\"Ruination Wurm\",\"manaCost\":\"{4}{R}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"},{\"id\":18,\"name\":\"Shambleshark\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Shark Crab\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nEvolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\"},{\"id\":19,\"name\":\"Signal the Clans\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Instant\",\"text\":\"Search your library for three creature cards and reveal them. If you reveal three cards with different names, choose one of them at random and put that card into your hand. Shuffle the rest into your library.\"},{\"id\":20,\"name\":\"Simic Charm\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Target creature gets +3/+3 until end of turn.\\n• Permanents you control gain hexproof until end of turn.\\n• Return target creature to its owner's hand.\"},{\"id\":21,\"name\":\"Skarrg Guildmage\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{R}{G}: Creatures you control gain trample until end of turn.\\n{1}{R}{G}: Target land you control becomes a 4/4 Elemental creature until end of turn. It's still a land.\"},{\"id\":22,\"name\":\"Skyknight Legionnaire\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying, haste\"},{\"id\":23,\"name\":\"Soul Ransom\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\\nDiscard two cards: This Aura's controller sacrifices it, then draws two cards. Only your opponents may activate this ability.\"},{\"id\":24,\"name\":\"Spark Trooper\",\"manaCost\":\"{1}{R}{R}{W}\",\"typeLine\":\"Creature — Elemental Soldier\",\"text\":\"Trample, lifelink, haste\\nAt the beginning of the end step, sacrifice this creature.\"},{\"id\":25,\"name\":\"Sunhome Guildmage\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}{R}{W}: Creatures you control get +1/+0 until end of turn.\\n{2}{R}{W}: Create a 1/1 red and white Soldier creature token with haste.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1571,
+      "cacheCreationInputTokens": 32746,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.787619,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.787619,
+      "pricedUsd": 0.787619,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.787619 and its own usage prices at $0.787619"
+    }
+  }
+}

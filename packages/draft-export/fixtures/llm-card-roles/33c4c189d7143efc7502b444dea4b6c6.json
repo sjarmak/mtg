@@ -1,0 +1,161 @@
+{
+  "key": "33c4c189d7143efc7502b444dea4b6c6",
+  "recordedAt": "2026-11-22T22:19:06.932Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Gold-Forged Sentinel\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Chimera\",\"text\":\"Flying\"},{\"id\":2,\"name\":\"Guardian Automaton\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature dies, you gain 3 life.\"},{\"id\":3,\"name\":\"Guardians of Meletis\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Defender (This creature can't attack.)\"},{\"id\":4,\"name\":\"Hangarback Walker\",\"manaCost\":\"{X}{X}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nWhen this creature dies, create a 1/1 colorless Thopter artifact creature token with flying for each +1/+1 counter on this creature.\\n{1}, {T}: Put a +1/+1 counter on this creature.\"},{\"id\":5,\"name\":\"Helm of the Gods\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 for each enchantment you control.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":6,\"name\":\"Jayemdae Tome\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Book\",\"text\":\"{4}, {T}: Draw a card.\"},{\"id\":7,\"name\":\"Mage-Ring Responder\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"This creature doesn't untap during your untap step.\\n{7}: Untap this creature.\\nWhenever this creature attacks, it deals 7 damage to target creature defending player controls.\"},{\"id\":8,\"name\":\"Meteorite\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, it deals 2 damage to any target.\\n{T}: Add one mana of any color.\"},{\"id\":9,\"name\":\"Orbs of Warding\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"You have hexproof. (You can't be the target of spells or abilities your opponents control.)\\nIf a creature would deal damage to you, prevent 1 of that damage.\"},{\"id\":10,\"name\":\"Prism Ring\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a color.\\nWhenever you cast a spell of the chosen color, you gain 1 life.\"},{\"id\":11,\"name\":\"Pyromancer's Goggles\",\"manaCost\":\"{5}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"{T}: Add {R}. When that mana is spent to cast a red instant or sorcery spell, copy that spell and you may choose new targets for the copy.\"},{\"id\":12,\"name\":\"Ramroller\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Juggernaut\",\"text\":\"This creature attacks each combat if able.\\nThis creature gets +2/+0 as long as you control another artifact.\"},{\"id\":13,\"name\":\"Runed Servitor\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature dies, each player draws a card.\"},{\"id\":14,\"name\":\"Sigil of Valor\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever equipped creature attacks alone, it gets +1/+1 until end of turn for each other creature you control.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":15,\"name\":\"Sword of the Animist\",\"manaCost\":\"{2}\",\"typeLine\":\"Legendary Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1.\\nWhenever equipped creature attacks, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\\nEquip {2}\"},{\"id\":16,\"name\":\"Throwing Knife\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+0.\\nWhenever equipped creature attacks, you may sacrifice this Equipment. If you do, this Equipment deals 2 damage to any target.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":17,\"name\":\"Veteran's Sidearm\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":18,\"name\":\"War Horn\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Attacking creatures you control get +1/+0.\"},{\"id\":19,\"name\":\"Battlefield Forge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {R} or {W}. This land deals 1 damage to you.\"},{\"id\":20,\"name\":\"Caves of Koilos\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {W} or {B}. This land deals 1 damage to you.\"},{\"id\":21,\"name\":\"Evolving Wilds\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":22,\"name\":\"Foundry of the Consuls\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{5}, {T}, Sacrifice this land: Create two 1/1 colorless Thopter artifact creature tokens with flying.\"},{\"id\":23,\"name\":\"Llanowar Wastes\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {B} or {G}. This land deals 1 damage to you.\"},{\"id\":24,\"name\":\"Mage-Ring Network\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{1}, {T}: Put a storage counter on this land.\\n{T}, Remove any number of storage counters from this land: Add {C} for each storage counter removed this way.\"},{\"id\":25,\"name\":\"Rogue's Passage\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{4}, {T}: Target creature can't be blocked this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1083,
+      "cacheCreationInputTokens": 32403,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7563590000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7563590000000001,
+      "pricedUsd": 0.756359,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.756359 and its own usage prices at $0.756359"
+    }
+  }
+}

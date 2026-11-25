@@ -1,0 +1,161 @@
+{
+  "key": "2fe995107efe3bdc58827ca23e6dfd17",
+  "recordedAt": "2026-11-22T22:15:58.825Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Akroan Jailer\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"{2}{W}, {T}: Tap target creature.\"},{\"id\":2,\"name\":\"Ampryn Tactician\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, creatures you control get +1/+1 until end of turn.\"},{\"id\":3,\"name\":\"Anointer of Champions\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}: Target attacking creature gets +1/+1 until end of turn.\"},{\"id\":4,\"name\":\"Archangel of Tithes\",\"manaCost\":\"{1}{W}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nAs long as this creature is untapped, creatures can't attack you or planeswalkers you control unless their controller pays {1} for each of those creatures.\\nAs long as this creature is attacking, creatures can't block unless their controller pays {1} for each of those creatures.\"},{\"id\":5,\"name\":\"Auramancer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may return target enchantment card from your graveyard to your hand.\"},{\"id\":6,\"name\":\"Aven Battle Priest\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Bird Cleric\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhen this creature enters, you gain 3 life.\"},{\"id\":7,\"name\":\"Blessed Spirits\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhenever you cast an enchantment spell, put a +1/+1 counter on this creature.\"},{\"id\":8,\"name\":\"Celestial Flare\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices an attacking or blocking creature of their choice.\"},{\"id\":9,\"name\":\"Charging Griffin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhenever this creature attacks, it gets +1/+1 until end of turn.\"},{\"id\":10,\"name\":\"Cleric of the Forward Order\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, you gain 2 life for each creature you control named Cleric of the Forward Order.\"},{\"id\":11,\"name\":\"Consul's Lieutenant\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"First strike\\nRenown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\nWhenever this creature attacks, if it's renowned, other attacking creatures you control get +1/+1 until end of turn.\"},{\"id\":12,\"name\":\"Enlightened Ascetic\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Monk\",\"text\":\"When this creature enters, you may destroy target enchantment.\"},{\"id\":13,\"name\":\"Enshrouding Mist\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 until end of turn. Prevent all damage that would be dealt to it this turn. If it's renowned, untap it.\"},{\"id\":14,\"name\":\"Gideon's Phalanx\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create four 2/2 white Knight creature tokens with vigilance.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, creatures you control gain indestructible until end of turn.\"},{\"id\":15,\"name\":\"Grasp of the Hieromancer\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has \\\"Whenever this creature attacks, tap target creature defending player controls.\\\"\"},{\"id\":16,\"name\":\"Hallowed Moonlight\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, if a creature would enter and it wasn't cast, exile it instead.\\nDraw a card.\"},{\"id\":17,\"name\":\"Healing Hands\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player gains 4 life.\\nDraw a card.\"},{\"id\":18,\"name\":\"Heavy Infantry\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, tap target creature an opponent controls.\"},{\"id\":19,\"name\":\"Hixus, Prison Warden\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhenever a creature deals combat damage to you, if Hixus entered this turn, exile that creature until Hixus leaves the battlefield. (That creature returns under its owner's control.)\"},{\"id\":20,\"name\":\"Knight of the Pilgrim's Road\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\"},{\"id\":21,\"name\":\"Knight of the White Orchid\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"First strike\\nWhen this creature enters, if an opponent controls more lands than you, you may search your library for a Plains card, put it onto the battlefield, then shuffle.\"},{\"id\":22,\"name\":\"Knightly Valor\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, create a 2/2 white Knight creature token with vigilance. (Attacking doesn't cause it to tap.)\\nEnchanted creature gets +2/+2 and has vigilance.\"},{\"id\":23,\"name\":\"Kytheon, Hero of Akros\",\"manaCost\":null,\"typeLine\":\"Legendary Creature — Human Soldier // Legendary Planeswalker — Gideon\",\"text\":null,\"faces\":[{\"name\":\"Kytheon, Hero of Akros\",\"manaCost\":\"{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"At end of combat, if Kytheon and at least two other creatures attacked this combat, exile Kytheon, then return him to the battlefield transformed under his owner's control.\\n{2}{W}: Kytheon gains indestructible until end of turn.\"},{\"name\":\"Gideon, Battle-Forged\",\"manaCost\":\"\",\"typeLine\":\"Legendary Planeswalker — Gideon\",\"text\":\"+2: Up to one target creature an opponent controls attacks Gideon during its controller's next turn if able.\\n+1: Until your next turn, target creature gains indestructible. Untap that creature.\\n0: Until end of turn, Gideon becomes a 4/4 Human Soldier creature with indestructible that's still a planeswalker. Prevent all damage that would be dealt to him this turn.\"}]},{\"id\":24,\"name\":\"Kytheon's Irregulars\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\n{W}{W}: Tap target creature.\"},{\"id\":25,\"name\":\"Kytheon's Tactics\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +2/+1 until end of turn.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, those creatures also gain vigilance until end of turn. (Attacking doesn't cause them to tap.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1563,
+      "cacheCreationInputTokens": 32968,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7916589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7916589999999999,
+      "pricedUsd": 0.791659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.791659 and its own usage prices at $0.791659"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "key": "b2a0a32cb50ef3b0bb95d60bd1acf1dc",
+  "recordedAt": "2026-11-22T22:05:28.004Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Armored Transport\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Prevent all combat damage that would be dealt to this creature by creatures blocking it.\"},{\"id\":2,\"name\":\"Boros Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {R} or {W}.\\n{R}{W}: This artifact becomes a 1/1 red and white Soldier artifact creature with double strike until end of turn. (It deals both first-strike and regular combat damage.)\"},{\"id\":3,\"name\":\"Dimir Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {U} or {B}.\\n{U}{B}: This artifact becomes a 2/2 blue and black Horror artifact creature until end of turn and can't be blocked this turn.\"},{\"id\":4,\"name\":\"Glaring Spotlight\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"Creatures your opponents control with hexproof can be the targets of spells and abilities you control as though they didn't have hexproof.\\n{3}, Sacrifice this artifact: Creatures you control gain hexproof until end of turn and can't be blocked this turn.\"},{\"id\":5,\"name\":\"Gruul Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {R} or {G}.\\n{R}{G}: This artifact becomes a 3/2 red and green Beast artifact creature with trample until end of turn.\"},{\"id\":6,\"name\":\"Illusionist's Bracers\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever an ability of equipped creature is activated, if it isn't a mana ability, copy that ability. You may choose new targets for the copy.\\nEquip {3}\"},{\"id\":7,\"name\":\"Millennial Gargoyle\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Gargoyle\",\"text\":\"Flying\"},{\"id\":8,\"name\":\"Orzhov Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {W} or {B}.\\n{W}{B}: This artifact becomes a 1/4 white and black Thrull artifact creature with lifelink until end of turn.\"},{\"id\":9,\"name\":\"Prophetic Prism\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, draw a card.\\n{1}, {T}: Add one mana of any color.\"},{\"id\":10,\"name\":\"Razortip Whip\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: This artifact deals 1 damage to target opponent or planeswalker.\"},{\"id\":11,\"name\":\"Riot Gear\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+2.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":12,\"name\":\"Simic Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {G} or {U}.\\n{G}{U}: This artifact becomes a 2/3 green and blue Crab artifact creature with hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":13,\"name\":\"Skyblinder Staff\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 and can't be blocked by creatures with flying.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":14,\"name\":\"Boros Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {W}.\"},{\"id\":15,\"name\":\"Breeding Pool\",\"manaCost\":\"\",\"typeLine\":\"Land — Forest Island\",\"text\":\"({T}: Add {G} or {U}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":16,\"name\":\"Dimir Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {B}.\"},{\"id\":17,\"name\":\"Godless Shrine\",\"manaCost\":\"\",\"typeLine\":\"Land — Plains Swamp\",\"text\":\"({T}: Add {W} or {B}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":18,\"name\":\"Gruul Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {G}.\"},{\"id\":19,\"name\":\"Orzhov Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {B}.\"},{\"id\":20,\"name\":\"Sacred Foundry\",\"manaCost\":\"\",\"typeLine\":\"Land — Mountain Plains\",\"text\":\"({T}: Add {R} or {W}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":21,\"name\":\"Simic Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {U}.\"},{\"id\":22,\"name\":\"Stomping Ground\",\"manaCost\":\"\",\"typeLine\":\"Land — Mountain Forest\",\"text\":\"({T}: Add {R} or {G}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":23,\"name\":\"Thespian's Stage\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}, {T}: This land becomes a copy of target land, except it has this ability.\"},{\"id\":24,\"name\":\"Watery Grave\",\"manaCost\":\"\",\"typeLine\":\"Land — Island Swamp\",\"text\":\"({T}: Add {U} or {B}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[\"fixing\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 429,
+      "cacheCreationInputTokens": 32313,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.721859,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.721859,
+      "pricedUsd": 0.721859,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.721859 and its own usage prices at $0.721859"
+    }
+  }
+}

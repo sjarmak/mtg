@@ -6,7 +6,8 @@
  * acceptance clause is that every card choice traces to a stated criterion, and
  * until this it was checkable only in a terminal report. A clause nobody can see
  * on the surface where they actually look at the deck is a clause that rots. So
- * every row names the criteria it cited, and the ids resolve against the
+ * every citation is drawn: the criteria every row cites once above the rows, in
+ * the person's own words, and each row's others on the row. The ids resolve against the
  * variation's own `statedCriteria` rather than against anything this page knows
  * — a citation naming an id the person never stated is a defect, and drawing it
  * as an unresolved id is how it gets noticed.

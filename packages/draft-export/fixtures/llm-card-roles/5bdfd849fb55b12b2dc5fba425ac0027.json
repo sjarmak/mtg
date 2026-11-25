@@ -1,0 +1,161 @@
+{
+  "key": "5bdfd849fb55b12b2dc5fba425ac0027",
+  "recordedAt": "2026-11-22T21:54:43.780Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Gladecover Scout\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":2,\"name\":\"Groundshaker Sliver\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have trample. (A creature with trample can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":3,\"name\":\"Howl of the Night Pack\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 2/2 green Wolf creature token for each Forest you control.\"},{\"id\":4,\"name\":\"Hunt the Weak\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on target creature you control. Then that creature fights target creature you don't control. (Each deals damage equal to its power to the other.)\"},{\"id\":5,\"name\":\"Into the Wilds\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, look at the top card of your library. If it's a land card, you may put it onto the battlefield.\"},{\"id\":6,\"name\":\"Kalonian Hydra\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"Trample\\nThis creature enters with four +1/+1 counters on it.\\nWhenever this creature attacks, double the number of +1/+1 counters on each creature you control.\"},{\"id\":7,\"name\":\"Kalonian Tusker\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":8,\"name\":\"Lay of the Land\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":9,\"name\":\"Manaweft Sliver\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have \\\"{T}: Add one mana of any color.\\\"\"},{\"id\":10,\"name\":\"Megantic Sliver\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control get +3/+3.\"},{\"id\":11,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":12,\"name\":\"Oath of the Ancient Wood\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever this enchantment or another enchantment you control enters, you may put a +1/+1 counter on target creature.\"},{\"id\":13,\"name\":\"Plummet\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying.\"},{\"id\":14,\"name\":\"Predatory Sliver\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control get +1/+1.\"},{\"id\":15,\"name\":\"Primeval Bounty\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a creature spell, create a 3/3 green Beast creature token.\\nWhenever you cast a noncreature spell, put three +1/+1 counters on target creature you control.\\nLandfall — Whenever a land you control enters, you gain 3 life.\"},{\"id\":16,\"name\":\"Ranger's Guile\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +1/+1 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":17,\"name\":\"Rootwalla\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"{1}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\"},{\"id\":18,\"name\":\"Rumbling Baloth\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":19,\"name\":\"Savage Summoning\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"This spell can't be countered.\\nThe next creature spell you cast this turn can be cast as though it had flash. That spell can't be countered. That creature enters with an additional +1/+1 counter on it.\"},{\"id\":20,\"name\":\"Scavenging Ooze\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"{G}: Exile target card from a graveyard. If it was a creature card, put a +1/+1 counter on this creature and you gain 1 life.\"},{\"id\":21,\"name\":\"Sporemound\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Fungus\",\"text\":\"Landfall — Whenever a land you control enters, create a 1/1 green Saproling creature token.\"},{\"id\":22,\"name\":\"Trollhide\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has \\\"{1}{G}: Regenerate this creature.\\\" (The next time the creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":23,\"name\":\"Vastwood Hydra\",\"manaCost\":\"{X}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nWhen this creature dies, you may distribute a number of +1/+1 counters equal to the number of +1/+1 counters on this creature among any number of creatures you control.\"},{\"id\":24,\"name\":\"Verdant Haven\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, you gain 2 life.\\nWhenever enchanted land is tapped for mana, its controller adds an additional one mana of any color.\"},{\"id\":25,\"name\":\"Voracious Wurm\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"This creature enters with X +1/+1 counters on it, where X is the amount of life you've gained this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 931,
+      "cacheCreationInputTokens": 32348,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.747659,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.747659,
+      "pricedUsd": 0.747659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.747659 and its own usage prices at $0.747659"
+    }
+  }
+}

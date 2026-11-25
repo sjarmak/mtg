@@ -1,0 +1,161 @@
+{
+  "key": "50df261d381b65ad5014177f7d0bcbae",
+  "recordedAt": "2026-11-22T21:49:21.586Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Mighty Leap\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 and gains flying until end of turn.\"},{\"id\":2,\"name\":\"Oblivion Ring\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile another target nonland permanent.\\nWhen this enchantment leaves the battlefield, return the exiled card to the battlefield under its owner's control.\"},{\"id\":3,\"name\":\"Pacifism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block.\"},{\"id\":4,\"name\":\"Peregrine Griffin\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\nFirst strike (This creature deals combat damage before creatures without first strike.)\"},{\"id\":5,\"name\":\"Personal Sanctuary\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"During your turn, prevent all damage that would be dealt to you.\"},{\"id\":6,\"name\":\"Pride Guardian\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Cat Monk\",\"text\":\"Defender\\nWhenever this creature blocks, you gain 3 life.\"},{\"id\":7,\"name\":\"Roc Egg\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird Egg\",\"text\":\"Defender (This creature can't attack.)\\nWhen this creature dies, create a 3/3 white Bird creature token with flying.\"},{\"id\":8,\"name\":\"Serra Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":9,\"name\":\"Siege Mastodon\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"\"},{\"id\":10,\"name\":\"Spirit Mantle\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has protection from creatures.\"},{\"id\":11,\"name\":\"Stave Off\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains protection from the color of your choice until end of turn.\"},{\"id\":12,\"name\":\"Stonehorn Dignitary\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Rhino Soldier\",\"text\":\"When this creature enters, target opponent skips their next combat phase.\"},{\"id\":13,\"name\":\"Stormfront Pegasus\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Pegasus\",\"text\":\"Flying\"},{\"id\":14,\"name\":\"Sun Titan\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Vigilance\\nWhenever this creature enters or attacks, you may return target permanent card with mana value 3 or less from your graveyard to the battlefield.\"},{\"id\":15,\"name\":\"Timely Reinforcements\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"If you have less life than an opponent, you gain 6 life. If you control fewer creatures than an opponent, create three 1/1 white Soldier creature tokens.\"},{\"id\":16,\"name\":\"Aether Adept\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, return target creature to its owner's hand.\"},{\"id\":17,\"name\":\"Alluring Siren\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Siren\",\"text\":\"{T}: Target creature an opponent controls attacks you this turn if able.\"},{\"id\":18,\"name\":\"Amphin Cutthroat\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Salamander Rogue\",\"text\":\"\"},{\"id\":19,\"name\":\"Aven Fleetwing\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Bird Soldier\",\"text\":\"Flying\\nHexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":20,\"name\":\"Azure Mage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{3}{U}: Draw a card.\"},{\"id\":21,\"name\":\"Belltower Sphinx\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever a source deals damage to this creature, that source's controller mills that many cards.\"},{\"id\":22,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":23,\"name\":\"Chasm Drake\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nWhenever this creature attacks, target creature you control gains flying until end of turn.\"},{\"id\":24,\"name\":\"Coral Merfolk\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk\",\"text\":\"\"},{\"id\":25,\"name\":\"Divination\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1210,
+      "cacheCreationInputTokens": 32006,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.754769,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.754769,
+      "pricedUsd": 0.754769,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.754769 and its own usage prices at $0.754769"
+    }
+  }
+}

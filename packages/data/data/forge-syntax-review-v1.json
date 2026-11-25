@@ -8,6 +8,13 @@
   "entries": [
     {
       "kind": "ability-api",
+      "token": "Abandon",
+      "disposition": "mapped",
+      "families": ["replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (20 scripts, e.g. b/because_i_have_willed_it.txt: T:Mode$ Phase | Phase$ End Of Turn | ValidPlayer$ Player.Opponent | Execute$ Abandon | TriggerZones$ Command | CheckSVar$ X | SVarCompare$ G): forge.game.ability.effects.AbandonEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.confirmAction, which forge-controller-method-families-v1.json maps to replacement-trigger-choices."
+    },
+    {
+      "kind": "ability-api",
       "token": "AbilityCast",
       "disposition": "non-choice",
       "families": [],
@@ -54,6 +61,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Airbend",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (13 scripts, e.g. a/aang_airbending_master.txt: SVar:TrigAirbend:DB$ Airbend | ValidTgts$ Creature.Other | TgtPrompt$ Select another target creature): forge.game.ability.effects.AirbendEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
     },
     {
       "kind": "ability-api",
@@ -208,6 +222,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Blight",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (6 scripts, e.g. c/champion_of_the_weird.txt: A:AB$ Blight | Cost$ PayLife<1> Blight<2> | SorcerySpeed$ True | ValidTgts$ Opponent | Num$ 2 | SpellDescription$ Target opponent blights 2.): forge.game.ability.effects.BlightEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseSingleEntityForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
     },
     {
       "kind": "ability-api",
@@ -456,6 +477,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "ChaosEnsues",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (146 scripts, e.g. a/academy_at_tolaria_west.txt: T:Mode$ ChaosEnsues | TriggerZones$ Command | Execute$ TrigDiscard | TriggerDescription$ Whenever chaos ensues, discard your hand.): forge.game.ability.effects.ChaosEnsuesEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "Charm",
       "disposition": "mapped",
       "families": ["modes", "zone-card-selection", "replacement-trigger-choices"],
@@ -540,6 +568,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Cloak",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (11 scripts, e.g. b/become_anonymous.txt: SVar:DBCloak:DB$ Cloak | Defined$ Remembered | Tapped$ True | Shuffle$ True | SubAbility$ DBCleanup): forge.game.ability.effects.CloakEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseCardsForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
       "token": "Clone",
       "disposition": "mapped",
       "families": ["zone-card-selection", "replacement-trigger-choices"],
@@ -551,6 +586,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Forge 2.0.14 bytecode audit (mtg-j4ucd.21): StaticAbilityCombatDamageToughness (b/belligerent_brontodon.txt) calls no PlayerController method; it rewrites combat-damage assignment from power to toughness, a pure state-based rule change."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Connive",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (51 scripts, e.g. a/a_i_m_scientists.txt: SVar:TrigConnive:DB$ Connive): forge.game.ability.effects.ConniveEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseCardsToDiscardFrom, chooseSingleEntityForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
     },
     {
       "kind": "ability-api",
@@ -790,6 +832,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Discover",
+      "disposition": "mapped",
+      "families": ["priority", "replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (35 scripts, e.g. a/aloy_savior_of_meridian.txt: SVar:TrigDiscover:DB$ Discover | Num$ X): forge.game.ability.effects.DiscoverEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.confirmAction, getAbilityToPlay, playSaFromPlayEffect, which forge-controller-method-families-v1.json maps to priority, replacement-trigger-choices."
+    },
+    {
+      "kind": "ability-api",
       "token": "Draw",
       "disposition": "mapped",
       "families": ["replacement-trigger-choices", "naming-text-numbers"],
@@ -811,6 +860,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Earthbend",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (36 scripts, e.g. a/aang_at_the_crossroads_aang_destined_savior.txt: SVar:TrigEarthbend:DB$ Earthbend | Num$ 2): forge.game.ability.effects.EarthbendEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "Effect",
       "disposition": "non-choice",
       "families": [],
@@ -822,6 +878,13 @@
       "disposition": "mapped",
       "families": ["replacement-trigger-choices"],
       "evidence": "Forge 2.0.14 bytecode audit (mtg-b02zw): EndTurnEffect calls PlayerController callbacks that add replacement-trigger-choices (confirmAction)."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Endure",
+      "disposition": "mapped",
+      "families": ["replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (12 scripts, e.g. a/amber_plate_ainok.txt: SVar:TrigEndure:DB$ Endure | Num$ 1): forge.game.ability.effects.EndureEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.confirmAction, which forge-controller-method-families-v1.json maps to replacement-trigger-choices."
     },
     {
       "kind": "ability-api",
@@ -958,6 +1021,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Heist",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (8 scripts, e.g. a/axavar_fate_thief.txt: SVar:DBHeist:DB$ Heist | ValidTgts$ Opponent): forge.game.ability.effects.HeistEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseSingleCardForZoneChange, which forge-controller-method-families-v1.json maps to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
       "token": "IgnoreHexproof",
       "disposition": "non-choice",
       "families": [],
@@ -986,6 +1056,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Incubate",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (33 scripts, e.g. a/assimilate_essence.txt: SVar:DBIncubate:DB$ Incubate | Amount$ 2 | StackDescription$ SpellDescription | SpellDescription$ If they do, you incubate 2. (Create an Inc): forge.game.ability.effects.IncubateEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "InfectDamage",
       "disposition": "non-choice",
       "families": [],
@@ -1004,6 +1081,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed against every GTC/RTR occurrence (s/search_the_city.txt: T:Mode$ LandPlayed | OptionalDecider$ You)"
+    },
+    {
+      "kind": "ability-api",
+      "token": "Learn",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (23 scripts, e.g. a/academic_dispute.txt: SVar:DBLearn:DB$ Learn | SpellDescription$ Learn. (You may reveal a Lesson card you own from outside the game and put it into your hand, or ): forge.game.ability.effects.LearnEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
     },
     {
       "kind": "ability-api",
@@ -1077,6 +1161,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "ManifestDread",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (37 scripts, e.g. a/abhorrent_oculus.txt: SVar:TrigDread:DB$ ManifestDread): forge.game.ability.effects.ManifestDreadEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseCardsForEffect, chooseSingleEntityForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
       "token": "Mill",
       "disposition": "mapped",
       "families": ["replacement-trigger-choices"],
@@ -1147,6 +1238,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "OpenAttraction",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (20 scripts, e.g. c/coming_attraction.txt: SVar:DBOpenAttraction:DB$ OpenAttraction | SpellDescription$ Open an Attraction. (Put the top card of your Attraction deck onto the battlefi): forge.game.ability.effects.OpenAttractionEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "OptionalAttackCost",
       "disposition": "mapped",
       "families": ["optional-costs", "combat"],
@@ -1193,6 +1291,13 @@
       "disposition": "mapped",
       "families": ["zone-card-selection"],
       "evidence": "forge-effect-controller-calls-v1.json already rows this ApiType: effect class PhasesEffect, controllerCalls [\"chooseCardsForEffect\"]. forge-controller-method-families-v1.json maps chooseCardsForEffect to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Planeswalk",
+      "disposition": "mapped",
+      "families": ["replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (28 scripts, e.g. a/aretopolis.txt: T:Mode$ PlaneswalkedTo | ValidCard$ Plane.Self | Execute$ AcquireScrolls | TriggerDescription$ When you planeswalk to CARDNAME or at the beg): forge.game.ability.effects.PlaneswalkEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.confirmAction, which forge-controller-method-families-v1.json maps to replacement-trigger-choices."
     },
     {
       "kind": "ability-api",
@@ -1273,6 +1378,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "Radiation",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (22 scripts, e.g. a/acquired_mutation.txt: SVar:TrigRadiation:DB$ Radiation | Defined$ TriggeredDefendingPlayer | Num$ 2): forge.game.ability.effects.RadiationEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "RaiseCost",
       "disposition": "non-choice",
       "families": [],
@@ -1291,6 +1403,13 @@
       "disposition": "mapped",
       "families": ["zone-card-selection", "ordering", "replacement-trigger-choices"],
       "evidence": "Reviewed ability-api token; it exposes zone-card-selection, ordering decision-family surface. Forge 2.0.14 bytecode audit (mtg-b02zw): RearrangeTopOfLibraryEffect calls PlayerController callbacks that add replacement-trigger-choices (confirmAction)."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Recruit",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (10 scripts, e.g. upcoming/bards_company.txt: SVar:TrigRecruit:DB$ Recruit): forge.game.ability.effects.RecruitEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseCardsToDiscardFrom, which forge-controller-method-families-v1.json maps to zone-card-selection."
     },
     {
       "kind": "ability-api",
@@ -1427,6 +1546,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "RingTemptsYou",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (54 scripts, e.g. a/aragorn_company_leader.txt: T:Mode$ RingTemptsYou | ValidCard$ Creature.YouCtrl+Other | TriggerZones$ Battlefield | Execute$ TrigPutCounters | TriggerDescription$ Whene): forge.game.ability.effects.RingTemptsYouEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseSingleEntityForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
       "token": "Sacrifice",
       "disposition": "mapped",
       "families": ["optional-costs", "zone-card-selection", "replacement-trigger-choices"],
@@ -1462,10 +1588,24 @@
     },
     {
       "kind": "ability-api",
+      "token": "Seek",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (108 scripts, e.g. a/adherents_heirloom.txt: SVar:TrigSeek:DB$ Seek | Type$ Card.Creature+MostProminentCreatureTypeInLibrary): forge.game.ability.effects.SeekEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "SetCost",
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed against the KLD/MPS occurrence (t/trinisphere.txt, S:Mode$ SetCost | ValidCard$ Card | Type$ Spell | Amount$ 3 | RaiseTo$ True | IsPresent$ Card.Self+untapped | ...): javap -p -c -constants over forge.game.cost.CostAdjustment shows the private method applySetCostAbility in full (offsets 0-52) is a pure mana-cost-floor calculation (getParam, Integer.parseInt, hasParam, ManaCostBeingPaid.getConvertedManaCost, Math.max, ManaCostBeingPaid.increaseGenericMana) with no PlayerController call anywhere in its own bytecode range, so it does not itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "SetInMotion",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (84 scripts, e.g. a/a_display_of_my_dark_power.txt: T:Mode$ SetInMotion | ValidCard$ Card.Self | Execute$ DarkEffect | TriggerZones$ Command | TriggerDescription$ When you set this scheme in m): forge.game.ability.effects.SetInMotionEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
     },
     {
       "kind": "ability-api",
@@ -1546,6 +1686,13 @@
     },
     {
       "kind": "ability-api",
+      "token": "TakeInitiative",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (23 scripts, e.g. a/aarakocra_sneak.txt: SVar:TrigInitiative:DB$ TakeInitiative): forge.game.ability.effects.TakeInitiativeEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls no PlayerController method."
+    },
+    {
+      "kind": "ability-api",
       "token": "Tap",
       "disposition": "mapped",
       "families": ["zone-card-selection"],
@@ -1585,6 +1732,13 @@
       "disposition": "mapped",
       "families": ["zone-card-selection"],
       "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TimeTravel",
+      "disposition": "mapped",
+      "families": ["zone-card-selection", "naming-text-numbers"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (10 scripts, e.g. a/all_of_history_all_at_once.txt: A:SP$ TimeTravel | SpellDescription$ Time travel. (For each suspended card you own and each permanent you control with a time counter on it,): forge.game.ability.effects.TimeTravelEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseBinary, chooseEntitiesForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection, naming-text-numbers."
     },
     {
       "kind": "ability-api",
@@ -1686,6 +1840,20 @@
     },
     {
       "kind": "ability-api",
+      "token": "Venture",
+      "disposition": "mapped",
+      "families": ["zone-card-selection", "naming-text-numbers"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (45 scripts, e.g. a/acererak_the_archlich.txt: SVar:DBVenture:DB$ Venture): forge.game.ability.effects.VentureEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseSingleCardFace, chooseSingleSpellForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection, naming-text-numbers."
+    },
+    {
+      "kind": "ability-api",
+      "token": "VillainousChoice",
+      "disposition": "mapped",
+      "families": ["zone-card-selection"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (13 scripts, e.g. d/damocles_base_sword_of_kang.txt: SVar:TrigVillainousChoice:DB$ VillainousChoice | Defined$ TriggeredTarget | Choices$ DBSac,DBLoseLife): forge.game.ability.effects.VillainousChoiceEffect (javap -p -c -constants over forge-gui-desktop-2.0.14-jar-with-dependencies.jar, recorded in forge-effect-controller-calls-v1.json) calls PlayerController.chooseSpellAbilitiesForEffect, which forge-controller-method-families-v1.json maps to zone-card-selection."
+    },
+    {
+      "kind": "ability-api",
       "token": "Vote",
       "disposition": "mapped",
       "families": ["naming-text-numbers", "piles-votes"],
@@ -1777,6 +1945,13 @@
     },
     {
       "kind": "keyword",
+      "token": "Backup",
+      "disposition": "mapped",
+      "families": ["targets", "zone-card-selection", "replacement-trigger-choices", "naming-text-numbers"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (26 scripts, e.g. a/archpriest_of_shadows.txt: K:Backup:1:BackupAbilities): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ ChangesZone | Destination$ Battlefield | ValidCard$ Card.Self | Secondary$ True | TriggerDescription$ …`; `DB$ PutCounter | ValidTgts$ Creature | CounterNum$ … | CounterType$ P1P1`; `… | ConditionDefined$ Targeted | ConditionPresent$ Card.Other | Defined$ Targeted`; its entry carries the union of those reviewed parts' families (ability-api:ChangesZone, ability-api:PutCounter, parameter-key:ConditionDefined, parameter-key:ConditionPresent, parameter-key:CounterNum, parameter-key:CounterType, parameter-key:DB, parameter-key:Defined, parameter-key:Destination, parameter-key:Mode, parameter-key:Secondary, parameter-key:TriggerDescription, parameter-key:ValidCard, parameter-key:ValidTgts)."
+    },
+    {
+      "kind": "keyword",
       "token": "Battle cry",
       "disposition": "non-choice",
       "families": [],
@@ -1795,6 +1970,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed against every M12 occurrence (b/blood_ogre.txt, K:Bloodthirst:1, and the nine other Bloodthirst creatures): forge/game/card/CardFactoryUtil.class expands the keyword into an ETB-counters replacement effect conditioned on an opponent having been dealt damage this turn, the same deterministic shape as the reviewed etbCounter keyword, with no OptionalDecider or chooser; it does not itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Bushido",
+      "disposition": "mapped",
+      "families": ["replacement-trigger-choices", "naming-text-numbers"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (37 scripts, e.g. a/araba_mothrider.txt: K:Bushido:1): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ Blocks | ValidCard$ Card.Self | Secondary$ True | TriggerDescription$ Bushido … (…)`; `Mode$ AttackerBlocked | ValidCard$ Card.Self | Secondary$ True | TriggerDescription$ Bushido … (…)`; `DB$ Pump | Defined$ Self | NumAtt$ … | NumDef$ …`; its entry carries the union of those reviewed parts' families (ability-api:AttackerBlocked, ability-api:Blocks, ability-api:Pump, parameter-key:DB, parameter-key:Defined, parameter-key:Mode, parameter-key:NumAtt, parameter-key:NumDef, parameter-key:Secondary, parameter-key:TriggerDescription, parameter-key:ValidCard)."
     },
     {
       "kind": "keyword",
@@ -1948,6 +2130,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "CardFactoryUtil bytecode: K:Dethrone expands to a trigger whose overriding ability is the literal `DB$ PutCounter | Defined$ Self | CounterType$ P1P1 | CounterNum$ 1` -- Defined$, CounterType$ and CounterNum$ are all fixed literals, so none of PutCounter's committed controllerCalls (chooseCardsForEffect, chooseCounterType, chooseNumber, chooseSingleEntityForEffect, confirmAction) are reachable for this specific invocation."
+    },
+    {
+      "kind": "keyword",
+      "token": "Devoid",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (132 scripts, e.g. a/abstruse_appropriation.txt: K:Devoid): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ Continuous | EffectZone$ All | Affected$ Card.Self | CharacteristicDefining$ True | SetColor$ Colorless `; its entry carries the union of those reviewed parts' families (ability-api:Continuous, parameter-key:Affected, parameter-key:CharacteristicDefining, parameter-key:Description, parameter-key:EffectZone, parameter-key:Mode, parameter-key:Secondary, parameter-key:SetColor)."
     },
     {
       "kind": "keyword",
@@ -2210,6 +2399,13 @@
     },
     {
       "kind": "keyword",
+      "token": "Job select",
+      "disposition": "mapped",
+      "families": ["zone-card-selection", "combat", "replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (19 scripts, e.g. a/astrologians_planisphere.txt: K:Job select): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ ChangesZone | Destination$ Battlefield |`; `ValidCard$ Card.Self | TriggerDescription$`; `DB$ Token | TokenScript$ c_1_1_hero | TokenOwner$ You | RememberTokens$ True`; `DB$ Attach | Defined$ Remembered`; `DB$ Cleanup | ClearRemembered$ True`; its entry carries the union of those reviewed parts' families (ability-api:Attach, ability-api:ChangesZone, ability-api:Cleanup, ability-api:Token, parameter-key:ClearRemembered, parameter-key:DB, parameter-key:Defined, parameter-key:Destination, parameter-key:Mode, parameter-key:RememberTokens, parameter-key:TokenOwner, parameter-key:TokenScript, parameter-key:TriggerDescription, parameter-key:ValidCard)."
+    },
+    {
+      "kind": "keyword",
       "token": "Kicker",
       "disposition": "mapped",
       "families": ["optional-costs"],
@@ -2291,6 +2487,13 @@
       "disposition": "mapped",
       "families": ["optional-costs", "replacement-trigger-choices"],
       "evidence": "Reviewed keyword token; it exposes optional-costs, replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Mobilize",
+      "disposition": "mapped",
+      "families": ["combat"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (15 scripts, e.g. a/avenger_of_the_fallen.txt: K:Mobilize:X): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ Attacks | ValidCard$ Card.Self | TriggerDescription$ Mobilize … (…)`; `DB$ Token | TokenAmount$ … | TokenScript$ r_1_1_warrior | TokenTapped$ True | TokenAttacking$ True | AtEOT$ Sa`; its entry carries the union of those reviewed parts' families (ability-api:Attacks, ability-api:Token, parameter-key:AtEOT, parameter-key:DB, parameter-key:Mode, parameter-key:TokenAmount, parameter-key:TokenAttacking, parameter-key:TokenScript, parameter-key:TokenTapped, parameter-key:TriggerDescription, parameter-key:ValidCard)."
     },
     {
       "kind": "keyword",
@@ -2504,6 +2707,13 @@
     },
     {
       "kind": "keyword",
+      "token": "Soulshift",
+      "disposition": "mapped",
+      "families": ["priority", "targets", "zone-card-selection", "ordering", "replacement-trigger-choices"],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (26 scripts, e.g. b/body_of_jukai.txt: K:Soulshift:8): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ ChangesZone | Origin$ Battlefield | Destination$ Graveyard| Secondary$ True | OptionalDecider$ You | Val`; `DB$ ChangeZone | Origin$ Graveyard | Destination$ Hand| ValidTgts$ Spirit.YouOwn+cmcLE…`; its entry carries the union of those reviewed parts' families (ability-api:ChangeZone, ability-api:ChangesZone, parameter-key:DB, parameter-key:Destination, parameter-key:Mode, parameter-key:OptionalDecider, parameter-key:Origin, parameter-key:Secondary, parameter-key:TriggerDescription, parameter-key:ValidCard, parameter-key:ValidTgts)."
+    },
+    {
+      "kind": "keyword",
       "token": "Splice",
       "disposition": "mapped",
       "families": ["optional-costs", "zone-card-selection"],
@@ -2623,6 +2833,19 @@
     },
     {
       "kind": "keyword",
+      "token": "Ward",
+      "disposition": "mapped",
+      "families": [
+        "targets",
+        "optional-costs",
+        "zone-card-selection",
+        "replacement-trigger-choices",
+        "naming-text-numbers"
+      ],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (206 scripts, e.g. a/aboleth_spawn.txt: K:Ward:2): javap -p -c -constants over forge.game.card.CardFactoryUtil shows the keyword expanded into `Mode$ BecomesTarget | ValidSource$ SpellAbility.OppCtrl | ValidTarget$ Card.Self | Secondary$ True | TriggerZo`; `DB$ Counter | Defined$ TriggeredSourceSA | UnlessCost$ … | UnlessPayer$ TriggeredSourceSAController`; `DB$ Counter | Defined$ TriggeredSourceSA | UnlessCost$ … | UnlessPayer$ TriggeredSourceSAController | SpellDes`; `DB$ GenericChoice | Defined$ TriggeredSourceSAController | AILogic$ PayUnlessCost`; `DB$ Counter | Defined$ TriggeredSourceSA`; its entry carries the union of those reviewed parts' families (ability-api:BecomesTarget, ability-api:Counter, ability-api:GenericChoice, parameter-key:AILogic, parameter-key:DB, parameter-key:Defined, parameter-key:Mode, parameter-key:Secondary, parameter-key:SpellDescription, parameter-key:TriggerDescription, parameter-key:TriggerZones, parameter-key:UnlessCost, parameter-key:UnlessPayer, parameter-key:ValidSource, parameter-key:ValidTarget)."
+    },
+    {
+      "kind": "keyword",
       "token": "You may choose not to untap CARDNAME during your untap step.",
       "disposition": "mapped",
       "families": ["replacement-trigger-choices"],
@@ -2693,6 +2916,20 @@
     },
     {
       "kind": "line-kind",
+      "token": "Draft",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (24 scripts, e.g. a/aether_searcher.txt: Draft:Reveal CARDNAME as you draft it.): CardRules$Reader passes the line to CardFace.addDraftAction: the text is a draft-time instruction (Conspiracy draft-matters cards) that the game engine never executes, so it requests no PlayerController choice in a game."
+    },
+    {
+      "kind": "line-kind",
+      "token": "HandLifeModifier",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (106 scripts, e.g. a/akroma_angel_of_wrath_avatar.txt: HandLifeModifier:+1/+7): CardRules$Reader stores the line in the face field handLife, the Vanguard avatar starting hand and life adjustment applied at game setup; it requests no PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
       "token": "K",
       "disposition": "non-choice",
       "families": [],
@@ -2711,6 +2948,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "MeldPair",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (14 scripts, e.g. a/argoth_sanctum_of_nature.txt: MeldPair:Titania, Voice of Gaea): CardRules$Reader stores the named partner in the field meldWith; it only identifies the other half, and melding itself is the separately reviewed Meld effect, so the line requests no PlayerController choice."
     },
     {
       "kind": "line-kind",
@@ -2774,6 +3018,13 @@
       "disposition": "non-choice",
       "families": [],
       "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Variant",
+      "disposition": "non-choice",
+      "families": [],
+      "evidence": "Reviewed against every Forge 2.0.14 occurrence (205 scripts, e.g. a/agent_venom.txt: Variant:UniversesWithin:FlavorName:Rhilex the Accursed): CardRules$Reader (javap -p -c -constants) passes a Variant line to CardFace.getOrCreateFunctionalVariant, which fixes the face a printing uses (a FlavorName or an attraction light set) when the card is built; no PlayerController method is reached, and any ability the variant line carries is tokenized and reviewed on its own."
     },
     {
       "kind": "parameter-key",

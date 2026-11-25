@@ -2,7 +2,12 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { botEvidenceSha256 } from '@mtg/bot-evidence';
-import { preparePrintedLimitedFormat, printedSourceFingerprint } from '@mtg/draft-export';
+import {
+  preparePrintedLimitedFormat,
+  printedSourceFingerprint,
+  validatePrintedCardRoles,
+  type PrintedCardRoles,
+} from '@mtg/draft-export';
 import type { PreparedPrintedLimitedFormat } from '@mtg/draft-export';
 import type { DeckRef, ObservedBackend, SeatId } from '@mtg/engine';
 import type {
@@ -21,6 +26,7 @@ import {
   printedLimitedSubjectIdentity,
   printedConstructionForgeRuntime,
   runPrintedLimitedConstructionCampaign,
+  type PrintedLimitedComparison,
 } from '../../tools/printed-limited-construction-campaign';
 import type { AdmittedPrintedBackend } from '../../tools/admitted-printed-backend';
 import {
@@ -120,8 +126,8 @@ beforeAll(async () => {
   forgeRuntime = printedConstructionForgeRuntime(admission());
 });
 
-function plan(): StageStrengthCampaignPlan {
-  const policies = printedLimitedConstructionPolicies(ratings);
+function plan(comparison?: PrintedLimitedComparison, roles?: PrintedCardRoles): StageStrengthCampaignPlan {
+  const policies = printedLimitedConstructionPolicies(ratings, comparison, roles);
   const subject = printedLimitedSubjectIdentity(prepared);
   return {
     version: 'stage-strength-campaign-plan/v1',
@@ -274,6 +280,47 @@ describe('printed Limited construction campaign', () => {
       expect(baseline.map(fixedSchedule)).toEqual(candidate.map(fixedSchedule));
     }
     expect(result.comparison.strength.meanPairedDifference).toBe(1);
+  });
+
+  it('builds the roles candidate beside its exact roleless control on the same pools', async () => {
+    const roles = validatePrintedCardRoles(
+      JSON.parse(readFileSync('packages/data/data/isd/card-roles-v1.json', 'utf8')),
+      [{ code: 'ISD', catalog }],
+    );
+    const run = (comparison?: PrintedLimitedComparison) =>
+      runPrintedLimitedConstructionCampaign(
+        {
+          plan: plan(comparison, comparison === undefined ? undefined : roles),
+          builderRuntime,
+          gameplayPolicy,
+          subjects: new Map([['isd', { ...subject(), roles }]]),
+          opponents: new Map([['frozen-opponent', opponentDeck]]),
+          maximumTurns: 200,
+          maximumDecisions: 5_000,
+          ...(comparison === undefined ? {} : { comparison }),
+        },
+        async (options) => completedGameReport(options, options.candidateSeat),
+      );
+    const decks = (result: Awaited<ReturnType<typeof run>>, arm: string) =>
+      result.trials.filter((trial) => trial.arm === arm).map((trial) => trial.episode.outcome);
+    const control = await run();
+
+    for (const [comparison, controlArm] of [
+      ['structural-vs-roles', 'baseline'],
+      ['ranked-vs-roles', 'candidate'],
+    ] as const) {
+      const result = await run(comparison);
+      const policies = printedLimitedConstructionPolicies(ratings, comparison, roles);
+      expect(policies.baseline).toEqual(printedLimitedConstructionPolicies(ratings)[controlArm]);
+      expect(policies.candidate.policyId).toBe(
+        `${policies.baseline.policyId}+roles/${policies.candidate.policyId.split('+roles/')[1]!}`,
+      );
+      // The control arm builds exactly the roleless deck; roles change at least one build.
+      expect(decks(result, 'baseline')).toEqual(decks(control, controlArm));
+      expect(decks(result, 'candidate')).not.toEqual(decks(result, 'baseline'));
+      for (const trial of result.trials)
+        expect(trial.episode.episode.behavior.policyId).toBe(policies[trial.arm].policyId);
+    }
   });
 
   it('rejects runtime or rating drift before opening a game', async () => {

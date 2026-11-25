@@ -36,6 +36,10 @@ data/gameplay/
 # UI/UX reports, written by the lab's feedback server (`packages/ui/tools/feedback/server.ts`).
 data/feedback
 data/feedback/
+# Choices the computer made for a player because the bridge has no reviewed screen yet (#66),
+# written by the lab (`packages/ui/tools/unreviewed-choices.ts`); `npm run unreviewed-choices` reads them.
+data/unreviewed-choices
+data/unreviewed-choices/
 *.sqlite
 *.sqlite-journal
 

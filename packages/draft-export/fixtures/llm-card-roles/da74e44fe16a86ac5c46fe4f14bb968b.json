@@ -1,0 +1,161 @@
+{
+  "key": "da74e44fe16a86ac5c46fe4f14bb968b",
+  "recordedAt": "2026-11-22T21:35:40.448Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Phyrexian Rager\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"When this creature enters, you draw a card and you lose 1 life.\"},{\"id\":2,\"name\":\"Phyrexian Vatmother\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nAt the beginning of your upkeep, you get a poison counter.\"},{\"id\":3,\"name\":\"Sangromancer\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Flying\\nWhenever a creature an opponent controls dies, you may gain 3 life.\\nWhenever an opponent discards a card, you may gain 3 life.\"},{\"id\":4,\"name\":\"Scourge Servant\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Phyrexian Zombie\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":5,\"name\":\"Septic Rats\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Rat\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever this creature attacks, if defending player is poisoned, it gets +1/+1 until end of turn.\"},{\"id\":6,\"name\":\"Spread the Sickness\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature, then proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":7,\"name\":\"Virulent Wound\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Put a -1/-1 counter on target creature. When that creature dies this turn, its controller gets a poison counter.\"},{\"id\":8,\"name\":\"Blisterstick Shaman\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature enters, it deals 1 damage to any target.\"},{\"id\":9,\"name\":\"Burn the Impure\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Burn the Impure deals 3 damage to target creature. If that creature has infect, Burn the Impure deals 3 damage to that creature's controller.\"},{\"id\":10,\"name\":\"Concussive Bolt\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Concussive Bolt deals 4 damage to target player or planeswalker.\\nMetalcraft — If you control three or more artifacts, creatures controlled by that player or by that planeswalker's controller can't block this turn.\"},{\"id\":11,\"name\":\"Crush\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target noncreature artifact.\"},{\"id\":12,\"name\":\"Galvanoth\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"At the beginning of your upkeep, you may look at the top card of your library. You may cast it without paying its mana cost if it's an instant or sorcery spell.\"},{\"id\":13,\"name\":\"Gnathosaur\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Sacrifice an artifact: This creature gains trample until end of turn.\"},{\"id\":14,\"name\":\"Goblin Wardriver\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Battle cry (Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)\"},{\"id\":15,\"name\":\"Hellkite Igniter\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\\n{1}{R}: This creature gets +X/+0 until end of turn, where X is the number of artifacts you control.\"},{\"id\":16,\"name\":\"Hero of Oxid Ridge\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Haste\\nBattle cry (Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)\\nWhenever this creature attacks, creatures with power 1 or less can't block this turn.\"},{\"id\":17,\"name\":\"Into the Core\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Exile two target artifacts.\"},{\"id\":18,\"name\":\"Koth's Courier\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\"},{\"id\":19,\"name\":\"Kuldotha Flamefiend\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, you may sacrifice an artifact. If you do, this creature deals 4 damage divided as you choose among any number of targets.\"},{\"id\":20,\"name\":\"Kuldotha Ringleader\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Giant Berserker\",\"text\":\"Battle cry (Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)\\nThis creature attacks each combat if able.\"},{\"id\":21,\"name\":\"Metallic Mastery\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target artifact until end of turn. Untap that artifact. It gains haste until end of turn.\"},{\"id\":22,\"name\":\"Ogre Resister\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Ogre\",\"text\":\"\"},{\"id\":23,\"name\":\"Rally the Forces\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures get +1/+0 and gain first strike until end of turn.\"},{\"id\":24,\"name\":\"Red Sun's Zenith\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Red Sun's Zenith deals X damage to any target. If a creature dealt damage this way would die this turn, exile it instead. Shuffle Red Sun's Zenith into its owner's library.\"},{\"id\":25,\"name\":\"Slagstorm\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Slagstorm deals 3 damage to each creature.\\n• Slagstorm deals 3 damage to each player.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 421,
+      "cacheCreationInputTokens": 32483,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7248589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7248589999999999,
+      "pricedUsd": 0.724859,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.724859 and its own usage prices at $0.724859"
+    }
+  }
+}

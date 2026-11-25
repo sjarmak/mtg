@@ -1,0 +1,161 @@
+{
+  "key": "d14802fd826c16f873a6c10be0507e41",
+  "recordedAt": "2026-11-22T22:01:15.030Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Mizzium Mortars\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Mizzium Mortars deals 4 damage to target creature you don't control.\\nOverload {3}{R}{R}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":2,\"name\":\"Pursuit of Flight\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has \\\"{U}: This creature gains flying until end of turn.\\\"\"},{\"id\":3,\"name\":\"Pyroconvergence\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a multicolored spell, this enchantment deals 2 damage to any target.\"},{\"id\":4,\"name\":\"Racecourse Fury\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{T}: Target creature gains haste until end of turn.\\\"\"},{\"id\":5,\"name\":\"Splatter Thug\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"First strike\\nUnleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":6,\"name\":\"Street Spasm\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Instant\",\"text\":\"Street Spasm deals X damage to target creature without flying you don't control.\\nOverload {X}{X}{R}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":7,\"name\":\"Survey the Wreckage\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Create a 1/1 red Goblin creature token.\"},{\"id\":8,\"name\":\"Tenement Crasher\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Haste\"},{\"id\":9,\"name\":\"Traitorous Instinct\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. Until end of turn, it gets +2/+0 and gains haste.\"},{\"id\":10,\"name\":\"Utvara Hellkite\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhenever a Dragon you control attacks, create a 6/6 red Dragon creature token with flying.\"},{\"id\":11,\"name\":\"Vandalblast\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact you don't control.\\nOverload {4}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":12,\"name\":\"Viashino Racketeer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Lizard Rogue\",\"text\":\"When this creature enters, you may discard a card. If you do, draw a card.\"},{\"id\":13,\"name\":\"Aerial Predation\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying. You gain 2 life.\"},{\"id\":14,\"name\":\"Archweaver\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach, trample\"},{\"id\":15,\"name\":\"Axebane Guardian\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Defender\\n{T}: Add X mana in any combination of colors, where X is the number of creatures you control with defender.\"},{\"id\":16,\"name\":\"Axebane Stag\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Elk\",\"text\":\"\"},{\"id\":17,\"name\":\"Brushstrider\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":18,\"name\":\"Centaur's Herald\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"{2}{G}, Sacrifice this creature: Create a 3/3 green Centaur creature token.\"},{\"id\":19,\"name\":\"Chorus of Might\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature gets +1/+1 for each creature you control and gains trample.\"},{\"id\":20,\"name\":\"Deadbridge Goliath\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Scavenge {4}{G}{G} ({4}{G}{G}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":21,\"name\":\"Death's Presence\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control dies, put X +1/+1 counters on target creature you control, where X is the power of the creature that died.\"},{\"id\":22,\"name\":\"Drudge Beetle\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Scavenge {5}{G} ({5}{G}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":23,\"name\":\"Druid's Deliverance\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt to you this turn. Populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":24,\"name\":\"Gatecreeper Vine\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Plant\",\"text\":\"Defender\\nWhen this creature enters, you may search your library for a basic land card or a Gate card, reveal it, put it into your hand, then shuffle.\"},{\"id\":25,\"name\":\"Giant Growth\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 960,
+      "cacheCreationInputTokens": 32333,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7488090000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7488090000000001,
+      "pricedUsd": 0.748809,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.748809 and its own usage prices at $0.748809"
+    }
+  }
+}

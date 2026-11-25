@@ -1,0 +1,153 @@
+{
+  "key": "d5fdb8b51aa26f3c8cca4315368f4a50",
+  "recordedAt": "2026-11-22T22:19:16.810Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Shivan Reef\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {U} or {R}. This land deals 1 damage to you.\"},{\"id\":2,\"name\":\"Yavimaya Coast\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {G} or {U}. This land deals 1 damage to you.\"},{\"id\":3,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"},{\"id\":4,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":5,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":6,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":7,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"},{\"id\":8,\"name\":\"Aegis Angel\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhen this creature enters, another target permanent gains indestructible for as long as you control this creature. (Effects that say \\\"destroy\\\" don't destroy it. A creature with indestructible can't be destroyed by damage.)\"},{\"id\":9,\"name\":\"Divine Verdict\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"id\":10,\"name\":\"Eagle of the Watch\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying, vigilance\"},{\"id\":11,\"name\":\"Serra Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":12,\"name\":\"Into the Void\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target creatures to their owners' hands.\"},{\"id\":13,\"name\":\"Mahamoti Djinn\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\"},{\"id\":14,\"name\":\"Weave Fate\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw two cards.\"},{\"id\":15,\"name\":\"Flesh to Dust\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature. It can't be regenerated.\"},{\"id\":16,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"},{\"id\":17,\"name\":\"Nightmare\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Nightmare Horse\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nNightmare's power and toughness are each equal to the number of Swamps you control.\"},{\"id\":18,\"name\":\"Sengir Vampire\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhenever a creature dealt damage by this creature this turn dies, put a +1/+1 counter on this creature.\"},{\"id\":19,\"name\":\"Fiery Hellhound\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":20,\"name\":\"Shivan Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":21,\"name\":\"Plummet\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying.\"},{\"id\":22,\"name\":\"Prized Unicorn\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Unicorn\",\"text\":\"All creatures able to block this creature do so.\"},{\"id\":23,\"name\":\"Terra Stomper\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"This spell can't be countered.\\nTrample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 728,
+      "cacheCreationInputTokens": 31835,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.727249,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.727249,
+      "pricedUsd": 0.727249,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.727249 and its own usage prices at $0.727249"
+    }
+  }
+}

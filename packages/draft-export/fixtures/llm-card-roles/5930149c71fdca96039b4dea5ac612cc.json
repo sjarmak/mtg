@@ -1,0 +1,161 @@
+{
+  "key": "5930149c71fdca96039b4dea5ac612cc",
+  "recordedAt": "2026-11-22T21:59:48.863Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Reforge the Soul\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player discards their hand, then draws seven cards.\\nMiracle {1}{R} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":2,\"name\":\"Riot Ringleader\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature attacks, Human creatures you control get +1/+0 until end of turn.\"},{\"id\":3,\"name\":\"Rite of Ruin\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose an order for artifacts, creatures, and lands. Each player sacrifices one permanent of their choice of the first type, sacrifices two of their choice of the second type, then sacrifices three of their choice of the third type.\"},{\"id\":4,\"name\":\"Rush of Blood\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +X/+0 until end of turn, where X is its power.\"},{\"id\":5,\"name\":\"Scalding Devil\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"{2}{R}: This creature deals 1 damage to target player or planeswalker.\"},{\"id\":6,\"name\":\"Somberwald Vigilante\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature becomes blocked by a creature, this creature deals 1 damage to that creature.\"},{\"id\":7,\"name\":\"Stonewright\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as Stonewright is paired with another creature, each of those creatures has \\\"{R}: This creature gets +1/+0 until end of turn.\\\"\"},{\"id\":8,\"name\":\"Thatcher Revolt\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create three 1/1 red Human creature tokens with haste. Sacrifice those tokens at the beginning of the next end step.\"},{\"id\":9,\"name\":\"Thunderbolt\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Thunderbolt deals 3 damage to target player or planeswalker.\\n• Thunderbolt deals 4 damage to target creature with flying.\"},{\"id\":10,\"name\":\"Thunderous Wrath\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Thunderous Wrath deals 5 damage to any target.\\nMiracle {R} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":11,\"name\":\"Tibalt, the Fiend-Blooded\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Tibalt\",\"text\":\"+1: Draw a card, then discard a card at random.\\n−4: Tibalt deals damage equal to the number of cards in target player's hand to that player.\\n−6: Gain control of all creatures until end of turn. Untap them. They gain haste until end of turn.\"},{\"id\":12,\"name\":\"Tyrant of Discord\",\"manaCost\":\"{4}{R}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, target opponent chooses a permanent they control at random and sacrifices it. If a nonland permanent is sacrificed this way, repeat this process.\"},{\"id\":13,\"name\":\"Uncanny Speed\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+0 and gains haste until end of turn.\"},{\"id\":14,\"name\":\"Vexing Devil\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"When this creature enters, any opponent may have it deal 4 damage to them. If a player does, sacrifice this creature.\"},{\"id\":15,\"name\":\"Vigilante Justice\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a Human you control enters, this enchantment deals 1 damage to any target.\"},{\"id\":16,\"name\":\"Zealous Conscripts\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Haste\\nWhen this creature enters, gain control of target permanent until end of turn. Untap that permanent. It gains haste until end of turn.\"},{\"id\":17,\"name\":\"Abundant Growth\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, draw a card.\\nEnchanted land has \\\"{T}: Add one mana of any color.\\\"\"},{\"id\":18,\"name\":\"Blessings of Nature\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Distribute four +1/+1 counters among any number of target creatures.\\nMiracle {G} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":19,\"name\":\"Borderland Ranger\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Scout Ranger\",\"text\":\"When this creature enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":20,\"name\":\"Bower Passage\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures with flying can't block creatures you control.\"},{\"id\":21,\"name\":\"Champion of Lambholt\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Creatures with power less than this creature's power can't block creatures you control.\\nWhenever another creature you control enters, put a +1/+1 counter on this creature.\"},{\"id\":22,\"name\":\"Craterhoof Behemoth\",\"manaCost\":\"{5}{G}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Haste\\nWhen this creature enters, creatures you control gain trample and get +X/+X until end of turn, where X is the number of creatures you control.\"},{\"id\":23,\"name\":\"Descendants' Path\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, reveal the top card of your library. If it's a creature card that shares a creature type with a creature you control, you may cast it without paying its mana cost. If you don't cast it, put it on the bottom of your library.\"},{\"id\":24,\"name\":\"Diregraf Escort\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have protection from Zombies.\"},{\"id\":25,\"name\":\"Druid's Familiar\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, each of those creatures gets +2/+2.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1844,
+      "cacheCreationInputTokens": 32680,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.799949,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.799949,
+      "pricedUsd": 0.799949,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.799949 and its own usage prices at $0.799949"
+    }
+  }
+}

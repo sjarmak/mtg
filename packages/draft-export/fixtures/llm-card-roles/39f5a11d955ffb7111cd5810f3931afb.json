@@ -1,0 +1,161 @@
+{
+  "key": "39f5a11d955ffb7111cd5810f3931afb",
+  "recordedAt": "2026-11-22T21:46:52.569Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Rampant Growth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\"},{\"id\":2,\"name\":\"Regenerate\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Regenerate target creature. (The next time that creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":3,\"name\":\"Runeclaw Bear\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"\"},{\"id\":4,\"name\":\"Stampeding Rhino\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Rhino\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":5,\"name\":\"Windstorm\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Windstorm deals X damage to each creature with flying.\"},{\"id\":6,\"name\":\"Angel's Feather\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a white spell, you may gain 1 life.\"},{\"id\":7,\"name\":\"Coat of Arms\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"Each creature gets +1/+1 for each other creature on the battlefield that shares at least one creature type with it. (For example, if two Goblin Warriors and a Goblin Shaman are on the battlefield, each gets +2/+2.)\"},{\"id\":8,\"name\":\"Darksteel Colossus\",\"manaCost\":\"{11}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nIndestructible (Damage and effects that say \\\"destroy\\\" don't destroy this creature.)\\nIf Darksteel Colossus would be put into a graveyard from anywhere, reveal Darksteel Colossus and shuffle it into its owner's library instead.\"},{\"id\":9,\"name\":\"Demon's Horn\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a black spell, you may gain 1 life.\"},{\"id\":10,\"name\":\"Dragon's Claw\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a red spell, you may gain 1 life.\"},{\"id\":11,\"name\":\"Gorgon Flail\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 and has deathtouch. (Any amount of damage it deals to a creature is enough to destroy that creature.)\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":12,\"name\":\"Howling Mine\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of each player's draw step, if this artifact is untapped, that player draws an additional card.\"},{\"id\":13,\"name\":\"Kraken's Eye\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a blue spell, you may gain 1 life.\"},{\"id\":14,\"name\":\"Magebane Armor\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+4 and loses flying.\\nPrevent all noncombat damage that would be dealt to equipped creature.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":15,\"name\":\"Mirror of Fate\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice this artifact: Choose up to seven face-up exiled cards you own. Exile all the cards from your library, then put the chosen cards on top of your library.\"},{\"id\":16,\"name\":\"Ornithopter\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact Creature — Thopter\",\"text\":\"Flying\"},{\"id\":17,\"name\":\"Pithing Needle\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a card name.\\nActivated abilities of sources with the chosen name can't be activated unless they're mana abilities.\"},{\"id\":18,\"name\":\"Platinum Angel\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact Creature — Angel\",\"text\":\"Flying\\nYou can't lose the game and your opponents can't win the game.\"},{\"id\":19,\"name\":\"Rod of Ruin\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: This artifact deals 1 damage to any target.\"},{\"id\":20,\"name\":\"Spellbook\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact — Book\",\"text\":\"You have no maximum hand size.\"},{\"id\":21,\"name\":\"Whispersilk Cloak\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can't be blocked and has shroud. (It can't be the target of spells or abilities.)\\nEquip {2}\"},{\"id\":22,\"name\":\"Wurm's Tooth\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a green spell, you may gain 1 life.\"},{\"id\":23,\"name\":\"Dragonskull Summit\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control a Swamp or a Mountain.\\n{T}: Add {B} or {R}.\"},{\"id\":24,\"name\":\"Drowned Catacomb\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control an Island or a Swamp.\\n{T}: Add {U} or {B}.\"},{\"id\":25,\"name\":\"Gargoyle Castle\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{5}, {T}, Sacrifice this land: Create a 3/4 colorless Gargoyle artifact creature token with flying.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 985,
+      "cacheCreationInputTokens": 32263,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.748659,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.748659,
+      "pricedUsd": 0.748659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.748659 and its own usage prices at $0.748659"
+    }
+  }
+}

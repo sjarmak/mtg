@@ -1,0 +1,161 @@
+{
+  "key": "b55422fb00aaf83a708b8d8359da978a",
+  "recordedAt": "2026-11-22T21:34:31.054Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Darksteel Myr\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"Indestructible (Damage and effects that say \\\"destroy\\\" don't destroy this creature. If its toughness is 0 or less, it still dies.)\"},{\"id\":2,\"name\":\"Darksteel Sentinel\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nVigilance\\nIndestructible (Damage and effects that say \\\"destroy\\\" don't destroy this creature. If its toughness is 0 or less, it's still put into its owner's graveyard.)\"},{\"id\":3,\"name\":\"Echo Circlet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can block an additional creature each combat.\\nEquip {1}\"},{\"id\":4,\"name\":\"Etched Champion\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Soldier\",\"text\":\"Metalcraft — This creature has protection from each color as long as you control three or more artifacts.\"},{\"id\":5,\"name\":\"Flight Spellbomb\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice this artifact: Target creature gains flying until end of turn.\\nWhen this artifact is put into a graveyard from the battlefield, you may pay {U}. If you do, draw a card.\"},{\"id\":6,\"name\":\"Glint Hawk Idol\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever another artifact you control enters, you may have this artifact become a 2/2 Bird artifact creature with flying until end of turn.\\n{W}: This artifact becomes a 2/2 Bird artifact creature with flying until end of turn.\"},{\"id\":7,\"name\":\"Gold Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add {W}.\"},{\"id\":8,\"name\":\"Golden Urn\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep, you may put a charge counter on this artifact.\\n{T}, Sacrifice this artifact: You gain life equal to the number of charge counters on this artifact.\"},{\"id\":9,\"name\":\"Golem Artisan\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"{2}: Target artifact creature gets +1/+1 until end of turn.\\n{2}: Target artifact creature gains your choice of flying, trample, or haste until end of turn.\"},{\"id\":10,\"name\":\"Golem Foundry\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast an artifact spell, you may put a charge counter on this artifact.\\nRemove three charge counters from this artifact: Create a 3/3 colorless Golem artifact creature token.\"},{\"id\":11,\"name\":\"Golem's Heart\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts an artifact spell, you may gain 1 life.\"},{\"id\":12,\"name\":\"Grafted Exoskeleton\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has infect. (It deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever this Equipment becomes unattached from a permanent, sacrifice that permanent.\\nEquip {2}\"},{\"id\":13,\"name\":\"Grindclock\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Put a charge counter on this artifact.\\n{T}: Target player mills X cards, where X is the number of charge counters on this artifact.\"},{\"id\":14,\"name\":\"Heavy Arbalest\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature doesn't untap during its controller's untap step.\\nEquipped creature has \\\"{T}: This creature deals 2 damage to any target.\\\"\\nEquip {4}\"},{\"id\":15,\"name\":\"Horizon Spellbomb\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.\\nWhen this artifact is put into a graveyard from the battlefield, you may pay {G}. If you do, draw a card.\"},{\"id\":16,\"name\":\"Ichorclaw Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Myr\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever this creature becomes blocked, it gets +2/+2 until end of turn.\"},{\"id\":17,\"name\":\"Infiltration Lens\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever equipped creature becomes blocked by a creature, you may draw two cards.\\nEquip {1}\"},{\"id\":18,\"name\":\"Iron Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add {R}.\"},{\"id\":19,\"name\":\"Kuldotha Forgemaster\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{T}, Sacrifice three artifacts: Search your library for an artifact card, put it onto the battlefield, then shuffle.\"},{\"id\":20,\"name\":\"Leaden Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add {B}.\"},{\"id\":21,\"name\":\"Liquimetal Coating\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Target permanent becomes an artifact in addition to its other types until end of turn.\"},{\"id\":22,\"name\":\"Livewire Lash\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+0 and has \\\"Whenever this creature becomes the target of a spell, this creature deals 2 damage to any target.\\\"\\nEquip {2}\"},{\"id\":23,\"name\":\"Lux Cannon\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Put a charge counter on this artifact.\\n{T}, Remove three charge counters from this artifact: Destroy target permanent.\"},{\"id\":24,\"name\":\"Memnite\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"\"},{\"id\":25,\"name\":\"Mimic Vat\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Imprint — Whenever a nontoken creature dies, you may exile that card. If you do, return each other card exiled with this artifact to its owner's graveyard.\\n{3}, {T}: Create a token that's a copy of a card exiled with this artifact. It gains haste. Exile it at the beginning of the next end step.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1136,
+      "cacheCreationInputTokens": 32607,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7630889999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7630889999999999,
+      "pricedUsd": 0.763089,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.763089 and its own usage prices at $0.763089"
+    }
+  }
+}

@@ -33,7 +33,7 @@ export interface AdmittedPrintedBackend {
   readonly backend: ObservedBackend;
 }
 
-type RefusedPrintedBackend = {
+export type RefusedPrintedBackend = {
   readonly admitted: false;
   readonly reasons: readonly (
     | PrintedAdmissionReason
@@ -75,6 +75,7 @@ async function loadOwnedBackend(
   admittedCardNames: ReadonlySet<string>,
   generatedObjectPolicy: ForgeGeneratedObjectPolicy | undefined,
   release: () => void,
+  unreviewedChoices: 'computer' | undefined,
 ): Promise<ObservedBackend> {
   const adapter = await import(/* @vite-ignore */ pathToFileURL(snapshot.inputs.adapterBundlePath).href);
   if (typeof adapter.installedForgeAdmittedBackend !== 'function')
@@ -91,6 +92,7 @@ async function loadOwnedBackend(
       {
         forgeHome: snapshot.inputs.forgeHome,
         compiledBridgeClasses: snapshot.inputs.bridge.path,
+        ...(unreviewedChoices === undefined ? {} : { unreviewedChoices }),
       },
       generatedObjectPolicy,
     );
@@ -167,6 +169,8 @@ export async function admitPrintedBackends(options: {
   readonly runtime: ForgeRuntimeIdentityOptions;
   readonly outputParent: string;
   readonly admissions: readonly PrintedBackendAdmissionInput[];
+  /** The lab's choice (#66): on Commander and Momir tables Forge's AI answers an unreviewed choice. */
+  readonly unreviewedChoices?: 'computer';
 }): Promise<readonly Result[]> {
   if (options.admissions.every((admission) => admission.evidence === null))
     return options.admissions.map(() => ({ admitted: false, reasons: [{ code: 'missing-evidence' }] }));
@@ -202,6 +206,7 @@ export async function admitPrintedBackends(options: {
         result.admittedCardNames,
         result.generatedObjectPolicy,
         release,
+        options.unreviewedChoices,
       );
       loaded = [...loaded, backend];
       results = [...results, { admitted: true, subject: result.subject, backend }];

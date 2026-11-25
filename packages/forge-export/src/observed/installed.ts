@@ -34,6 +34,8 @@ export interface InstalledForgeBackendOptions {
   readonly printedCardNames?: ReadonlySet<string>;
   /** Verification-only switch for exercising Forge's pre-2025 combat-order callbacks. */
   readonly forceLegacyCombatOrderingForTest?: boolean;
+  /** See `ForgeObservedBackendOptions.unreviewedChoices` (#66). */
+  readonly unreviewedChoices?: 'stop' | 'computer';
 }
 
 export interface CompileInstalledForgeBridgeOptions {
@@ -289,6 +291,7 @@ function createInstalledForgeBackend(
     expectedForgeVersionPrefix: install.version,
     ...(options.resolveCustomSet === undefined ? {} : { resolveCustomSet: options.resolveCustomSet }),
     ...(printedCardNames === undefined ? {} : { printedCardNames }),
+    ...(options.unreviewedChoices === undefined ? {} : { unreviewedChoices: options.unreviewedChoices }),
     acquireProfile: () => profileMutex.acquire(),
     beforeSpawn: (exports) => {
       materializeForgeProfile(install, exports);

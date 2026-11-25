@@ -1,0 +1,161 @@
+{
+  "key": "fef53eba70698ca4b66708f7e36b3a3e",
+  "recordedAt": "2026-11-22T22:12:55.300Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Knowledge and Power\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you scry, you may pay {2}. If you do, this enchantment deals 2 damage to any target.\"},{\"id\":2,\"name\":\"Lightning Diadem\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, it deals 2 damage to any target.\\nEnchanted creature gets +2/+2.\"},{\"id\":3,\"name\":\"Magma Spray\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Magma Spray deals 2 damage to target creature. If that creature would die this turn, exile it instead.\"},{\"id\":4,\"name\":\"Mogis's Warhound\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment Creature — Dog\",\"text\":\"Bestow {2}{R} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature attacks each combat if able.\\nEnchanted creature gets +2/+2 and attacks each combat if able.\"},{\"id\":5,\"name\":\"Pensive Minotaur\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"\"},{\"id\":6,\"name\":\"Prophetic Flamespeaker\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Double strike, trample\\nWhenever this creature deals combat damage to a player, exile the top card of your library. You may play it this turn.\"},{\"id\":7,\"name\":\"Riddle of Lightning\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose any target. Scry 3, then reveal the top card of your library. Riddle of Lightning deals damage equal to that card's mana value to that permanent or player.\"},{\"id\":8,\"name\":\"Rollick of Abandon\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get +2/-2 until end of turn.\"},{\"id\":9,\"name\":\"Rouse the Mob\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{R} more to cast for each target beyond the first.\\nAny number of target creatures each get +2/+0 and gain trample until end of turn.\"},{\"id\":10,\"name\":\"Satyr Hoplite\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Satyr Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":11,\"name\":\"Sigiled Skink\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"Whenever this creature attacks, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":12,\"name\":\"Spawn of Thraxes\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhen this creature enters, it deals damage to any target equal to the number of Mountains you control.\"},{\"id\":13,\"name\":\"Spite of Mogis\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Spite of Mogis deals damage to target creature equal to the number of instant and sorcery cards in your graveyard. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":14,\"name\":\"Starfall\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Starfall deals 3 damage to target creature. If that creature is an enchantment, Starfall deals 3 damage to that creature's controller.\"},{\"id\":15,\"name\":\"Twinflame\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Strive — This spell costs {2}{R} more to cast for each target beyond the first.\\nChoose any number of target creatures you control. For each of them, create a token that's a copy of that creature, except it has haste. Exile those tokens at the beginning of the next end step.\"},{\"id\":16,\"name\":\"Wildfire Cerberus\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Dog\",\"text\":\"{5}{R}{R}: Monstrosity 1. (If this creature isn't monstrous, put a +1/+1 counter on it and it becomes monstrous.)\\nWhen this creature becomes monstrous, it deals 2 damage to each opponent and each creature they control.\"},{\"id\":17,\"name\":\"Bassara Tower Archer\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"Reach, hexproof\"},{\"id\":18,\"name\":\"Colossal Heroics\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {1}{G} more to cast for each target beyond the first.\\nAny number of target creatures each get +2/+2 until end of turn. Untap those creatures.\"},{\"id\":19,\"name\":\"Consign to Dust\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{G} more to cast for each target beyond the first.\\nDestroy any number of target artifacts and/or enchantments.\"},{\"id\":20,\"name\":\"Desecration Plague\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target enchantment or land.\"},{\"id\":21,\"name\":\"Dictate of Karametra\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Flash\\nWhenever a player taps a land for mana, that player adds one mana of any type that land produced.\"},{\"id\":22,\"name\":\"Eidolon of Blossoms\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, draw a card.\"},{\"id\":23,\"name\":\"Font of Fertility\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}{G}, Sacrifice this enchantment: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":24,\"name\":\"Golden Hind\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elk\",\"text\":\"{T}: Add {G}.\"},{\"id\":25,\"name\":\"Goldenhide Ox\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Enchantment Creature — Ox\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, target creature must be blocked this turn if able.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1288,
+      "cacheCreationInputTokens": 32483,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7682089999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7682089999999999,
+      "pricedUsd": 0.768209,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.768209 and its own usage prices at $0.768209"
+    }
+  }
+}

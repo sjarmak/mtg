@@ -5,10 +5,10 @@
     "version": "2.0.14",
     "jarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9"
   },
-  "reviewedTokens": 1131,
+  "reviewedTokens": 1166,
   "library": {
     "scripts": 33587,
-    "closed": 28393
+    "closed": 29618
   },
   "editions": [
     {
@@ -44,7 +44,7 @@
     {
       "code": "40K",
       "cards": 286,
-      "closed": 246
+      "closed": 250
     },
     {
       "code": "4ED",
@@ -114,7 +114,7 @@
     {
       "code": "ACR",
       "cards": 138,
-      "closed": 115
+      "closed": 116
     },
     {
       "code": "AER",
@@ -124,12 +124,12 @@
     {
       "code": "AFC",
       "cards": 275,
-      "closed": 241
+      "closed": 246
     },
     {
       "code": "AFR",
       "cards": 266,
-      "closed": 180
+      "closed": 207
     },
     {
       "code": "AJMP",
@@ -209,17 +209,17 @@
     {
       "code": "BFZ",
       "cards": 254,
-      "closed": 182
+      "closed": 228
     },
     {
       "code": "BIG",
       "cards": 30,
-      "closed": 26
+      "closed": 27
     },
     {
       "code": "BLB",
       "cards": 266,
-      "closed": 174
+      "closed": 179
     },
     {
       "code": "BLC",
@@ -234,7 +234,7 @@
     {
       "code": "BOK",
       "cards": 165,
-      "closed": 133
+      "closed": 147
     },
     {
       "code": "BOT",
@@ -249,12 +249,12 @@
     {
       "code": "BRC",
       "cards": 176,
-      "closed": 170
+      "closed": 171
     },
     {
       "code": "BRO",
       "cards": 272,
-      "closed": 226
+      "closed": 231
     },
     {
       "code": "BRR",
@@ -309,7 +309,7 @@
     {
       "code": "C21",
       "cards": 328,
-      "closed": 312
+      "closed": 315
     },
     {
       "code": "CC1",
@@ -324,7 +324,7 @@
     {
       "code": "CHK",
       "cards": 291,
-      "closed": 231
+      "closed": 259
     },
     {
       "code": "CHR",
@@ -334,7 +334,7 @@
     {
       "code": "CLB",
       "cards": 361,
-      "closed": 273
+      "closed": 289
     },
     {
       "code": "CLU",
@@ -379,12 +379,12 @@
     {
       "code": "CN2",
       "cards": 221,
-      "closed": 177
+      "closed": 188
     },
     {
       "code": "CNS",
       "cards": 210,
-      "closed": 185
+      "closed": 197
     },
     {
       "code": "CON",
@@ -419,12 +419,12 @@
     {
       "code": "DBL",
       "cards": 531,
-      "closed": 404
+      "closed": 406
     },
     {
       "code": "DCI",
       "cards": 77,
-      "closed": 65
+      "closed": 69
     },
     {
       "code": "DD1",
@@ -504,7 +504,7 @@
     {
       "code": "DDP",
       "cards": 67,
-      "closed": 64
+      "closed": 65
     },
     {
       "code": "DDQ",
@@ -534,7 +534,7 @@
     {
       "code": "DFT",
       "cards": 276,
-      "closed": 176
+      "closed": 177
     },
     {
       "code": "DGM",
@@ -569,7 +569,7 @@
     {
       "code": "DMU",
       "cards": 266,
-      "closed": 230
+      "closed": 234
     },
     {
       "code": "DOM",
@@ -589,7 +589,7 @@
     {
       "code": "DRC",
       "cards": 161,
-      "closed": 155
+      "closed": 156
     },
     {
       "code": "DRC94",
@@ -609,12 +609,12 @@
     {
       "code": "DSC",
       "cards": 340,
-      "closed": 284
+      "closed": 323
     },
     {
       "code": "DSK",
       "cards": 253,
-      "closed": 177
+      "closed": 199
     },
     {
       "code": "DST",
@@ -649,7 +649,7 @@
     {
       "code": "EA2",
       "cards": 25,
-      "closed": 23
+      "closed": 25
     },
     {
       "code": "EA3",
@@ -659,12 +659,12 @@
     {
       "code": "ECC",
       "cards": 153,
-      "closed": 144
+      "closed": 147
     },
     {
       "code": "ECL",
       "cards": 273,
-      "closed": 247
+      "closed": 255
     },
     {
       "code": "ELD",
@@ -679,17 +679,17 @@
     {
       "code": "EMN",
       "cards": 205,
-      "closed": 170
+      "closed": 173
     },
     {
       "code": "EOC",
       "cards": 171,
-      "closed": 156
+      "closed": 160
     },
     {
       "code": "EOE",
       "cards": 266,
-      "closed": 194
+      "closed": 198
     },
     {
       "code": "EOS",
@@ -794,7 +794,7 @@
     {
       "code": "F16",
       "cards": 12,
-      "closed": 10
+      "closed": 11
     },
     {
       "code": "F17",
@@ -814,7 +814,7 @@
     {
       "code": "FDN",
       "cards": 276,
-      "closed": 261
+      "closed": 266
     },
     {
       "code": "FEM",
@@ -824,12 +824,12 @@
     {
       "code": "FIC",
       "cards": 339,
-      "closed": 305
+      "closed": 311
     },
     {
       "code": "FIN",
       "cards": 299,
-      "closed": 259
+      "closed": 277
     },
     {
       "code": "FNM",
@@ -1039,7 +1039,7 @@
     {
       "code": "HBG",
       "cards": 271,
-      "closed": 187
+      "closed": 201
     },
     {
       "code": "HHO",
@@ -1054,17 +1054,17 @@
     {
       "code": "HOB",
       "cards": 193,
-      "closed": 160
+      "closed": 171
     },
     {
       "code": "HOC",
       "cards": 117,
-      "closed": 111
+      "closed": 114
     },
     {
       "code": "HOP",
       "cards": 184,
-      "closed": 142
+      "closed": 149
     },
     {
       "code": "HOU",
@@ -1089,7 +1089,7 @@
     {
       "code": "INR",
       "cards": 287,
-      "closed": 254
+      "closed": 257
     },
     {
       "code": "INV",
@@ -1154,17 +1154,17 @@
     {
       "code": "J21",
       "cards": 372,
-      "closed": 333
+      "closed": 337
     },
     {
       "code": "J22",
       "cards": 819,
-      "closed": 800
+      "closed": 807
     },
     {
       "code": "J25",
       "cards": 768,
-      "closed": 742
+      "closed": 744
     },
     {
       "code": "JGP",
@@ -1224,12 +1224,12 @@
     {
       "code": "LCC",
       "cards": 312,
-      "closed": 295
+      "closed": 299
     },
     {
       "code": "LCI",
       "cards": 291,
-      "closed": 220
+      "closed": 250
     },
     {
       "code": "LEA",
@@ -1254,7 +1254,7 @@
     {
       "code": "LMAR",
       "cards": 4,
-      "closed": 1
+      "closed": 4
     },
     {
       "code": "LRW",
@@ -1264,12 +1264,12 @@
     {
       "code": "LTC",
       "cards": 340,
-      "closed": 307
+      "closed": 313
     },
     {
       "code": "LTR",
       "cards": 266,
-      "closed": 189
+      "closed": 240
     },
     {
       "code": "M10",
@@ -1319,17 +1319,17 @@
     {
       "code": "M3C",
       "cards": 319,
-      "closed": 287
+      "closed": 303
     },
     {
       "code": "MAR",
       "cards": 94,
-      "closed": 89
+      "closed": 90
     },
     {
       "code": "MAT",
       "cards": 50,
-      "closed": 41
+      "closed": 43
     },
     {
       "code": "MB1",
@@ -1344,7 +1344,7 @@
     {
       "code": "MBC",
       "cards": 68,
-      "closed": 45
+      "closed": 46
     },
     {
       "code": "MBP",
@@ -1389,12 +1389,12 @@
     {
       "code": "MH2",
       "cards": 240,
-      "closed": 217
+      "closed": 218
     },
     {
       "code": "MH3",
       "cards": 308,
-      "closed": 253
+      "closed": 286
     },
     {
       "code": "MIC",
@@ -1414,17 +1414,17 @@
     {
       "code": "MKC",
       "cards": 301,
-      "closed": 272
+      "closed": 279
     },
     {
       "code": "MKM",
       "cards": 271,
-      "closed": 174
+      "closed": 181
     },
     {
       "code": "MM2",
       "cards": 249,
-      "closed": 242
+      "closed": 245
     },
     {
       "code": "MM3",
@@ -1444,12 +1444,12 @@
     {
       "code": "MOC",
       "cards": 385,
-      "closed": 311
+      "closed": 337
     },
     {
       "code": "MOM",
       "cards": 281,
-      "closed": 181
+      "closed": 223
     },
     {
       "code": "MOR",
@@ -1494,12 +1494,12 @@
     {
       "code": "MSC",
       "cards": 616,
-      "closed": 522
+      "closed": 562
     },
     {
       "code": "MSH",
       "cards": 281,
-      "closed": 210
+      "closed": 224
     },
     {
       "code": "MUL",
@@ -1509,17 +1509,17 @@
     {
       "code": "NCC",
       "cards": 347,
-      "closed": 308
+      "closed": 312
     },
     {
       "code": "NEC",
       "cards": 140,
-      "closed": 119
+      "closed": 120
     },
     {
       "code": "NEO",
       "cards": 287,
-      "closed": 225
+      "closed": 228
     },
     {
       "code": "NMS",
@@ -1544,7 +1544,7 @@
     {
       "code": "OARC",
       "cards": 45,
-      "closed": 0
+      "closed": 44
     },
     {
       "code": "OBC",
@@ -1559,12 +1559,12 @@
     {
       "code": "OE01",
       "cards": 20,
-      "closed": 0
+      "closed": 18
     },
     {
       "code": "OGW",
       "cards": 183,
-      "closed": 117
+      "closed": 160
     },
     {
       "code": "OLGC",
@@ -1574,7 +1574,7 @@
     {
       "code": "OM1",
       "cards": 35,
-      "closed": 31
+      "closed": 33
     },
     {
       "code": "OMB",
@@ -1589,7 +1589,7 @@
     {
       "code": "ONE",
       "cards": 266,
-      "closed": 202
+      "closed": 204
     },
     {
       "code": "ONS",
@@ -1604,12 +1604,12 @@
     {
       "code": "OTC",
       "cards": 305,
-      "closed": 285
+      "closed": 288
     },
     {
       "code": "OTJ",
       "cards": 276,
-      "closed": 169
+      "closed": 172
     },
     {
       "code": "OTP",
@@ -1824,7 +1824,7 @@
     {
       "code": "PBFZ",
       "cards": 10,
-      "closed": 7
+      "closed": 9
     },
     {
       "code": "PBNG",
@@ -1839,12 +1839,12 @@
     {
       "code": "PC2",
       "cards": 176,
-      "closed": 134
+      "closed": 142
     },
     {
       "code": "PCA",
       "cards": 222,
-      "closed": 134
+      "closed": 150
     },
     {
       "code": "PCBB",
@@ -2004,7 +2004,7 @@
     {
       "code": "PF23",
       "cards": 4,
-      "closed": 2
+      "closed": 4
     },
     {
       "code": "PF24",
@@ -2129,12 +2129,12 @@
     {
       "code": "PIO",
       "cards": 278,
-      "closed": 266
+      "closed": 268
     },
     {
       "code": "PIP",
       "cards": 334,
-      "closed": 288
+      "closed": 304
     },
     {
       "code": "PISD",
@@ -2269,7 +2269,7 @@
     {
       "code": "PLST",
       "cards": 4769,
-      "closed": 4487
+      "closed": 4521
     },
     {
       "code": "PLTC",
@@ -2334,7 +2334,7 @@
     {
       "code": "PMEI",
       "cards": 94,
-      "closed": 87
+      "closed": 90
     },
     {
       "code": "PMH1",
@@ -2349,7 +2349,7 @@
     {
       "code": "PMOA",
       "cards": 74,
-      "closed": 0
+      "closed": 56
     },
     {
       "code": "PMOR",
@@ -2424,7 +2424,7 @@
     {
       "code": "POGW",
       "cards": 9,
-      "closed": 5
+      "closed": 7
     },
     {
       "code": "PONS",
@@ -2514,7 +2514,7 @@
     {
       "code": "PRM",
       "cards": 2691,
-      "closed": 2423
+      "closed": 2448
     },
     {
       "code": "PRNA",
@@ -2609,7 +2609,7 @@
     {
       "code": "PSPL",
       "cards": 13,
-      "closed": 11
+      "closed": 12
     },
     {
       "code": "PSS1",
@@ -2759,7 +2759,7 @@
     {
       "code": "PW25",
       "cards": 16,
-      "closed": 12
+      "closed": 14
     },
     {
       "code": "PW26",
@@ -2774,7 +2774,7 @@
     {
       "code": "PWCS",
       "cards": 46,
-      "closed": 36
+      "closed": 37
     },
     {
       "code": "PWOR",
@@ -2834,7 +2834,7 @@
     {
       "code": "REX",
       "cards": 26,
-      "closed": 19
+      "closed": 20
     },
     {
       "code": "RFIN",
@@ -2889,7 +2889,7 @@
     {
       "code": "SCH",
       "cards": 50,
-      "closed": 42
+      "closed": 43
     },
     {
       "code": "SDS",
@@ -2904,7 +2904,7 @@
     {
       "code": "SIR",
       "cards": 281,
-      "closed": 239
+      "closed": 242
     },
     {
       "code": "SIS",
@@ -2919,12 +2919,12 @@
     {
       "code": "SLD",
       "cards": 1680,
-      "closed": 1546
+      "closed": 1581
     },
     {
       "code": "SLP",
       "cards": 52,
-      "closed": 47
+      "closed": 48
     },
     {
       "code": "SLU",
@@ -2939,7 +2939,7 @@
     {
       "code": "SNC",
       "cards": 266,
-      "closed": 210
+      "closed": 223
     },
     {
       "code": "SOA",
@@ -2949,7 +2949,7 @@
     {
       "code": "SOC",
       "cards": 375,
-      "closed": 340
+      "closed": 342
     },
     {
       "code": "SOI",
@@ -2959,7 +2959,7 @@
     {
       "code": "SOK",
       "cards": 165,
-      "closed": 132
+      "closed": 148
     },
     {
       "code": "SOM",
@@ -2969,7 +2969,7 @@
     {
       "code": "SOS",
       "cards": 271,
-      "closed": 206
+      "closed": 213
     },
     {
       "code": "SPE",
@@ -2979,12 +2979,12 @@
     {
       "code": "SPG",
       "cards": 139,
-      "closed": 127
+      "closed": 129
     },
     {
       "code": "SPM",
       "cards": 193,
-      "closed": 36
+      "closed": 161
     },
     {
       "code": "SS1",
@@ -3014,7 +3014,7 @@
     {
       "code": "STX",
       "cards": 275,
-      "closed": 235
+      "closed": 259
     },
     {
       "code": "TD0",
@@ -3034,7 +3034,7 @@
     {
       "code": "TDC",
       "cards": 371,
-      "closed": 350
+      "closed": 352
     },
     {
       "code": "TDLS",
@@ -3044,7 +3044,7 @@
     {
       "code": "TDM",
       "cards": 276,
-      "closed": 223
+      "closed": 251
     },
     {
       "code": "THB",
@@ -3059,7 +3059,7 @@
     {
       "code": "TLA",
       "cards": 286,
-      "closed": 207
+      "closed": 245
     },
     {
       "code": "TLE",
@@ -3079,7 +3079,7 @@
     {
       "code": "TMT",
       "cards": 190,
-      "closed": 148
+      "closed": 150
     },
     {
       "code": "TOR",
@@ -3094,7 +3094,7 @@
     {
       "code": "TRC",
       "cards": 16,
-      "closed": 15
+      "closed": 16
     },
     {
       "code": "TRK",
@@ -3159,7 +3159,7 @@
     {
       "code": "UNK",
       "cards": 108,
-      "closed": 93
+      "closed": 94
     },
     {
       "code": "USG",
@@ -3209,12 +3209,12 @@
     {
       "code": "V17",
       "cards": 15,
-      "closed": 13
+      "closed": 14
     },
     {
       "code": "VAN",
       "cards": 32,
-      "closed": 0
+      "closed": 32
     },
     {
       "code": "VIS",
@@ -3234,7 +3234,7 @@
     {
       "code": "VOW",
       "cards": 272,
-      "closed": 202
+      "closed": 204
     },
     {
       "code": "W16",
@@ -3254,7 +3254,7 @@
     {
       "code": "WHO",
       "cards": 356,
-      "closed": 236
+      "closed": 271
     },
     {
       "code": "WMC",
@@ -3264,12 +3264,12 @@
     {
       "code": "WOC",
       "cards": 143,
-      "closed": 134
+      "closed": 136
     },
     {
       "code": "WOE",
       "cards": 266,
-      "closed": 228
+      "closed": 232
     },
     {
       "code": "WOT",
@@ -3299,52 +3299,52 @@
     {
       "code": "YBLB",
       "cards": 30,
-      "closed": 9
+      "closed": 12
     },
     {
       "code": "YBRO",
       "cards": 30,
-      "closed": 10
+      "closed": 13
     },
     {
       "code": "YDFT",
       "cards": 30,
-      "closed": 8
+      "closed": 11
     },
     {
       "code": "YDMU",
       "cards": 30,
-      "closed": 12
+      "closed": 16
     },
     {
       "code": "YDSK",
       "cards": 28,
-      "closed": 9
+      "closed": 14
     },
     {
       "code": "YECL",
       "cards": 26,
-      "closed": 7
+      "closed": 10
     },
     {
       "code": "YEOE",
       "cards": 39,
-      "closed": 16
+      "closed": 18
     },
     {
       "code": "YLCI",
       "cards": 30,
-      "closed": 6
+      "closed": 10
     },
     {
       "code": "YMID",
       "cards": 63,
-      "closed": 13
+      "closed": 25
     },
     {
       "code": "YMKM",
       "cards": 30,
-      "closed": 5
+      "closed": 6
     },
     {
       "code": "YNEO",
@@ -3354,32 +3354,32 @@
     {
       "code": "YONE",
       "cards": 30,
-      "closed": 5
+      "closed": 10
     },
     {
       "code": "YOTJ",
       "cards": 30,
-      "closed": 6
+      "closed": 18
     },
     {
       "code": "YSNC",
       "cards": 30,
-      "closed": 10
+      "closed": 14
     },
     {
       "code": "YSOS",
       "cards": 27,
-      "closed": 10
+      "closed": 12
     },
     {
       "code": "YTDM",
       "cards": 29,
-      "closed": 6
+      "closed": 14
     },
     {
       "code": "YWOE",
       "cards": 30,
-      "closed": 9
+      "closed": 13
     },
     {
       "code": "ZEN",

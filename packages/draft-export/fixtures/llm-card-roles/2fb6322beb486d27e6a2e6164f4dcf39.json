@@ -1,0 +1,161 @@
+{
+  "key": "2fb6322beb486d27e6a2e6164f4dcf39",
+  "recordedAt": "2026-11-22T21:58:15.876Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Angel of Glory's Rise\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, exile all Zombies, then return all Human creature cards from your graveyard to the battlefield.\"},{\"id\":2,\"name\":\"Angel of Jubilation\",\"manaCost\":\"{1}{W}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nOther nonblack creatures you control get +1/+1.\\nPlayers can't pay life or sacrifice creatures to cast spells or activate abilities.\"},{\"id\":3,\"name\":\"Angel's Mercy\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"You gain 7 life.\"},{\"id\":4,\"name\":\"Angelic Wall\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\\nFlying\"},{\"id\":5,\"name\":\"Archangel\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, vigilance\"},{\"id\":6,\"name\":\"Avacyn, Angel of Hope\",\"manaCost\":\"{5}{W}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, vigilance, indestructible\\nOther permanents you control have indestructible.\"},{\"id\":7,\"name\":\"Banishing Stroke\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Instant\",\"text\":\"Put target artifact, creature, or enchantment on the bottom of its owner's library.\\nMiracle {W} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":8,\"name\":\"Builder's Blessing\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Untapped creatures you control get +0/+2.\"},{\"id\":9,\"name\":\"Call to Serve\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant nonblack creature\\nEnchanted creature gets +1/+2, has flying, and is an Angel in addition to its other types.\"},{\"id\":10,\"name\":\"Cathars' Crusade\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control enters, put a +1/+1 counter on each creature you control.\"},{\"id\":11,\"name\":\"Cathedral Sanctifier\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, you gain 3 life.\"},{\"id\":12,\"name\":\"Cloudshift\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature you control, then return that card to the battlefield under your control.\"},{\"id\":13,\"name\":\"Commander's Authority\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"At the beginning of your upkeep, create a 1/1 white Human creature token.\\\"\"},{\"id\":14,\"name\":\"Cursebreak\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment. You gain 2 life.\"},{\"id\":15,\"name\":\"Defang\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nPrevent all damage that would be dealt by enchanted creature.\"},{\"id\":16,\"name\":\"Defy Death\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to the battlefield. If it's an Angel, put two +1/+1 counters on it.\"},{\"id\":17,\"name\":\"Devout Chaplain\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}, Tap two untapped Humans you control: Exile target artifact or enchantment.\"},{\"id\":18,\"name\":\"Divine Deflection\",\"manaCost\":\"{X}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent the next X damage that would be dealt to you and/or permanents you control this turn. If damage is prevented this way, Divine Deflection deals that much damage to any target.\"},{\"id\":19,\"name\":\"Emancipation Angel\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, return a permanent you control to its owner's hand.\"},{\"id\":20,\"name\":\"Entreat the Angels\",\"manaCost\":\"{X}{X}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create X 4/4 white Angel creature tokens with flying.\\nMiracle {X}{W}{W} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":21,\"name\":\"Farbog Explorer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\"},{\"id\":22,\"name\":\"Goldnight Commander\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric Soldier\",\"text\":\"Whenever another creature you control enters, creatures you control get +1/+1 until end of turn.\"},{\"id\":23,\"name\":\"Goldnight Redeemer\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, you gain 2 life for each other creature you control.\"},{\"id\":24,\"name\":\"Herald of War\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhenever this creature attacks, put a +1/+1 counter on it.\\nAngel spells and Human spells you cast cost {1} less to cast for each +1/+1 counter on this creature.\"},{\"id\":25,\"name\":\"Holy Justiciar\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{2}{W}, {T}: Tap target creature. If that creature is a Zombie, exile it.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\",\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1198,
+      "cacheCreationInputTokens": 32288,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7598089999999998,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7598089999999998,
+      "pricedUsd": 0.759809,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.759809 and its own usage prices at $0.759809"
+    }
+  }
+}

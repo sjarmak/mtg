@@ -1,0 +1,161 @@
+{
+  "key": "0290a8868c47fda4fa273f8ba8705924",
+  "recordedAt": "2026-11-22T21:41:37.454Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Lethargy Trap\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If three or more creatures are attacking, you may pay {U} rather than pay this spell's mana cost.\\nAttacking creatures get -3/-0 until end of turn.\"},{\"id\":2,\"name\":\"Living Tsunami\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nAt the beginning of your upkeep, sacrifice this creature unless you return a land you control to its owner's hand.\"},{\"id\":3,\"name\":\"Lorthos, the Tidemaker\",\"manaCost\":\"{5}{U}{U}{U}\",\"typeLine\":\"Legendary Creature — Octopus\",\"text\":\"Whenever Lorthos attacks, you may pay {8}. If you do, tap up to eight target permanents. Those permanents don't untap during their controllers' next untap steps.\"},{\"id\":4,\"name\":\"Lullmage Mentor\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Whenever a spell or ability you control counters a spell, you may create a 1/1 blue Merfolk creature token.\\nTap seven untapped Merfolk you control: Counter target spell.\"},{\"id\":5,\"name\":\"Merfolk Seastalkers\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\n{2}{U}: Tap target creature without flying.\"},{\"id\":6,\"name\":\"Merfolk Wayfinder\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"Flying\\nWhen this creature enters, reveal the top three cards of your library. Put all Island cards revealed this way into your hand and the rest on the bottom of your library in any order.\"},{\"id\":7,\"name\":\"Mindbreak Trap\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent cast three or more spells this turn, you may pay {0} rather than pay this spell's mana cost.\\nExile any number of target spells.\"},{\"id\":8,\"name\":\"Paralyzing Grasp\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":9,\"name\":\"Quest for Ancient Secrets\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a card is put into your graveyard from anywhere, you may put a quest counter on this enchantment.\\nRemove five quest counters from this enchantment and sacrifice it: Target player shuffles their graveyard into their library.\"},{\"id\":10,\"name\":\"Reckless Scholar\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}: Target player draws a card, then discards a card.\"},{\"id\":11,\"name\":\"Rite of Replication\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker {5} (You may pay an additional {5} as you cast this spell.)\\nCreate a token that's a copy of target creature. If this spell was kicked, create five of those tokens instead.\"},{\"id\":12,\"name\":\"Roil Elemental\",\"manaCost\":\"{3}{U}{U}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nLandfall — Whenever a land you control enters, you may gain control of target creature for as long as you control this creature.\"},{\"id\":13,\"name\":\"Sea Gate Loremaster\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Merfolk Wizard Ally\",\"text\":\"{T}: Draw a card for each Ally you control.\"},{\"id\":14,\"name\":\"Seascape Aerialist\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Merfolk Wizard Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have Ally creatures you control gain flying until end of turn.\"},{\"id\":15,\"name\":\"Shoal Serpent\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Defender\\nLandfall — Whenever a land you control enters, this creature loses defender until end of turn.\"},{\"id\":16,\"name\":\"Sky Ruin Drake\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\"},{\"id\":17,\"name\":\"Spell Pierce\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell unless its controller pays {2}.\"},{\"id\":18,\"name\":\"Sphinx of Jwar Isle\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nShroud (This creature can't be the target of spells or abilities.)\\nYou may look at the top card of your library any time.\"},{\"id\":19,\"name\":\"Sphinx of Lost Truths\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.)\\nFlying\\nWhen this creature enters, draw three cards. Then if it wasn't kicked, discard three cards.\"},{\"id\":20,\"name\":\"Spreading Seas\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, draw a card.\\nEnchanted land is an Island.\"},{\"id\":21,\"name\":\"Summoner's Bane\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature spell. Create a 2/2 blue Illusion creature token.\"},{\"id\":22,\"name\":\"Tempest Owl\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Kicker {4}{U} (You may pay an additional {4}{U} as you cast this spell.)\\nFlying\\nWhen this creature enters, if it was kicked, tap up to three target permanents.\"},{\"id\":23,\"name\":\"Trapfinder's Trick\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand and discards all Trap cards.\"},{\"id\":24,\"name\":\"Trapmaker's Snare\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Search your library for a Trap card, reveal it, put it into your hand, then shuffle.\"},{\"id\":25,\"name\":\"Umara Raptor\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Bird Ally\",\"text\":\"Flying\\nWhenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1639,
+      "cacheCreationInputTokens": 32529,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7866790000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7866790000000001,
+      "pricedUsd": 0.786679,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786679 and its own usage prices at $0.786679"
+    }
+  }
+}

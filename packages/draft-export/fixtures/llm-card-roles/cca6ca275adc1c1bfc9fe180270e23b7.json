@@ -1,0 +1,161 @@
+{
+  "key": "cca6ca275adc1c1bfc9fe180270e23b7",
+  "recordedAt": "2026-11-22T21:46:40.467Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Elvish Archdruid\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"Other Elf creatures you control get +1/+1.\\n{T}: Add {G} for each Elf you control.\"},{\"id\":2,\"name\":\"Elvish Piper\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{G}, {T}: You may put a creature card from your hand onto the battlefield.\"},{\"id\":3,\"name\":\"Elvish Visionary\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, draw a card.\"},{\"id\":4,\"name\":\"Emerald Oryx\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Antelope\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\"},{\"id\":5,\"name\":\"Enormous Baloth\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":6,\"name\":\"Entangling Vines\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant tapped creature\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":7,\"name\":\"Fog\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\"},{\"id\":8,\"name\":\"Garruk Wildspeaker\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Untap two target lands.\\n−1: Create a 3/3 green Beast creature token.\\n−4: Creatures you control get +3/+3 and gain trample until end of turn.\"},{\"id\":9,\"name\":\"Giant Growth\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 until end of turn.\"},{\"id\":10,\"name\":\"Giant Spider\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":11,\"name\":\"Great Sable Stag\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Elk\",\"text\":\"This spell can't be countered.\\nProtection from blue and from black (This creature can't be blocked, targeted, dealt damage, or enchanted by anything blue or black.)\"},{\"id\":12,\"name\":\"Howl of the Night Pack\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 2/2 green Wolf creature token for each Forest you control.\"},{\"id\":13,\"name\":\"Kalonian Behemoth\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Shroud (This creature can't be the target of spells or abilities.)\"},{\"id\":14,\"name\":\"Llanowar Elves\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":15,\"name\":\"Lurking Predators\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent casts a spell, reveal the top card of your library. If it's a creature card, put it onto the battlefield. Otherwise, you may put that card on the bottom of your library.\"},{\"id\":16,\"name\":\"Master of the Wild Hunt\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"At the beginning of your upkeep, create a 2/2 green Wolf creature token.\\n{T}: Tap all untapped Wolf creatures you control. Each Wolf tapped this way deals damage equal to its power to target creature. That creature deals damage equal to its power divided as its controller chooses among any number of those Wolves.\"},{\"id\":17,\"name\":\"Might of Oaks\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +7/+7 until end of turn.\"},{\"id\":18,\"name\":\"Mist Leopard\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Shroud (This creature can't be the target of spells or abilities.)\"},{\"id\":19,\"name\":\"Mold Adder\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Fungus Snake\",\"text\":\"Whenever an opponent casts a blue or black spell, you may put a +1/+1 counter on this creature.\"},{\"id\":20,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":21,\"name\":\"Nature's Spiral\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target permanent card from your graveyard to your hand.\"},{\"id\":22,\"name\":\"Oakenform\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+3.\"},{\"id\":23,\"name\":\"Overrun\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +3/+3 and gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":24,\"name\":\"Prized Unicorn\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Unicorn\",\"text\":\"All creatures able to block this creature do so.\"},{\"id\":25,\"name\":\"Protean Hydra\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nIf damage would be dealt to this creature, prevent that damage and remove that many +1/+1 counters from it.\\nWhenever a +1/+1 counter is removed from this creature, put two +1/+1 counters on it at the beginning of the next end step.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 400,
+      "cacheCreationInputTokens": 32244,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.719029,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.719029,
+      "pricedUsd": 0.719029,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.719029 and its own usage prices at $0.719029"
+    }
+  }
+}

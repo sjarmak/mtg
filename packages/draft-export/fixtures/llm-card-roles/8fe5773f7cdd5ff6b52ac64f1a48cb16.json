@@ -1,0 +1,161 @@
+{
+  "key": "8fe5773f7cdd5ff6b52ac64f1a48cb16",
+  "recordedAt": "2026-11-22T21:54:56.411Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Windstorm\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Windstorm deals X damage to each creature with flying.\"},{\"id\":2,\"name\":\"Witchstalker\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nWhenever an opponent casts a blue or black spell during your turn, put a +1/+1 counter on this creature.\"},{\"id\":3,\"name\":\"Woodborn Behemoth\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"As long as you control eight or more lands, this creature gets +4/+4 and has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":4,\"name\":\"Accorder's Shield\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +0/+3 and has vigilance. (Attacking doesn't cause it to tap.)\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":5,\"name\":\"Bubbling Cauldron\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}, Sacrifice a creature: You gain 4 life.\\n{1}, {T}, Sacrifice a creature named Festering Newt: Each opponent loses 4 life. You gain life equal to the life lost this way.\"},{\"id\":6,\"name\":\"Darksteel Forge\",\"manaCost\":\"{9}\",\"typeLine\":\"Artifact\",\"text\":\"Artifacts you control have indestructible. (Effects that say \\\"destroy\\\" don't destroy them. Artifact creatures with indestructible can't be destroyed by damage.)\"},{\"id\":7,\"name\":\"Darksteel Ingot\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Indestructible (Effects that say \\\"destroy\\\" don't destroy this artifact.)\\n{T}: Add one mana of any color.\"},{\"id\":8,\"name\":\"Door of Destinies\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a creature type.\\nWhenever you cast a spell of the chosen type, put a charge counter on this artifact.\\nCreatures you control of the chosen type get +1/+1 for each charge counter on this artifact.\"},{\"id\":9,\"name\":\"Elixir of Immortality\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: You gain 5 life. Shuffle this artifact and your graveyard into their owner's library.\"},{\"id\":10,\"name\":\"Fireshrieker\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has double strike. (It deals both first-strike and regular combat damage.)\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":11,\"name\":\"Guardian of the Ages\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Defender (This creature can't attack.)\\nWhen a creature attacks you or a planeswalker you control, if this creature has defender, it loses defender and gains trample.\"},{\"id\":12,\"name\":\"Haunted Plate Mail\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +4/+4.\\n{0}: Until end of turn, this permanent becomes a 4/4 Spirit artifact creature that's no longer an Equipment. Activate only if you control no creatures.\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":13,\"name\":\"Millstone\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Target player mills two cards.\"},{\"id\":14,\"name\":\"Pyromancer's Gauntlet\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"If a red instant or sorcery spell you control or a red planeswalker you control would deal damage to a permanent or player, it deals that much damage plus 2 to that permanent or player instead.\"},{\"id\":15,\"name\":\"Ratchet Bomb\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Put a charge counter on this artifact.\\n{T}, Sacrifice this artifact: Destroy each nonland permanent with mana value equal to the number of charge counters on this artifact.\"},{\"id\":16,\"name\":\"Ring of Three Wishes\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three wish counters on it.\\n{5}, {T}, Remove a wish counter from this artifact: Search your library for a card, put that card into your hand, then shuffle.\"},{\"id\":17,\"name\":\"Rod of Ruin\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: This artifact deals 1 damage to any target.\"},{\"id\":18,\"name\":\"Sliver Construct\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Sliver Construct\",\"text\":\"\"},{\"id\":19,\"name\":\"Staff of the Death Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a black spell or a Swamp you control enters, you gain 1 life.\"},{\"id\":20,\"name\":\"Staff of the Flame Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a red spell or a Mountain you control enters, you gain 1 life.\"},{\"id\":21,\"name\":\"Staff of the Mind Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a blue spell or an Island you control enters, you gain 1 life.\"},{\"id\":22,\"name\":\"Staff of the Sun Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a white spell or a Plains you control enters, you gain 1 life.\"},{\"id\":23,\"name\":\"Staff of the Wild Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a green spell or a Forest you control enters, you gain 1 life.\"},{\"id\":24,\"name\":\"Strionic Resonator\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Copy target triggered ability you control. You may choose new targets for the copy. (A triggered ability uses the words \\\"when,\\\" \\\"whenever,\\\" or \\\"at.\\\")\"},{\"id\":25,\"name\":\"Trading Post\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}, Discard a card: You gain 4 life.\\n{1}, {T}, Pay 1 life: Create a 0/1 white Goat creature token.\\n{1}, {T}, Sacrifice a creature: Return target artifact card from your graveyard to your hand.\\n{1}, {T}, Sacrifice an artifact: Draw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1028,
+      "cacheCreationInputTokens": 32615,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.757849,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.757849,
+      "pricedUsd": 0.757849,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.757849 and its own usage prices at $0.757849"
+    }
+  }
+}

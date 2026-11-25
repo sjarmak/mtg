@@ -188,6 +188,16 @@ export {
   PRINTED_EVALUATION_POLICY,
 } from './limited-evaluation/printed';
 export {
+  PrintedCardRolesSchema,
+  printedCardRolesOf,
+  printedRolesPolicy,
+  validatePrintedCardRoles,
+  withPrintedCardRoles,
+} from './limited-evaluation/printed-roles';
+export type { PrintedCardRoles } from './limited-evaluation/printed-roles';
+export { CARD_ROLES } from './limited-evaluation/model';
+export type { CardRole } from './limited-evaluation/model';
+export {
   evaluateStructuralPrintedCard,
   planStructuralPrintedPool,
   structuralPrintedFacts,

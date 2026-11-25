@@ -1,0 +1,161 @@
+{
+  "key": "8cc1ffc2fd78b816468f8be922141e5d",
+  "recordedAt": "2026-11-22T21:24:46.944Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Pride Sovereign\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"This creature gets +1/+1 for each other Cat you control.\\n{W}, {T}, Exert this creature: Create two 1/1 white Cat creature tokens with lifelink. (An exerted creature won't untap during your next untap step.)\"},{\"id\":2,\"name\":\"Quarry Beetle\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"When this creature enters, you may return target land card from your graveyard to the battlefield.\"},{\"id\":3,\"name\":\"Rampaging Hippo\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Hippo\",\"text\":\"Trample\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":4,\"name\":\"Ramunap Excavator\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Cleric\",\"text\":\"You may play lands from your graveyard.\"},{\"id\":5,\"name\":\"Ramunap Hydra\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Snake Hydra\",\"text\":\"Reach, vigilance, trample\\nThis creature gets +1/+1 as long as you control a Desert.\\nThis creature gets +1/+1 as long as there is a Desert card in your graveyard.\"},{\"id\":6,\"name\":\"Resilient Khenra\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Jackal Wizard\",\"text\":\"When this creature enters, you may have target creature get +X/+X until end of turn, where X is this creature's power.\\nEternalize {4}{G}{G} ({4}{G}{G}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Jackal Wizard with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":7,\"name\":\"Rhonas's Last Stand\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 5/4 green Snake creature token. Lands you control don't untap during your next untap step.\"},{\"id\":8,\"name\":\"Rhonas's Stalwart\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, it gets +1/+1 until end of turn and can't be blocked by creatures with power 2 or less this turn. (An exerted creature won't untap during your next untap step.)\"},{\"id\":9,\"name\":\"Sidewinder Naga\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Warrior\",\"text\":\"As long as you control a Desert or there is a Desert card in your graveyard, this creature gets +1/+0 and has trample.\"},{\"id\":10,\"name\":\"Sifter Wurm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Trample\\nWhen this creature enters, scry 3, then reveal the top card of your library. You gain life equal to that card's mana value.\"},{\"id\":11,\"name\":\"Tenacious Hunter\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"As long as a creature has a -1/-1 counter on it, this creature has vigilance and deathtouch.\"},{\"id\":12,\"name\":\"Uncage the Menagerie\",\"manaCost\":\"{X}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to X creature cards with different names that each have mana value X, reveal them, put them into your hand, then shuffle.\"},{\"id\":13,\"name\":\"Bloodwater Entity\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nWhen this creature enters, you may put target instant or sorcery card from your graveyard on top of your library.\"},{\"id\":14,\"name\":\"The Locust God\",\"manaCost\":\"{4}{U}{R}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Flying\\nWhenever you draw a card, create a 1/1 blue and red Insect creature token with flying and haste.\\n{2}{U}{R}: Draw a card, then discard a card.\\nWhen The Locust God dies, return it to its owner's hand at the beginning of the next end step.\"},{\"id\":15,\"name\":\"Nicol Bolas, God-Pharaoh\",\"manaCost\":\"{4}{U}{B}{R}\",\"typeLine\":\"Legendary Planeswalker — Bolas\",\"text\":\"+2: Target opponent exiles cards from the top of their library until they exile a nonland card. Until end of turn, you may cast that card without paying its mana cost.\\n+1: Each opponent exiles two cards from their hand.\\n−4: Nicol Bolas deals 7 damage to target opponent, creature an opponent controls, or planeswalker an opponent controls.\\n−12: Exile each nonland permanent your opponents control.\"},{\"id\":16,\"name\":\"Obelisk Spider\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\\nWhenever this creature deals combat damage to a creature, put a -1/-1 counter on that creature.\\nWhenever you put one or more -1/-1 counters on a creature, each opponent loses 1 life and you gain 1 life.\"},{\"id\":17,\"name\":\"Resolute Survivors\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"You may exert this creature as it attacks. (It won't untap during your next untap step.)\\nWhenever you exert a creature, this creature deals 1 damage to each opponent and you gain 1 life.\"},{\"id\":18,\"name\":\"River Hoopoe\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\n{3}{G}{U}: You gain 2 life and draw a card.\"},{\"id\":19,\"name\":\"Samut, the Tested\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Legendary Planeswalker — Samut\",\"text\":\"+1: Up to one target creature gains double strike until end of turn.\\n−2: Samut deals 2 damage divided as you choose among one or two targets.\\n−7: Search your library for up to two creature and/or planeswalker cards, put them onto the battlefield, then shuffle.\"},{\"id\":20,\"name\":\"The Scarab God\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"At the beginning of your upkeep, each opponent loses X life and you scry X, where X is the number of Zombies you control.\\n{2}{U}{B}: Exile target creature card from a graveyard. Create a token that's a copy of it, except it's a 4/4 black Zombie.\\nWhen The Scarab God dies, return it to its owner's hand at the beginning of the next end step.\"},{\"id\":21,\"name\":\"The Scorpion God\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Whenever a creature with a -1/-1 counter on it dies, draw a card.\\n{1}{B}{R}: Put a -1/-1 counter on another target creature.\\nWhen The Scorpion God dies, return it to its owner's hand at the beginning of the next end step.\"},{\"id\":22,\"name\":\"Unraveling Mummy\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"{1}{W}: Target attacking Zombie gains lifelink until end of turn.\\n{1}{B}: Target attacking Zombie gains deathtouch until end of turn.\"},{\"id\":23,\"name\":\"Farm // Market\",\"manaCost\":\"{2}{W} // {2}{U}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Farm\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"name\":\"Market\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nDraw two cards, then discard two cards.\"}]},{\"id\":24,\"name\":\"Consign // Oblivion\",\"manaCost\":\"{1}{U} // {4}{B}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Consign\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand.\"},{\"name\":\"Oblivion\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nTarget opponent discards two cards.\"}]},{\"id\":25,\"name\":\"Claim // Fame\",\"manaCost\":\"{B} // {1}{R}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Claim\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card with mana value 2 or less from your graveyard to the battlefield.\"},{\"name\":\"Fame\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nTarget creature gets +2/+0 and gains haste until end of turn.\"}]}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\",\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\",\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 424,
+      "cacheCreationInputTokens": 33426,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.743869,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.743869,
+      "pricedUsd": 0.743869,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.743869 and its own usage prices at $0.743869"
+    }
+  }
+}

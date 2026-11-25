@@ -1,0 +1,161 @@
+{
+  "key": "6a016ce30f142446c201c8669ae0a847",
+  "recordedAt": "2026-11-22T21:52:19.876Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Craterize\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land.\"},{\"id\":2,\"name\":\"Crimson Muckwader\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"This creature gets +1/+1 as long as you control a Swamp.\\n{2}{B}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":3,\"name\":\"Dragon Hatchling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":4,\"name\":\"Fervor\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control have haste. (They can attack and {T} as soon as they come under your control.)\"},{\"id\":5,\"name\":\"Fire Elemental\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"\"},{\"id\":6,\"name\":\"Firewing Phoenix\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying\\n{1}{R}{R}{R}: Return this card from your graveyard to your hand.\"},{\"id\":7,\"name\":\"Flames of the Firebrand\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Flames of the Firebrand deals 3 damage divided as you choose among one, two, or three targets.\"},{\"id\":8,\"name\":\"Furnace Whelp\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":9,\"name\":\"Goblin Arsonist\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature dies, you may have it deal 1 damage to any target.\"},{\"id\":10,\"name\":\"Goblin Battle Jester\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin\",\"text\":\"Whenever you cast a red spell, target creature can't block this turn.\"},{\"id\":11,\"name\":\"Hamletback Goliath\",\"manaCost\":\"{6}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"Whenever another creature enters, you may put X +1/+1 counters on this creature, where X is that creature's power.\"},{\"id\":12,\"name\":\"Kindled Fury\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":13,\"name\":\"Krenko, Mob Boss\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Creature — Goblin Warrior\",\"text\":\"{T}: Create X 1/1 red Goblin creature tokens, where X is the number of Goblins you control.\"},{\"id\":14,\"name\":\"Krenko's Command\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 1/1 red Goblin creature tokens.\"},{\"id\":15,\"name\":\"Magmaquake\",\"manaCost\":\"{X}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Magmaquake deals X damage to each creature without flying and each planeswalker.\"},{\"id\":16,\"name\":\"Mark of Mutiny\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Put a +1/+1 counter on it and untap it. That creature gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":17,\"name\":\"Mindclaw Shaman\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Lizard Shaman\",\"text\":\"When this creature enters, target opponent reveals their hand. You may cast an instant or sorcery spell from among those cards without paying its mana cost.\"},{\"id\":18,\"name\":\"Mogg Flunkies\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin\",\"text\":\"This creature can't attack or block alone.\"},{\"id\":19,\"name\":\"Reckless Brute\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nThis creature attacks each combat if able.\"},{\"id\":20,\"name\":\"Reverberate\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Copy target instant or sorcery spell. You may choose new targets for the copy.\"},{\"id\":21,\"name\":\"Rummaging Goblin\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{T}, Discard a card: Draw a card.\"},{\"id\":22,\"name\":\"Searing Spear\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Searing Spear deals 3 damage to any target.\"},{\"id\":23,\"name\":\"Slumbering Dragon\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nThis creature can't attack or block unless it has five or more +1/+1 counters on it.\\nWhenever a creature attacks you or a planeswalker you control, put a +1/+1 counter on this creature.\"},{\"id\":24,\"name\":\"Smelt\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\"},{\"id\":25,\"name\":\"Thundermaw Hellkite\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nHaste (This creature can attack and {T} as soon as it comes under your control.)\\nWhen this creature enters, it deals 1 damage to each creature with flying your opponents control. Tap those creatures.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 413,
+      "cacheCreationInputTokens": 32213,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7190589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7190589999999999,
+      "pricedUsd": 0.719059,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.719059 and its own usage prices at $0.719059"
+    }
+  }
+}

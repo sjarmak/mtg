@@ -122,7 +122,7 @@ confirmed, and Kytheon passes.
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ori/probes/ori-scenario-probes-v1-config.json --out out/ori/scenario-probes-v1 --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/ori/scenario-probes-v1 --inventory out/ori/decision-inventory-v2/inventory.json --out out/ori/script-qualifications-v1
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ori/probes/ori-match-probes-v1-config.json --out out/ori/match-probes-v1 --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ori/ori-limited-format-v1.json --catalog packages/data/data/ori/ori-printed-catalog-v1.json --qualifications out/ori/script-qualifications-v1 --match-probes out/ori/match-probes-v1 --out packages/data/data/ori/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ori/ori-limited-format-v1.json --catalog packages/data/data/ori/ori-printed-catalog-v1.json --qualifications out/ori/script-qualifications-v1 --match-probes out/ori/match-probes-v1 --out packages/data/data/ori/play-admission
 ```
 
 The qualification bundle reports `qualified: 273, residual: 0`.
@@ -204,7 +204,7 @@ change, use output `play-admission-v8/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `ori` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v7`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher reads every supported entry at boot, so a launcher started before this
 entry landed needs a restart to serve Origins. Card art is not staged: the catalog
 carries each printing's Scryfall image URIs and

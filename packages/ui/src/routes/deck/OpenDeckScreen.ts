@@ -424,8 +424,13 @@ function SelectionBar(props: {
  *
  * Fewer than two citing entries has no shared set worth naming, because "shared
  * across one card" is just that card's own list.
+ *
+ * Structural on purpose: the deck workbench's variation rows carry the same
+ * `criteria` field and ask the same question (`./workbench/VariationDeck.ts`).
  */
-function sharedCriteria(entries: readonly DeckArtifactEntry[]): readonly string[] {
+export function sharedCriteria(
+  entries: readonly { readonly criteria: readonly string[] }[],
+): readonly string[] {
   const citing = entries.filter((entry) => entry.criteria.length > 0);
   const first = citing[0];
   if (first === undefined || citing.length < 2) return [];

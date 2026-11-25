@@ -1,0 +1,161 @@
+{
+  "key": "750f6950fcc693d4a6c834de07374717",
+  "recordedAt": "2026-11-22T22:07:06.354Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Down // Dirty\",\"manaCost\":\"{3}{B} // {2}{G}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Down\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Dirty\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target card from your graveyard to your hand.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":2,\"name\":\"Far // Away\",\"manaCost\":\"{1}{U} // {2}{B}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Far\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature to its owner's hand.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Away\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices a creature of their choice.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":3,\"name\":\"Flesh // Blood\",\"manaCost\":\"{3}{B}{G} // {R}{G}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Flesh\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target creature card from a graveyard. Put X +1/+1 counters on target creature, where X is the power of the card you exiled.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Blood\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control deals damage equal to its power to any target.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":4,\"name\":\"Give // Take\",\"manaCost\":\"{2}{G} // {2}{U}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Give\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put three +1/+1 counters on target creature.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Take\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Remove all +1/+1 counters from target creature you control. Draw that many cards.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":5,\"name\":\"Profit // Loss\",\"manaCost\":\"{1}{W} // {2}{B}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Profit\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+1 until end of turn.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Loss\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -1/-1 until end of turn.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":6,\"name\":\"Protect // Serve\",\"manaCost\":\"{2}{W} // {1}{U}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Protect\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+4 until end of turn.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Serve\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -6/-0 until end of turn.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":7,\"name\":\"Ready // Willing\",\"manaCost\":\"{1}{G}{W} // {1}{W}{B}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Ready\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control gain indestructible until end of turn. Untap each creature you control.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Willing\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control gain deathtouch and lifelink until end of turn.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":8,\"name\":\"Toil // Trouble\",\"manaCost\":\"{2}{B} // {2}{R}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Toil\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws two cards and loses 2 life.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Trouble\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Trouble deals damage to target player equal to the number of cards in that player's hand.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":9,\"name\":\"Turn // Burn\",\"manaCost\":\"{2}{U} // {1}{R}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Turn\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature loses all abilities and becomes a red Weird with base power and toughness 0/1.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Burn\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Burn deals 2 damage to any target.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":10,\"name\":\"Wear // Tear\",\"manaCost\":\"{1}{R} // {W}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Wear\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\\nFuse (You may cast one or both halves of this card from your hand.)\"},{\"name\":\"Tear\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment.\\nFuse (You may cast one or both halves of this card from your hand.)\"}]},{\"id\":11,\"name\":\"Azorius Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {W} or {U}.\\n{W}{U}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":12,\"name\":\"Boros Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {R} or {W}.\\n{R}{W}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":13,\"name\":\"Dimir Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {U} or {B}.\\n{U}{B}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":14,\"name\":\"Golgari Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {B} or {G}.\\n{B}{G}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":15,\"name\":\"Gruul Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {R} or {G}.\\n{R}{G}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":16,\"name\":\"Izzet Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {U} or {R}.\\n{U}{R}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":17,\"name\":\"Orzhov Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {W} or {B}.\\n{W}{B}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":18,\"name\":\"Rakdos Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {B} or {R}.\\n{B}{R}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":19,\"name\":\"Selesnya Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {G} or {W}.\\n{G}{W}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":20,\"name\":\"Simic Cluestone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {G} or {U}.\\n{G}{U}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":21,\"name\":\"Azorius Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {U}.\"},{\"id\":22,\"name\":\"Boros Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {W}.\"},{\"id\":23,\"name\":\"Dimir Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {B}.\"},{\"id\":24,\"name\":\"Golgari Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {G}.\"},{\"id\":25,\"name\":\"Gruul Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {G}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1199,
+      "cacheCreationInputTokens": 33663,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7873589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7873589999999999,
+      "pricedUsd": 0.787359,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.787359 and its own usage prices at $0.787359"
+    }
+  }
+}

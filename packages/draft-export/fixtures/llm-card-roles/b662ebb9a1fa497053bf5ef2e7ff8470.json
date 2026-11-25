@@ -1,0 +1,161 @@
+{
+  "key": "b662ebb9a1fa497053bf5ef2e7ff8470",
+  "recordedAt": "2026-11-22T22:09:33.721Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Reaper of the Wilds\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Creature — Gorgon\",\"text\":\"Whenever another creature dies, scry 1.\\n{B}: This creature gains deathtouch until end of turn.\\n{1}{G}: This creature gains hexproof until end of turn.\"},{\"id\":2,\"name\":\"Sentry of the Underworld\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Creature — Griffin Skeleton\",\"text\":\"Flying, vigilance\\n{W}{B}, Pay 3 life: Regenerate this creature.\"},{\"id\":3,\"name\":\"Shipwreck Singer\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Creature — Siren\",\"text\":\"Flying\\n{1}{U}: Target creature an opponent controls attacks this turn if able.\\n{1}{B}, {T}: Attacking creatures get -1/-1 until end of turn.\"},{\"id\":4,\"name\":\"Spellheart Chimera\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Chimera\",\"text\":\"Flying, trample\\nSpellheart Chimera's power is equal to the number of instant and sorcery cards in your graveyard.\"},{\"id\":5,\"name\":\"Steam Augury\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Reveal the top five cards of your library and separate them into two piles. An opponent chooses one of those piles. Put that pile into your hand and the other into your graveyard.\"},{\"id\":6,\"name\":\"Triad of Fates\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Legendary Creature — Human Wizard\",\"text\":\"{1}, {T}: Put a fate counter on another target creature.\\n{W}, {T}: Exile target creature that has a fate counter on it, then return it to the battlefield under its owner's control.\\n{B}, {T}: Exile target creature that has a fate counter on it. Its controller draws two cards.\"},{\"id\":7,\"name\":\"Tymaret, the Murder King\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Legendary Creature — Zombie Warrior\",\"text\":\"{1}{R}, Sacrifice another creature: Tymaret deals 2 damage to target player or planeswalker.\\n{1}{B}, Sacrifice a creature: Return this card from your graveyard to your hand.\"},{\"id\":8,\"name\":\"Underworld Cerberus\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Dog\",\"text\":\"This creature can't be blocked except by three or more creatures.\\nCards in graveyards can't be the targets of spells or abilities.\\nWhen this creature dies, exile it and each player returns all creature cards from their graveyard to their hand.\"},{\"id\":9,\"name\":\"Xenagos, the Reveler\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Legendary Planeswalker — Xenagos\",\"text\":\"+1: Add X mana in any combination of {R} and/or {G}, where X is the number of creatures you control.\\n0: Create a 2/2 red and green Satyr creature token with haste.\\n−6: Exile the top seven cards of your library. You may put any number of creature and/or land cards from among them onto the battlefield.\"},{\"id\":10,\"name\":\"Akroan Horse\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Horse\",\"text\":\"Defender\\nWhen this creature enters, an opponent gains control of it.\\nAt the beginning of your upkeep, each opponent creates a 1/1 white Soldier creature token.\"},{\"id\":11,\"name\":\"Anvilwrought Raptor\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Bird\",\"text\":\"Flying\\nFirst strike (This creature deals combat damage before creatures without first strike.)\"},{\"id\":12,\"name\":\"Bronze Sable\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Sable\",\"text\":\"\"},{\"id\":13,\"name\":\"Burnished Hart\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Elk\",\"text\":\"{3}, Sacrifice this creature: Search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":14,\"name\":\"Colossus of Akros\",\"manaCost\":\"{8}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Defender, indestructible\\n{10}: Monstrosity 10. (If this creature isn't monstrous, put ten +1/+1 counters on it and it becomes monstrous.)\\nAs long as this creature is monstrous, it has trample and can attack as though it didn't have defender.\"},{\"id\":15,\"name\":\"Flamecast Wheel\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{5}, {T}, Sacrifice this artifact: It deals 3 damage to target creature.\"},{\"id\":16,\"name\":\"Fleetfeather Sandals\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has flying and haste.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":17,\"name\":\"Guardians of Meletis\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Defender (This creature can't attack.)\"},{\"id\":18,\"name\":\"Opaline Unicorn\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Unicorn\",\"text\":\"{T}: Add one mana of any color.\"},{\"id\":19,\"name\":\"Prowler's Helm\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can't be blocked except by Walls.\\nEquip {2}\"},{\"id\":20,\"name\":\"Pyxis of Pandemonium\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Each player exiles the top card of their library face down.\\n{7}, {T}, Sacrifice this artifact: Each player turns face up all cards they own exiled with this artifact, then puts all permanent cards among them onto the battlefield.\"},{\"id\":21,\"name\":\"Traveler's Amulet\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":22,\"name\":\"Witches' Eye\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has \\\"{1}, {T}: Scry 1.\\\" (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\\nEquip {1}\"},{\"id\":23,\"name\":\"Nykthos, Shrine to Nyx\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"{T}: Add {C}.\\n{2}, {T}: Choose a color. Add an amount of mana of that color equal to your devotion to that color. (Your devotion to a color is the number of mana symbols of that color in the mana costs of permanents you control.)\"},{\"id\":24,\"name\":\"Temple of Abandon\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\\n{T}: Add {R} or {G}.\"},{\"id\":25,\"name\":\"Temple of Deceit\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\\n{T}: Add {U} or {B}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 421,
+      "cacheCreationInputTokens": 32791,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7310190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7310190000000001,
+      "pricedUsd": 0.731019,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.731019 and its own usage prices at $0.731019"
+    }
+  }
+}

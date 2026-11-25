@@ -1,0 +1,161 @@
+{
+  "key": "089e9ef62c08d750f6457ea247144e93",
+  "recordedAt": "2026-11-22T21:21:58.881Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Consuming Fervor\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+3 and has \\\"At the beginning of your upkeep, put a -1/-1 counter on this creature.\\\"\"},{\"id\":2,\"name\":\"Deem Worthy\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Deem Worthy deals 7 damage to target creature.\\nCycling {3}{R} ({3}{R}, Discard this card: Draw a card.)\\nWhen you cycle this card, you may have it deal 2 damage to target creature.\"},{\"id\":3,\"name\":\"Desert Cerodon\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Cycling {R} ({R}, Discard this card: Draw a card.)\"},{\"id\":4,\"name\":\"Electrify\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Electrify deals 4 damage to target creature.\"},{\"id\":5,\"name\":\"Emberhorn Minotaur\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, it gets +1/+1 and gains menace until end of turn. (An exerted creature won't untap during your next untap step. A creature with menace can't be blocked except by two or more creatures.)\"},{\"id\":6,\"name\":\"Flameblade Adept\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"Menace\\nWhenever you cycle or discard a card, this creature gets +1/+0 until end of turn.\"},{\"id\":7,\"name\":\"Fling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nFling deals damage equal to the sacrificed creature's power to any target.\"},{\"id\":8,\"name\":\"Glorious End\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"End the turn. (Exile all spells and abilities from the stack, including this card. The player whose turn it is discards down to their maximum hand size. Damage wears off, and \\\"this turn\\\" and \\\"until end of turn\\\" effects end.)\\nAt the beginning of your next end step, you lose the game.\"},{\"id\":9,\"name\":\"Glorybringer\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\\nYou may exert this creature as it attacks. When you do, it deals 4 damage to target non-Dragon creature an opponent controls. (An exerted creature won't untap during your next untap step.)\"},{\"id\":10,\"name\":\"Harsh Mentor\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Whenever an opponent activates an ability of an artifact, creature, or land on the battlefield, if it isn't a mana ability, this creature deals 2 damage to that player.\"},{\"id\":11,\"name\":\"Hazoret the Fervent\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Indestructible, haste\\nHazoret can't attack or block unless you have one or fewer cards in hand.\\n{2}{R}, Discard a card: Hazoret deals 2 damage to each opponent.\"},{\"id\":12,\"name\":\"Hazoret's Favor\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of combat on your turn, you may have target creature you control get +2/+0 and gain haste until end of turn. If you do, sacrifice it at the beginning of the next end step.\"},{\"id\":13,\"name\":\"Heart-Piercer Manticore\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Manticore\",\"text\":\"When this creature enters, you may sacrifice another creature. When you do, this creature deals damage equal to that creature's power to any target.\\nEmbalm {5}{R} ({5}{R}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Manticore with no mana cost. Embalm only as a sorcery.)\"},{\"id\":14,\"name\":\"Hyena Pack\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Hyena\",\"text\":\"\"},{\"id\":15,\"name\":\"Limits of Solidarity\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":16,\"name\":\"Magma Spray\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Magma Spray deals 2 damage to target creature. If that creature would die this turn, exile it instead.\"},{\"id\":17,\"name\":\"Manticore of the Gauntlet\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Manticore\",\"text\":\"When this creature enters, put a -1/-1 counter on target creature you control. This creature deals 3 damage to target opponent or planeswalker.\"},{\"id\":18,\"name\":\"Minotaur Sureshot\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Minotaur Archer\",\"text\":\"Reach (This creature can block creatures with flying.)\\n{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":19,\"name\":\"Nef-Crop Entangler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nYou may exert this creature as it attacks. When you do, it gets +1/+2 until end of turn. (An exerted creature won't untap during your next untap step.)\"},{\"id\":20,\"name\":\"Nimble-Blade Khenra\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":21,\"name\":\"Pathmaker Initiate\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}: Target creature with power 2 or less can't be blocked this turn.\"},{\"id\":22,\"name\":\"Pursue Glory\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures get +2/+0 until end of turn.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":23,\"name\":\"Soul-Scar Mage\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Prowess\\nIf a source you control would deal noncombat damage to a creature an opponent controls, put that many -1/-1 counters on that creature instead.\"},{\"id\":24,\"name\":\"Sweltering Suns\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Sweltering Suns deals 3 damage to each creature.\\nCycling {3} ({3}, Discard this card: Draw a card.)\"},{\"id\":25,\"name\":\"Thresher Lizard\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"This creature gets +1/+2 as long as you have one or fewer cards in hand.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 414,
+      "cacheCreationInputTokens": 32724,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7293290000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7293290000000001,
+      "pricedUsd": 0.729329,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.729329 and its own usage prices at $0.729329"
+    }
+  }
+}

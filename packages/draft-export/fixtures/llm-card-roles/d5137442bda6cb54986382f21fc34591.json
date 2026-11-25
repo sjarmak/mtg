@@ -1,0 +1,161 @@
+{
+  "key": "d5137442bda6cb54986382f21fc34591",
+  "recordedAt": "2026-11-22T22:05:22.139Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Treasury Thrull\",\"manaCost\":\"{4}{W}{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\\nWhenever this creature attacks, you may return target artifact, creature, or enchantment card from your graveyard to your hand.\"},{\"id\":2,\"name\":\"Truefire Paladin\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Vigilance\\n{R}{W}: This creature gets +2/+0 until end of turn.\\n{R}{W}: This creature gains first strike until end of turn.\"},{\"id\":3,\"name\":\"Unexpected Results\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Shuffle your library, then reveal the top card. If it's a nonland card, you may cast it without paying its mana cost. If it's a land card, you may put it onto the battlefield and return Unexpected Results to its owner's hand.\"},{\"id\":4,\"name\":\"Urban Evolution\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw three cards. You may play an additional land this turn.\"},{\"id\":5,\"name\":\"Vizkopa Confessor\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\\nWhen this creature enters, pay any amount of life. Target opponent reveals that many cards from their hand. You choose one of them and exile it.\"},{\"id\":6,\"name\":\"Vizkopa Guildmage\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}{W}{B}: Target creature gains lifelink until end of turn.\\n{1}{W}{B}: Whenever you gain life this turn, each opponent loses that much life.\"},{\"id\":7,\"name\":\"Whispering Madness\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player discards their hand, then draws cards equal to the greatest number of cards a player discarded this way.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":8,\"name\":\"Wojek Halberdiers\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gains first strike until end of turn.\"},{\"id\":9,\"name\":\"Zameck Guildmage\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Elf Wizard\",\"text\":\"{G}{U}: This turn, each creature you control enters with an additional +1/+1 counter on it.\\n{G}{U}, Remove a +1/+1 counter from a creature you control: Draw a card.\"},{\"id\":10,\"name\":\"Zhur-Taa Swine\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Bloodrush — {1}{R}{G}, Discard this card: Target attacking creature gets +5/+4 until end of turn.\"},{\"id\":11,\"name\":\"Arrows of Justice\",\"manaCost\":\"{2}{R/W}\",\"typeLine\":\"Instant\",\"text\":\"Arrows of Justice deals 4 damage to target attacking or blocking creature.\"},{\"id\":12,\"name\":\"Beckon Apparition\",\"manaCost\":\"{W/B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target card from a graveyard. Create a 1/1 white and black Spirit creature token with flying.\"},{\"id\":13,\"name\":\"Biomass Mutation\",\"manaCost\":\"{X}{G/U}{G/U}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control have base power and toughness X/X until end of turn.\"},{\"id\":14,\"name\":\"Bioshift\",\"manaCost\":\"{G/U}\",\"typeLine\":\"Instant\",\"text\":\"Move any number of +1/+1 counters from target creature onto another target creature with the same controller.\"},{\"id\":15,\"name\":\"Boros Reckoner\",\"manaCost\":\"{R/W}{R/W}{R/W}\",\"typeLine\":\"Creature — Minotaur Wizard\",\"text\":\"Whenever this creature is dealt damage, it deals that much damage to any target.\\n{R/W}: This creature gains first strike until end of turn.\"},{\"id\":16,\"name\":\"Burning-Tree Emissary\",\"manaCost\":\"{R/G}{R/G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"When this creature enters, add {R}{G}.\"},{\"id\":17,\"name\":\"Coerced Confession\",\"manaCost\":\"{4}{U/B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills four cards. You draw a card for each creature card put into their graveyard this way.\"},{\"id\":18,\"name\":\"Deathcult Rogue\",\"manaCost\":\"{1}{U/B}{U/B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"This creature can't be blocked except by Rogues.\"},{\"id\":19,\"name\":\"Gift of Orzhova\",\"manaCost\":\"{1}{W/B}{W/B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has flying and lifelink.\"},{\"id\":20,\"name\":\"Immortal Servitude\",\"manaCost\":\"{X}{W/B}{W/B}{W/B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return each creature card with mana value X from your graveyard to the battlefield.\"},{\"id\":21,\"name\":\"Merfolk of the Depths\",\"manaCost\":\"{4}{G/U}{G/U}\",\"typeLine\":\"Creature — Merfolk Soldier\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\"},{\"id\":22,\"name\":\"Nightveil Specter\",\"manaCost\":\"{U/B}{U/B}{U/B}\",\"typeLine\":\"Creature — Specter\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, that player exiles the top card of their library.\\nYou may play lands and cast spells from among cards exiled with this creature.\"},{\"id\":23,\"name\":\"Pit Fight\",\"manaCost\":\"{1}{R/G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control fights another target creature. (Each deals damage equal to its power to the other.)\"},{\"id\":24,\"name\":\"Rubblebelt Raiders\",\"manaCost\":\"{1}{R/G}{R/G}{R/G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature attacks, put a +1/+1 counter on it for each attacking creature you control.\"},{\"id\":25,\"name\":\"Shattering Blow\",\"manaCost\":\"{1}{R/W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target artifact.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1803,
+      "cacheCreationInputTokens": 32581,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.795919,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.795919,
+      "pricedUsd": 0.795919,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.795919 and its own usage prices at $0.795919"
+    }
+  }
+}

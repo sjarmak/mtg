@@ -1,0 +1,161 @@
+{
+  "key": "0995fa8647441538c093fa5c40acfcec",
+  "recordedAt": "2026-11-22T21:46:29.584Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Berserkers of Blood Ridge\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"This creature attacks each combat if able.\"},{\"id\":2,\"name\":\"Bogardan Hellkite\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flash\\nFlying\\nWhen this creature enters, it deals 5 damage divided as you choose among any number of targets.\"},{\"id\":3,\"name\":\"Burning Inquiry\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player draws three cards, then discards three cards at random.\"},{\"id\":4,\"name\":\"Burst of Speed\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control gain haste until end of turn. (They can attack and {T} even if they just came under your control.)\"},{\"id\":5,\"name\":\"Canyon Minotaur\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"\"},{\"id\":6,\"name\":\"Capricious Efreet\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Efreet\",\"text\":\"At the beginning of your upkeep, choose target nonland permanent you control and up to two target nonland permanents you don't control. Destroy one of them at random.\"},{\"id\":7,\"name\":\"Chandra Nalaar\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Chandra Nalaar deals 1 damage to target player or planeswalker.\\n−X: Chandra Nalaar deals X damage to target creature.\\n−8: Chandra Nalaar deals 10 damage to target player or planeswalker and each creature that player or that planeswalker's controller controls.\"},{\"id\":8,\"name\":\"Dragon Whelp\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn. If this ability has been activated four or more times this turn, sacrifice this creature at the beginning of the next end step.\"},{\"id\":9,\"name\":\"Earthquake\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Earthquake deals X damage to each creature without flying and each player.\"},{\"id\":10,\"name\":\"Fiery Hellhound\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":11,\"name\":\"Fireball\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell costs {1} more to cast for each target beyond the first.\\nFireball deals X damage divided evenly, rounded down, among any number of targets.\"},{\"id\":12,\"name\":\"Firebreathing\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\n{R}: Enchanted creature gets +1/+0 until end of turn.\"},{\"id\":13,\"name\":\"Goblin Artillery\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{T}: This creature deals 2 damage to any target and 3 damage to you.\"},{\"id\":14,\"name\":\"Goblin Chieftain\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Goblin\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nOther Goblin creatures you control get +1/+1 and have haste.\"},{\"id\":15,\"name\":\"Goblin Piker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"\"},{\"id\":16,\"name\":\"Ignite Disorder\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Ignite Disorder deals 3 damage divided as you choose among one, two, or three target white and/or blue creatures.\"},{\"id\":17,\"name\":\"Inferno Elemental\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Whenever this creature blocks or becomes blocked by a creature, this creature deals 3 damage to that creature.\"},{\"id\":18,\"name\":\"Jackal Familiar\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Jackal\",\"text\":\"This creature can't attack or block alone.\"},{\"id\":19,\"name\":\"Kindled Fury\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":20,\"name\":\"Lava Axe\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Lava Axe deals 5 damage to target player or planeswalker.\"},{\"id\":21,\"name\":\"Lightning Bolt\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Lightning Bolt deals 3 damage to any target.\"},{\"id\":22,\"name\":\"Lightning Elemental\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":23,\"name\":\"Magma Phoenix\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying\\nWhen this creature dies, it deals 3 damage to each creature and each player.\\n{3}{R}{R}: Return this card from your graveyard to your hand.\"},{\"id\":24,\"name\":\"Manabarbs\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a player taps a land for mana, this enchantment deals 1 damage to that player.\"},{\"id\":25,\"name\":\"Panic Attack\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Up to three target creatures can't block this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\",\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 421,
+      "cacheCreationInputTokens": 32230,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7197990000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7197990000000001,
+      "pricedUsd": 0.719799,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.719799 and its own usage prices at $0.719799"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "542dda5ac46e81f9c02291bc205d7ede",
+  "recordedAt": "2026-11-22T21:58:41.198Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Favorable Winds\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control with flying get +1/+1.\"},{\"id\":2,\"name\":\"Fettergeist\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nAt the beginning of your upkeep, sacrifice this creature unless you pay {1} for each other creature you control.\"},{\"id\":3,\"name\":\"Fleeting Distraction\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -1/-0 until end of turn.\\nDraw a card.\"},{\"id\":4,\"name\":\"Galvanic Alchemist\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, each of those creatures has \\\"{2}{U}: Untap this creature.\\\"\"},{\"id\":5,\"name\":\"Geist Snatch\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature spell. Create a 1/1 blue Spirit creature token with flying.\"},{\"id\":6,\"name\":\"Ghostform\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Up to two target creatures can't be blocked this turn.\"},{\"id\":7,\"name\":\"Ghostly Flicker\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Exile two target artifacts, creatures, and/or lands you control, then return those cards to the battlefield under your control.\"},{\"id\":8,\"name\":\"Ghostly Touch\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"Whenever this creature attacks, you may tap or untap target permanent.\\\"\"},{\"id\":9,\"name\":\"Gryff Vanguard\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying\\nWhen this creature enters, draw a card.\"},{\"id\":10,\"name\":\"Havengul Skaab\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Zombie Horror\",\"text\":\"Whenever this creature attacks, return another creature you control to its owner's hand.\"},{\"id\":11,\"name\":\"Infinite Reflection\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters attached to a creature, each other nontoken creature you control becomes a copy of that creature.\\nNontoken creatures you control enter as a copy of enchanted creature.\"},{\"id\":12,\"name\":\"Into the Void\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target creatures to their owners' hands.\"},{\"id\":13,\"name\":\"Latch Seeker\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked.\"},{\"id\":14,\"name\":\"Lone Revenant\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nWhenever this creature deals combat damage to a player, if you control no other creatures, look at the top four cards of your library. Put one of them into your hand and the rest on the bottom of your library in any order.\"},{\"id\":15,\"name\":\"Lunar Mystic\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever you cast an instant spell, you may pay {1}. If you do, draw a card.\"},{\"id\":16,\"name\":\"Mass Appeal\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card for each Human you control.\"},{\"id\":17,\"name\":\"Mist Raven\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, return target creature to its owner's hand.\"},{\"id\":18,\"name\":\"Misthollow Griffin\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\nYou may cast this card from exile.\"},{\"id\":19,\"name\":\"Nephalia Smuggler\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{3}{U}, {T}: Exile another target creature you control, then return that card to the battlefield under your control.\"},{\"id\":20,\"name\":\"Outwit\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell that targets a player.\"},{\"id\":21,\"name\":\"Peel from Reality\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature you control and target creature you don't control to their owners' hands.\"},{\"id\":22,\"name\":\"Rotcrown Ghoul\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, target player mills five cards.\"},{\"id\":23,\"name\":\"Scrapskin Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Zombie Drake\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature can block only creatures with flying.\"},{\"id\":24,\"name\":\"Second Guess\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell that's the second spell cast this turn.\"},{\"id\":25,\"name\":\"Spectral Prison\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\\nWhen enchanted creature becomes the target of a spell, sacrifice this Aura.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1348,
+      "cacheCreationInputTokens": 32208,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7657090000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7657090000000001,
+      "pricedUsd": 0.765709,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.765709 and its own usage prices at $0.765709"
+    }
+  }
+}

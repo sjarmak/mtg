@@ -1,0 +1,161 @@
+{
+  "key": "7fc0380e4aa85d03630c9bd3c059bbc8",
+  "recordedAt": "2026-11-22T22:22:46.297Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aether Chaser\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"First strike\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":2,\"name\":\"Chandra's Revolution\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Chandra's Revolution deals 4 damage to target creature. Tap target land. That land doesn't untap during its controller's next untap step.\"},{\"id\":3,\"name\":\"Destructive Tampering\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Destroy target artifact.\\n• Creatures without flying can't block this turn.\"},{\"id\":4,\"name\":\"Embraal Gear-Smasher\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"{T}, Sacrifice an artifact: This creature deals 2 damage to each opponent.\"},{\"id\":5,\"name\":\"Enraged Giant\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nTrample, haste\"},{\"id\":6,\"name\":\"Freejam Regent\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Cat Dragon\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nFlying\\n{1}{R}: This creature gets +2/+0 until end of turn.\"},{\"id\":7,\"name\":\"Frontline Rebel\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"This creature attacks each combat if able.\"},{\"id\":8,\"name\":\"Gremlin Infestation\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant artifact\\nAt the beginning of your end step, this Aura deals 2 damage to enchanted artifact's controller.\\nWhen enchanted artifact is put into a graveyard, create a 2/2 red Gremlin creature token.\"},{\"id\":9,\"name\":\"Hungry Flames\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Hungry Flames deals 3 damage to target creature and 2 damage to target player or planeswalker.\"},{\"id\":10,\"name\":\"Indomitable Creativity\",\"manaCost\":\"{X}{R}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy X target artifacts and/or creatures. For each permanent destroyed this way, its controller reveals cards from the top of their library until an artifact or creature card is revealed and exiles that card. Those players put the exiled cards onto the battlefield, then shuffle.\"},{\"id\":11,\"name\":\"Invigorated Rampage\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Target creature gets +4/+0 and gains trample until end of turn.\\n• Two target creatures each get +2/+0 and gain trample until end of turn.\"},{\"id\":12,\"name\":\"Kari Zev, Skyship Raider\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Legendary Creature — Human Pirate\",\"text\":\"First strike, menace\\nWhenever Kari Zev attacks, create Ragavan, a legendary 2/1 red Monkey creature token. Ragavan enters tapped and attacking. Exile that token at end of combat.\"},{\"id\":13,\"name\":\"Kari Zev's Expertise\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature or Vehicle until end of turn. Untap it. It gains haste until end of turn.\\nYou may cast a spell with mana value 2 or less from your hand without paying its mana cost.\"},{\"id\":14,\"name\":\"Lathnu Sailback\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"\"},{\"id\":15,\"name\":\"Lightning Runner\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Double strike, haste\\nWhenever this creature attacks, you get {E}{E} (two energy counters), then you may pay eight {E}. If you pay, untap all creatures you control, and after this phase, there is an additional combat phase.\"},{\"id\":16,\"name\":\"Pia's Revolution\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a nontoken artifact is put into your graveyard from the battlefield, return that card to your hand unless target opponent has this enchantment deal 3 damage to them.\"},{\"id\":17,\"name\":\"Precise Strike\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains first strike until end of turn.\"},{\"id\":18,\"name\":\"Quicksmith Rebel\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"When this creature enters, target artifact you control gains \\\"{T}: This artifact deals 2 damage to any target\\\" for as long as you control this creature.\"},{\"id\":19,\"name\":\"Ravenous Intruder\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"Sacrifice an artifact: This creature gets +2/+2 until end of turn.\"},{\"id\":20,\"name\":\"Reckless Racer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Pilot\",\"text\":\"First strike\\nWhenever this creature becomes tapped, you may discard a card. If you do, draw a card.\"},{\"id\":21,\"name\":\"Release the Gremlins\",\"manaCost\":\"{X}{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy X target artifacts. Create X 2/2 red Gremlin creature tokens.\"},{\"id\":22,\"name\":\"Scrapper Champion\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Double strike (This creature deals both first-strike and regular combat damage.)\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":23,\"name\":\"Shock\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Shock deals 2 damage to any target.\"},{\"id\":24,\"name\":\"Siege Modification\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature or Vehicle\\nAs long as enchanted permanent is a Vehicle, it's a creature in addition to its other types.\\nEnchanted creature gets +3/+0 and has first strike.\"},{\"id\":25,\"name\":\"Sweatworks Brawler\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nMenace\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 414,
+      "cacheCreationInputTokens": 32693,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.728709,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.728709,
+      "pricedUsd": 0.728709,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728709 and its own usage prices at $0.728709"
+    }
+  }
+}

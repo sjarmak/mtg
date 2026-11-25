@@ -1,0 +1,161 @@
+{
+  "key": "49b1c287e3668f5386a817a7b60ce0b3",
+  "recordedAt": "2026-11-22T21:50:11.498Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Manic Vandal\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, destroy target artifact.\"},{\"id\":2,\"name\":\"Reverberate\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Copy target instant or sorcery spell. You may choose new targets for the copy.\"},{\"id\":3,\"name\":\"Scrambleverse\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"For each nonland permanent, choose a player at random. Then each player gains control of each permanent for which they were chosen. Untap those permanents.\"},{\"id\":4,\"name\":\"Shock\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Shock deals 2 damage to any target.\"},{\"id\":5,\"name\":\"Slaughter Cry\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":6,\"name\":\"Stormblood Berserker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Bloodthirst 2 (If an opponent was dealt damage this turn, this creature enters with two +1/+1 counters on it.)\\nMenace (This creature can't be blocked except by two or more creatures.)\"},{\"id\":7,\"name\":\"Tectonic Rift\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Creatures without flying can't block this turn.\"},{\"id\":8,\"name\":\"Volcanic Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\"},{\"id\":9,\"name\":\"Wall of Torches\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\"},{\"id\":10,\"name\":\"Warstorm Surge\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control enters, it deals damage equal to its power to any target.\"},{\"id\":11,\"name\":\"Acidic Slime\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nWhen this creature enters, destroy target artifact, enchantment, or land.\"},{\"id\":12,\"name\":\"Arachnus Spinner\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\\nTap an untapped Spider you control: Search your graveyard and/or library for a card named Arachnus Web and put it onto the battlefield attached to target creature. If you search your library this way, shuffle.\"},{\"id\":13,\"name\":\"Arachnus Web\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\\nAt the beginning of the end step, if enchanted creature's power is 4 or greater, destroy this Aura.\"},{\"id\":14,\"name\":\"Autumn's Veil\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Spells you control can't be countered by blue or black spells this turn, and creatures you control can't be the targets of blue or black spells this turn.\"},{\"id\":15,\"name\":\"Birds of Paradise\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\n{T}: Add one mana of any color.\"},{\"id\":16,\"name\":\"Bountiful Harvest\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"You gain 1 life for each land you control.\"},{\"id\":17,\"name\":\"Brindle Boar\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Sacrifice this creature: You gain 4 life.\"},{\"id\":18,\"name\":\"Carnage Wurm\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Bloodthirst 3 (If an opponent was dealt damage this turn, this creature enters with three +1/+1 counters on it.)\\nTrample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":19,\"name\":\"Cudgel Troll\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Troll\",\"text\":\"{G}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":20,\"name\":\"Doubling Chant\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"For each creature you control, you may search your library for a creature card with the same name as that creature. Put those cards onto the battlefield, then shuffle.\"},{\"id\":21,\"name\":\"Dungrove Elder\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Treefolk\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nDungrove Elder's power and toughness are each equal to the number of Forests you control.\"},{\"id\":22,\"name\":\"Elvish Archdruid\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"Other Elf creatures you control get +1/+1.\\n{T}: Add {G} for each Elf you control.\"},{\"id\":23,\"name\":\"Fog\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\"},{\"id\":24,\"name\":\"Garruk, Primal Hunter\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Create a 3/3 green Beast creature token.\\n−3: Draw cards equal to the greatest power among creatures you control.\\n−6: Create a 6/6 green Wurm creature token for each land you control.\"},{\"id\":25,\"name\":\"Garruk's Companion\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 413,
+      "cacheCreationInputTokens": 32343,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.721659,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.721659,
+      "pricedUsd": 0.721659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.721659 and its own usage prices at $0.721659"
+    }
+  }
+}

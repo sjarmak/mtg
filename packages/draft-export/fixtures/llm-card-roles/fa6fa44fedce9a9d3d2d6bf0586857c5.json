@@ -1,0 +1,161 @@
+{
+  "key": "fa6fa44fedce9a9d3d2d6bf0586857c5",
+  "recordedAt": "2026-11-22T21:22:15.547Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Tormenting Voice\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, discard a card.\\nDraw two cards.\"},{\"id\":2,\"name\":\"Trial of Zeal\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, it deals 3 damage to any target.\\nWhen a Cartouche you control enters, return this enchantment to its owner's hand.\"},{\"id\":3,\"name\":\"Trueheart Twins\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"You may exert this creature as it attacks. (It won't untap during your next untap step.)\\nWhenever you exert a creature, creatures you control get +1/+0 until end of turn.\"},{\"id\":4,\"name\":\"Violent Impact\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":5,\"name\":\"Warfire Javelineer\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"When this creature enters, it deals X damage to target creature an opponent controls, where X is the number of instant and sorcery cards in your graveyard.\"},{\"id\":6,\"name\":\"Benefaction of Rhonas\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top five cards of your library. You may put a creature card and/or an enchantment card from among them into your hand. Put the rest into your graveyard.\"},{\"id\":7,\"name\":\"Bitterblade Warrior\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, it gets +1/+0 and gains deathtouch until end of turn. (An exerted creature won't untap during your next untap step.)\"},{\"id\":8,\"name\":\"Cartouche of Strength\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura Cartouche\",\"text\":\"Enchant creature you control\\nWhen this Aura enters, you may have enchanted creature fight target creature an opponent controls. (Each deals damage equal to its power to the other.)\\nEnchanted creature gets +1/+1 and has trample.\"},{\"id\":9,\"name\":\"Champion of Rhonas\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, you may put a creature card from your hand onto the battlefield. (An exerted creature won't untap during your next untap step.)\"},{\"id\":10,\"name\":\"Channeler Initiate\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"When this creature enters, put three -1/-1 counters on target creature you control.\\n{T}, Remove a -1/-1 counter from this creature: Add one mana of any color.\"},{\"id\":11,\"name\":\"Colossapede\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"\"},{\"id\":12,\"name\":\"Crocodile of the Crossing\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"Haste\\nWhen this creature enters, put a -1/-1 counter on target creature you control.\"},{\"id\":13,\"name\":\"Defiant Greatmaw\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Hippo\",\"text\":\"When this creature enters, put two -1/-1 counters on target creature you control.\\nWhenever you put one or more -1/-1 counters on this creature, remove a -1/-1 counter from another target creature you control.\"},{\"id\":14,\"name\":\"Dissenter's Deliverance\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\\nCycling {G} ({G}, Discard this card: Draw a card.)\"},{\"id\":15,\"name\":\"Exemplar of Strength\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, put three -1/-1 counters on target creature you control.\\nWhenever this creature attacks, remove a -1/-1 counter from it. If you do, you gain 1 life.\"},{\"id\":16,\"name\":\"Giant Spider\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":17,\"name\":\"Gift of Paradise\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, you gain 3 life.\\nEnchanted land has \\\"{T}: Add two mana of any one color.\\\"\"},{\"id\":18,\"name\":\"Greater Sandwurm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"This creature can't be blocked by creatures with power 2 or less.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":19,\"name\":\"Hapatra's Mark\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains hexproof until end of turn. Remove all -1/-1 counters from it. (A creature with hexproof can't be the target of spells or abilities your opponents control.)\"},{\"id\":20,\"name\":\"Harvest Season\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to X basic land cards, where X is the number of tapped creatures you control, put those cards onto the battlefield tapped, then shuffle.\"},{\"id\":21,\"name\":\"Haze of Pollen\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\\nCycling {3} ({3}, Discard this card: Draw a card.)\"},{\"id\":22,\"name\":\"Honored Hydra\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Snake Hydra\",\"text\":\"Trample\\nEmbalm {3}{G} ({3}{G}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Snake Hydra with no mana cost. Embalm only as a sorcery.)\"},{\"id\":23,\"name\":\"Hooded Brawler\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, it gets +2/+2 until end of turn. (An exerted creature won't untap during your next untap step.)\"},{\"id\":24,\"name\":\"Initiate's Companion\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Whenever this creature deals combat damage to a player, untap target creature or land.\"},{\"id\":25,\"name\":\"Manglehorn\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, you may destroy target artifact.\\nArtifacts your opponents control enter tapped.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"fixing\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1263,
+      "cacheCreationInputTokens": 32615,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.769599,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.769599,
+      "pricedUsd": 0.769599,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.769599 and its own usage prices at $0.769599"
+    }
+  }
+}

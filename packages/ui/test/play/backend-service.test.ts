@@ -5,7 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ObservedBackend } from '@mtg/engine';
 import { compileInstalledForgeBridge, installedForgeBackend } from '@mtg/forge-export';
 import { serveBackendGateway, serveStartingBackendGateway } from '@mtg/netplay';
-import { readBackendPort, startBackendService } from '../../tools/backend-service';
+import {
+  MISSING_EVIDENCE_REASON,
+  RUNTIME_MISMATCH_REASON,
+  readBackendPort,
+  startBackendService,
+} from '../../tools/backend-service';
 import { admitPrintedBackends } from '../../tools/admitted-printed-backend';
 import { bundleInstalledForgeAdapter } from '../../tools/installed-adapter-bundle';
 import { discoverForgeHome } from '../../tools/forge-home';
@@ -59,6 +64,7 @@ afterEach(() => {
 
 describe('independent backend service', () => {
   const printedAdmission = {
+    formatId: 'akh-hou',
     format: {},
     catalogs: [],
     evidence: null,
@@ -117,7 +123,22 @@ describe('independent backend service', () => {
     });
     const options = vi.mocked(serveBackendGateway).mock.calls[0]![0];
     expect(options.routes.printed).toEqual({ 'legacy-cube-2021-08': probe.id });
-    expect(service.message).toContain('missing-evidence');
+    expect(service.message).toContain('Printed format akh-hou admission refused');
+    expect(service.withheld).toEqual([{ formatId: 'akh-hou', reason: MISSING_EVIDENCE_REASON }]);
+    await service.close();
+  });
+
+  it('withholds a runtime-mismatched format by name, with the sentence the page shows', async () => {
+    vi.mocked(admitPrintedBackends).mockResolvedValue([
+      { admitted: true, subject, backend: probe },
+      { admitted: false, reasons: [{ code: 'runtime-mismatch', detail: 'stale' }] },
+    ]);
+    const service = await startBackendService({
+      repoRoot,
+      port: 0,
+      printedAdmissions: [printedAdmission, { ...printedAdmission, formatId: 'isd' }],
+    });
+    expect(service.withheld).toEqual([{ formatId: 'isd', reason: RUNTIME_MISMATCH_REASON }]);
     await service.close();
   });
 

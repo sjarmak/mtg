@@ -1,0 +1,161 @@
+{
+  "key": "adefb3d5945fd3b288be5822c16f0d96",
+  "recordedAt": "2026-11-22T21:41:14.247Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Makindi Shieldmate\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Kor Soldier Ally\",\"text\":\"Defender\\nWhenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":2,\"name\":\"Narrow Escape\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Return target permanent you control to its owner's hand. You gain 4 life.\"},{\"id\":3,\"name\":\"Nimbus Wings\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+2 and has flying.\"},{\"id\":4,\"name\":\"Noble Vestige\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\n{T}: Prevent the next 1 damage that would be dealt to target player or planeswalker this turn.\"},{\"id\":5,\"name\":\"Ondu Cleric\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kor Cleric Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may gain life equal to the number of Allies you control.\"},{\"id\":6,\"name\":\"Pillarfield Ox\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Ox\",\"text\":\"\"},{\"id\":7,\"name\":\"Pitfall Trap\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If exactly one creature is attacking, you may pay {W} rather than pay this spell's mana cost.\\nDestroy target attacking creature without flying.\"},{\"id\":8,\"name\":\"Quest for the Holy Relic\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a creature spell, you may put a quest counter on this enchantment.\\nRemove five quest counters from this enchantment and sacrifice it: Search your library for an Equipment card, put it onto the battlefield, attach it to a creature you control, then shuffle.\"},{\"id\":9,\"name\":\"Shepherd of the Lost\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, first strike, vigilance\"},{\"id\":10,\"name\":\"Shieldmate's Blessing\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent the next 3 damage that would be dealt to any target this turn.\"},{\"id\":11,\"name\":\"Steppe Lynx\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Landfall — Whenever a land you control enters, this creature gets +2/+2 until end of turn.\"},{\"id\":12,\"name\":\"Sunspring Expedition\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: You gain 8 life.\"},{\"id\":13,\"name\":\"Windborne Charge\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Two target creatures you control each get +2/+2 and gain flying until end of turn.\"},{\"id\":14,\"name\":\"World Queller\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"At the beginning of your upkeep, you may choose a card type. If you do, each player sacrifices a permanent of their choice of that type.\"},{\"id\":15,\"name\":\"Aether Figment\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"Kicker {3} (You may pay an additional {3} as you cast this spell.)\\nIf this creature was kicked, it enters with two +1/+1 counters on it.\\nThis creature can't be blocked.\"},{\"id\":16,\"name\":\"Archive Trap\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent searched their library this turn, you may pay {0} rather than pay this spell's mana cost.\\nTarget opponent mills thirteen cards.\"},{\"id\":17,\"name\":\"Archmage Ascension\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each end step, if you drew two or more cards this turn, you may put a quest counter on this enchantment.\\nAs long as this enchantment has six or more quest counters on it, if you would draw a card, you may instead search your library for a card, put that card into your hand, then shuffle.\"},{\"id\":18,\"name\":\"Caller of Gales\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{1}{U}, {T}: Target creature gains flying until end of turn.\"},{\"id\":19,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":20,\"name\":\"Cosi's Trickster\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Whenever an opponent shuffles their library, you may put a +1/+1 counter on this creature.\"},{\"id\":21,\"name\":\"Gomazoa\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Jellyfish\",\"text\":\"Defender, flying\\n{T}: Put this creature and each creature it's blocking on top of their owners' libraries, then those players shuffle.\"},{\"id\":22,\"name\":\"Hedron Crab\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Crab\",\"text\":\"Landfall — Whenever a land you control enters, target player mills three cards. (They put the top three cards of their library into their graveyard.)\"},{\"id\":23,\"name\":\"Into the Roil\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.)\\nReturn target nonland permanent to its owner's hand. If this spell was kicked, draw a card.\"},{\"id\":24,\"name\":\"Ior Ruin Expedition\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: Draw two cards.\"},{\"id\":25,\"name\":\"Kraken Hatchling\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Kraken\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 405,
+      "cacheCreationInputTokens": 32393,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.722259,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.722259,
+      "pricedUsd": 0.722259,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.722259 and its own usage prices at $0.722259"
+    }
+  }
+}

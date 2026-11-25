@@ -272,6 +272,12 @@ export interface BridgeOpenRequest {
   readonly maximumTurns: number | null;
   /** Explicit trust boundary selected by the constructor that supplied the card inventory. */
   readonly validationPurpose?: 'catalog-discovery' | 'admitted-format';
+  /**
+   * `computer` lets Forge's AI answer a local-seat choice the bridge has no
+   * reviewed screen for, and records it as an `Unreviewed choice` event,
+   * instead of ending the game (#66). Absent is `stop`.
+   */
+  readonly unreviewedChoices?: 'stop' | 'computer';
   readonly seats: readonly [
     {
       readonly name: string;

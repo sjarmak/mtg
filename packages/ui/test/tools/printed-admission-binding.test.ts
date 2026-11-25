@@ -40,7 +40,7 @@ function tree(ids: readonly string[], bridge: string, adapterSha256: string): vo
       formats: ids.map((id) => ({
         id,
         formatFile: `${id}-format.json`,
-        admissionDirectory: 'play-admission-v1',
+        admissionDirectory: 'play-admission',
         availability: {
           browse: 'available',
           draft: 'available',
@@ -52,7 +52,7 @@ function tree(ids: readonly string[], bridge: string, adapterSha256: string): vo
     }),
   );
   for (const id of ids) {
-    const directory = join(root, 'packages/data/data', id, 'play-admission-v1');
+    const directory = join(root, 'packages/data/data', id, 'play-admission');
     write(join(directory, BRIDGE_SOURCE), bridge);
     write(
       join(directory, 'admission.json'),
@@ -93,10 +93,7 @@ it('fails when only the adapter bundle moved', () => {
 it('flags only the format left behind when a lane re-binds some admissions and not others', () => {
   tree(['aaa', 'bbb'], 'class ForgeBridge {}', sha('adapter v1'));
   write(join(root, BRIDGE_SOURCE), 'class ForgeBridge { int v2; }');
-  write(
-    join(root, 'packages/data/data/aaa/play-admission-v1', BRIDGE_SOURCE),
-    'class ForgeBridge { int v2; }',
-  );
+  write(join(root, 'packages/data/data/aaa/play-admission', BRIDGE_SOURCE), 'class ForgeBridge { int v2; }');
   expect(
     staleAdmissionBindings({ repoRoot: root, adapterSha256: sha('adapter v1') }).map((s) => s.formatId),
   ).toEqual(['bbb']);

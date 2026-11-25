@@ -1,0 +1,161 @@
+{
+  "key": "078107fa21fa08aae5ef419a8ff5a6e5",
+  "recordedAt": "2026-11-22T21:40:20.894Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Shrivel\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get -1/-1 until end of turn.\"},{\"id\":2,\"name\":\"Skeletal Wurm\",\"manaCost\":\"{7}{B}\",\"typeLine\":\"Creature — Skeleton Wurm\",\"text\":\"{B}: Regenerate this creature.\"},{\"id\":3,\"name\":\"Suffer the Past\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile X target cards from target player's graveyard. For each card exiled this way, that player loses 1 life and you gain 1 life.\"},{\"id\":4,\"name\":\"Thought Gorger\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Trample\\nWhen this creature enters, put a +1/+1 counter on it for each card in your hand. If you do, discard your hand.\\nWhen this creature leaves the battlefield, draw a card for each +1/+1 counter on it.\"},{\"id\":5,\"name\":\"Vendetta\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonblack creature. It can't be regenerated. You lose life equal to that creature's toughness.\"},{\"id\":6,\"name\":\"Virulent Swipe\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+0 and gains deathtouch until end of turn.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":7,\"name\":\"Zof Shade\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"{2}{B}: This creature gets +2/+2 until end of turn.\"},{\"id\":8,\"name\":\"Zulaport Enforcer\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Level up {4} ({4}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-2\\n3/3\\nLEVEL 3+\\n5/5\\nThis creature can't be blocked except by black creatures.\"},{\"id\":9,\"name\":\"Akoum Boulderfoot\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"When this creature enters, it deals 1 damage to any target.\"},{\"id\":10,\"name\":\"Battle Rampart\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\n{T}: Target creature gains haste until end of turn.\"},{\"id\":11,\"name\":\"Battle-Rattle Shaman\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"At the beginning of combat on your turn, you may have target creature get +2/+0 until end of turn.\"},{\"id\":12,\"name\":\"Brimstone Mage\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Level up {3}{R} ({3}{R}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-2\\n2/3\\n{T}: This creature deals 1 damage to any target.\\nLEVEL 3+\\n2/4\\n{T}: This creature deals 3 damage to any target.\"},{\"id\":13,\"name\":\"Brood Birthing\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"If you control an Eldrazi Spawn, create three 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\" Otherwise, create one of those tokens.\"},{\"id\":14,\"name\":\"Conquering Manticore\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Manticore\",\"text\":\"Flying\\nWhen this creature enters, gain control of target creature an opponent controls until end of turn. Untap that creature. It gains haste until end of turn.\"},{\"id\":15,\"name\":\"Devastating Summons\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice X lands.\\nCreate two X/X red Elemental creature tokens.\"},{\"id\":16,\"name\":\"Disaster Radius\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, reveal a creature card from your hand.\\nDisaster Radius deals X damage to each creature your opponents control, where X is the revealed card's mana value.\"},{\"id\":17,\"name\":\"Emrakul's Hatcher\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Eldrazi Drone\",\"text\":\"When this creature enters, create three 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":18,\"name\":\"Explosive Revelation\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose any target. Reveal cards from the top of your library until you reveal a nonland card. Explosive Revelation deals damage equal to that card's mana value to that permanent or player. Put the nonland card into your hand and the rest on the bottom of your library in any order.\"},{\"id\":19,\"name\":\"Fissure Vent\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Destroy target artifact.\\n• Destroy target nonbasic land.\"},{\"id\":20,\"name\":\"Flame Slash\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Flame Slash deals 4 damage to target creature.\"},{\"id\":21,\"name\":\"Forked Bolt\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Forked Bolt deals 2 damage divided as you choose among one or two targets.\"},{\"id\":22,\"name\":\"Goblin Arsonist\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature dies, you may have it deal 1 damage to any target.\"},{\"id\":23,\"name\":\"Goblin Tunneler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{T}: Target creature with power 2 or less can't be blocked this turn.\"},{\"id\":24,\"name\":\"Grotag Siege-Runner\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{R}, Sacrifice this creature: Destroy target creature with defender. This creature deals 2 damage to that creature's controller.\"},{\"id\":25,\"name\":\"Heat Ray\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Instant\",\"text\":\"Heat Ray deals X damage to target creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1435,
+      "cacheCreationInputTokens": 32524,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7763789999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7763789999999999,
+      "pricedUsd": 0.776379,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776379 and its own usage prices at $0.776379"
+    }
+  }
+}

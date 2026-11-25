@@ -10,6 +10,7 @@ import type { Variation, VariationEntry } from '../../src/routes/deck/workbench/
 import {
   DECK_GROUPS_LABEL,
   DECK_PANE,
+  SHARED_CRITERIA_LABEL,
   VariationDeck,
   entryGroupingFacts,
   variationCurve,
@@ -207,8 +208,55 @@ describe('the deck on the workbench', () => {
       node.textContent,
       node.getAttribute('data-resolved'),
     ]);
-    expect(cites).toContainEqual(['archetype', 'false']);
-    expect(cites.filter(([id]) => id === 'sets')).toHaveLength(4);
+    // `sets` is cited by every citing row, so it is said once above them and
+    // the rows keep only what tells one card from another.
+    expect(cites).toStrictEqual([['archetype', 'false']]);
+  });
+
+  it('states the criteria every card shares once, as the statement rather than the id', () => {
+    const container = open();
+    const shared = screen.getByRole('list', { name: SHARED_CRITERIA_LABEL });
+    const items = [...asElement(shared).querySelectorAll('.mtg-workbench__cite')].map((node) => [
+      node.getAttribute('data-criterion'),
+      node.textContent,
+      node.getAttribute('data-resolved'),
+    ]);
+    expect(items).toStrictEqual([['sets', 'printed in XMP', 'true']]);
+    const following = 4;
+    const groups = screen.getByRole('group', { name: DECK_GROUPS_LABEL });
+    expect(asElement(shared).compareDocumentPosition(groups) & following).toBe(following);
+    expect([...container.querySelectorAll('.mtg-workbench__shared')]).toHaveLength(1);
+  });
+
+  it('keeps a shared citation nobody stated marked as unresolved', () => {
+    const everyCiting = (list: readonly VariationEntry[]): VariationEntry[] =>
+      list.map((one) => (one.criteria.length === 0 ? one : { ...one, criteria: ['sets', 'archetype'] }));
+    const variation = { ...VARIATION, spells: everyCiting(SPELLS), lands: everyCiting(LANDS) };
+    const { container } = render(h(VariationDeck, { variation, statements: statementsOf(variation) }));
+    const shared = screen.getByRole('list', { name: SHARED_CRITERIA_LABEL });
+    const items = [...asElement(shared).querySelectorAll('.mtg-workbench__cite')].map((node) => [
+      node.textContent,
+      node.getAttribute('data-resolved'),
+      node.getAttribute('title'),
+    ]);
+    expect(items).toStrictEqual([
+      ['printed in XMP', 'true', 'sets'],
+      ['archetype', 'false', 'no criterion archetype was stated'],
+    ]);
+    expect([...asElement(container).querySelectorAll('.mtg-deck__column .mtg-workbench__cite')]).toHaveLength(
+      0,
+    );
+  });
+
+  it('says nothing shared when one row is the only one citing', () => {
+    const lone = { ...VARIATION, spells: SPELLS.slice(0, 1), lands: LANDS };
+    const { container } = render(h(VariationDeck, { variation: lone, statements: statementsOf(lone) }));
+    expect(screen.queryByRole('list', { name: SHARED_CRITERIA_LABEL })).toBeNull();
+    expect(
+      [...asElement(container).querySelectorAll('.mtg-deck__column .mtg-workbench__cite')].map(
+        (node) => node.textContent,
+      ),
+    ).toStrictEqual(['sets']);
   });
 
   it('offers mana value, color and type, and never rarity, which an entry does not carry', () => {

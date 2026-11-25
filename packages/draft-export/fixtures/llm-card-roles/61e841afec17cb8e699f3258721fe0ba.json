@@ -1,0 +1,161 @@
+{
+  "key": "61e841afec17cb8e699f3258721fe0ba",
+  "recordedAt": "2026-11-22T21:46:23.465Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Kelinore Bat\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\"},{\"id\":2,\"name\":\"Liliana Vess\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Target player discards a card.\\n−2: Search your library for a card, then shuffle and put that card on top.\\n−8: Put all creature cards from all graveyards onto the battlefield under your control.\"},{\"id\":3,\"name\":\"Looming Shade\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":4,\"name\":\"Megrim\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent discards a card, this enchantment deals 2 damage to that player.\"},{\"id\":5,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"},{\"id\":6,\"name\":\"Mind Shatter\",\"manaCost\":\"{X}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards X cards at random.\"},{\"id\":7,\"name\":\"Nightmare\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Nightmare Horse\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nNightmare's power and toughness are each equal to the number of Swamps you control.\"},{\"id\":8,\"name\":\"Relentless Rats\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"This creature gets +1/+1 for each other creature on the battlefield named Relentless Rats.\\nA deck can have any number of cards named Relentless Rats.\"},{\"id\":9,\"name\":\"Rise from the Grave\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature card from a graveyard onto the battlefield under your control. That creature is a black Zombie in addition to its other colors and types.\"},{\"id\":10,\"name\":\"Royal Assassin\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"{T}: Destroy target tapped creature.\"},{\"id\":11,\"name\":\"Sanguine Bond\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you gain life, target opponent loses that much life.\"},{\"id\":12,\"name\":\"Sign in Blood\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws two cards and loses 2 life.\"},{\"id\":13,\"name\":\"Soul Bleed\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of the upkeep of enchanted creature's controller, that player loses 1 life.\"},{\"id\":14,\"name\":\"Tendrils of Corruption\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"Tendrils of Corruption deals X damage to target creature and you gain X life, where X is the number of Swamps you control.\"},{\"id\":15,\"name\":\"Underworld Dreams\",\"manaCost\":\"{B}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent draws a card, this enchantment deals 1 damage to that player.\"},{\"id\":16,\"name\":\"Unholy Strength\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+1.\"},{\"id\":17,\"name\":\"Vampire Aristocrat\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire Rogue Noble\",\"text\":\"Sacrifice a creature: This creature gets +2/+2 until end of turn.\"},{\"id\":18,\"name\":\"Vampire Nocturnus\",\"manaCost\":\"{1}{B}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Play with the top card of your library revealed.\\nAs long as the top card of your library is black, this creature and other Vampire creatures you control get +2/+1 and have flying.\"},{\"id\":19,\"name\":\"Wall of Bone\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Skeleton Wall\",\"text\":\"Defender (This creature can't attack.)\\n{B}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":20,\"name\":\"Warpath Ghoul\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"\"},{\"id\":21,\"name\":\"Weakness\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-1.\"},{\"id\":22,\"name\":\"Xathrid Demon\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying, trample\\nAt the beginning of your upkeep, sacrifice a creature other than this creature, then each opponent loses life equal to the sacrificed creature's power. If you can't sacrifice a creature, tap this creature and you lose 7 life.\"},{\"id\":23,\"name\":\"Zombie Goliath\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"\"},{\"id\":24,\"name\":\"Act of Treason\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":25,\"name\":\"Ball Lightning\",\"manaCost\":\"{R}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nHaste (This creature can attack and {T} as soon as it comes under your control.)\\nAt the beginning of the end step, sacrifice this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1125,
+      "cacheCreationInputTokens": 32281,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.756019,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.756019,
+      "pricedUsd": 0.756019,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.756019 and its own usage prices at $0.756019"
+    }
+  }
+}

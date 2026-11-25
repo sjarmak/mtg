@@ -1,0 +1,161 @@
+{
+  "key": "89f558173e22970bb0ee8b49b23ebc54",
+  "recordedAt": "2026-11-22T22:29:47.632Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Perilous Forays\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}, Sacrifice a creature: Search your library for a land card with a basic land type, put it onto the battlefield tapped, then shuffle.\"},{\"id\":2,\"name\":\"Primordial Sage\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Whenever you cast a creature spell, you may draw a card.\"},{\"id\":3,\"name\":\"Recollect\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target card from your graveyard to your hand.\"},{\"id\":4,\"name\":\"Rolling Spoil\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. If {B} was spent to cast this spell, all creatures get -1/-1 until end of turn.\"},{\"id\":5,\"name\":\"Root-Kin Ally\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTap two untapped creatures you control: This creature gets +2/+2 until end of turn.\"},{\"id\":6,\"name\":\"Scatter the Seeds\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nCreate three 1/1 green Saproling creature tokens.\"},{\"id\":7,\"name\":\"Scion of the Wild\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Scion of the Wild's power and toughness are each equal to the number of creatures you control.\"},{\"id\":8,\"name\":\"Siege Wurm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTrample\"},{\"id\":9,\"name\":\"Stone-Seeder Hierophant\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Landfall — Whenever a land you control enters, untap this creature.\\n{T}: Untap target land.\"},{\"id\":10,\"name\":\"Sundering Vitae\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nDestroy target artifact or enchantment.\"},{\"id\":11,\"name\":\"Transluminant\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Dryad Shaman\",\"text\":\"{W}, Sacrifice this creature: Create a 1/1 white Spirit creature token with flying at the beginning of the next end step.\"},{\"id\":12,\"name\":\"Trophy Hunter\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"{1}{G}: This creature deals 1 damage to target creature with flying.\\nWhenever a creature with flying dealt damage by this creature this turn dies, put a +1/+1 counter on this creature.\"},{\"id\":13,\"name\":\"Ursapine\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"{G}: Target creature gets +1/+1 until end of turn.\"},{\"id\":14,\"name\":\"Vinelasher Kudzu\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Plant\",\"text\":\"Landfall — Whenever a land you control enters, put a +1/+1 counter on this creature.\"},{\"id\":15,\"name\":\"Agrus Kos, Wojek Veteran\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"Whenever Agrus Kos attacks, attacking red creatures get +2/+0 and attacking white creatures get +0/+2 until end of turn.\"},{\"id\":16,\"name\":\"Autochthon Wurm\",\"manaCost\":\"{10}{G}{G}{G}{W}{W}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTrample\"},{\"id\":17,\"name\":\"Bloodbond March\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a player casts a creature spell, each player returns all cards with the same name as that spell from their graveyard to the battlefield.\"},{\"id\":18,\"name\":\"Boros Swiftblade\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Double strike\"},{\"id\":19,\"name\":\"Brightflame\",\"manaCost\":\"{X}{R}{R}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Radiance — Brightflame deals X damage to target creature and each other creature that shares a color with it. You gain life equal to the damage dealt this way.\"},{\"id\":20,\"name\":\"Chorus of the Conclave\",\"manaCost\":\"{4}{G}{G}{W}{W}\",\"typeLine\":\"Legendary Creature — Dryad\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\\nAs an additional cost to cast creature spells, you may pay any amount of mana. If you do, that creature enters with that many additional +1/+1 counters on it.\"},{\"id\":21,\"name\":\"Circu, Dimir Lobotomist\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Legendary Creature — Human Wizard\",\"text\":\"Whenever you cast a blue spell, exile the top card of target player's library.\\nWhenever you cast a black spell, exile the top card of target player's library.\\nYour opponents can't cast spells with the same name as a card exiled with Circu.\"},{\"id\":22,\"name\":\"Clutch of the Undercity\",\"manaCost\":\"{1}{U}{U}{B}\",\"typeLine\":\"Instant\",\"text\":\"Return target permanent to its owner's hand. Its controller loses 3 life.\\nTransmute {1}{U}{B} ({1}{U}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":23,\"name\":\"Congregation at Dawn\",\"manaCost\":\"{G}{G}{W}\",\"typeLine\":\"Instant\",\"text\":\"Search your library for up to three creature cards, reveal them, then shuffle and put those cards on top in any order.\"},{\"id\":24,\"name\":\"Consult the Necrosages\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Target player draws two cards.\\n• Target player discards two cards.\"},{\"id\":25,\"name\":\"Dark Heart of the Wood\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Sacrifice a Forest: You gain 3 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1167,
+      "cacheCreationInputTokens": 32660,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.765699,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.765699,
+      "pricedUsd": 0.765699,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.765699 and its own usage prices at $0.765699"
+    }
+  }
+}

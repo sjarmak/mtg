@@ -1,0 +1,161 @@
+{
+  "key": "979871dc3d2373a8c7cf402e703baaff",
+  "recordedAt": "2026-11-22T21:28:43.560Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ghoulcaller's Chant\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Return target creature card from your graveyard to your hand.\\n• Return two target Zombie cards from your graveyard to your hand.\"},{\"id\":2,\"name\":\"Ghoulraiser\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, return a Zombie card at random from your graveyard to your hand.\"},{\"id\":3,\"name\":\"Gruesome Deformity\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has intimidate. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":4,\"name\":\"Heartless Summoning\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Creature spells you cast cost {2} less to cast.\\nCreatures you control get -1/-1.\"},{\"id\":5,\"name\":\"Liliana of the Veil\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Each player discards a card.\\n−2: Target player sacrifices a creature.\\n−6: Separate all permanents target player controls into two piles. That player sacrifices all permanents in the pile of their choice.\"},{\"id\":6,\"name\":\"Manor Skeleton\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Skeleton\",\"text\":\"Haste\\n{1}{B}: Regenerate this creature.\"},{\"id\":7,\"name\":\"Markov Patrician\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":8,\"name\":\"Maw of the Mire\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. You gain 4 life.\"},{\"id\":9,\"name\":\"Moan of the Unhallowed\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 2/2 black Zombie creature tokens.\\nFlashback {5}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":10,\"name\":\"Morkrut Banshee\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Morbid — When this creature enters, if a creature died this turn, target creature gets -4/-4 until end of turn.\"},{\"id\":11,\"name\":\"Night Terrors\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand. You choose a nonland card from it. Exile that card.\"},{\"id\":12,\"name\":\"Reaper from the Abyss\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nMorbid — At the beginning of each end step, if a creature died this turn, destroy target non-Demon creature.\"},{\"id\":13,\"name\":\"Rotting Fensnake\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Snake\",\"text\":\"\"},{\"id\":14,\"name\":\"Screeching Bat\",\"manaCost\":null,\"typeLine\":\"Creature — Bat // Creature — Vampire\",\"text\":null,\"faces\":[{\"name\":\"Screeching Bat\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\\nAt the beginning of your upkeep, you may pay {2}{B}{B}. If you do, transform this creature.\"},{\"name\":\"Stalking Vampire\",\"manaCost\":\"\",\"typeLine\":\"Creature — Vampire\",\"text\":\"At the beginning of your upkeep, you may pay {2}{B}{B}. If you do, transform this creature.\"}]},{\"id\":15,\"name\":\"Sever the Bloodline\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target creature and all other creatures with the same name as that creature.\\nFlashback {5}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":16,\"name\":\"Skeletal Grimace\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 and has \\\"{B}: Regenerate this creature.\\\"\"},{\"id\":17,\"name\":\"Skirsdag High Priest\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Morbid — {T}, Tap two untapped creatures you control: Create a 5/5 black Demon creature token with flying. Activate only if a creature died this turn.\"},{\"id\":18,\"name\":\"Stromkirk Patrol\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"Whenever this creature deals combat damage to a player, put a +1/+1 counter on it.\"},{\"id\":19,\"name\":\"Tribute to Hunger\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target opponent sacrifices a creature of their choice. You gain life equal to that creature's toughness.\"},{\"id\":20,\"name\":\"Typhoid Rats\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":21,\"name\":\"Unbreathing Horde\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature enters with a +1/+1 counter on it for each other Zombie you control and each Zombie card in your graveyard.\\nIf this creature would be dealt damage, prevent that damage and remove a +1/+1 counter from it.\"},{\"id\":22,\"name\":\"Unburial Rites\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to the battlefield.\\nFlashback {3}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":23,\"name\":\"Vampire Interloper\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire Scout\",\"text\":\"Flying\\nThis creature can't block.\"},{\"id\":24,\"name\":\"Victim of Night\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target non-Vampire, non-Werewolf, non-Zombie creature.\"},{\"id\":25,\"name\":\"Village Cannibals\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human\",\"text\":\"Whenever another Human creature dies, put a +1/+1 counter on this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1399,
+      "cacheCreationInputTokens": 32522,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.774539,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.774539,
+      "pricedUsd": 0.774539,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.774539 and its own usage prices at $0.774539"
+    }
+  }
+}

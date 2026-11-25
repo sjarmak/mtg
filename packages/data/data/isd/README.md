@@ -115,7 +115,7 @@ npx tsx packages/data/tools/inventory-printed-decisions.ts --catalog packages/da
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/rebind/isd/scenario.json --out out/rebind/isd/scenario-probes --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/rebind/isd/scenario-probes --inventory out/rebind/isd/decision-inventory/inventory.json --out out/rebind/isd/script-qualifications
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/rebind/isd/match.json --out out/rebind/isd/match-probes --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/isd/isd-limited-format-v1.json --catalog packages/data/data/isd/isd-printed-catalog-v1.json --qualifications out/rebind/isd/script-qualifications --match-probes out/rebind/isd/match-probes --out packages/data/data/isd/play-admission-v18
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/isd/isd-limited-format-v1.json --catalog packages/data/data/isd/isd-printed-catalog-v1.json --qualifications out/rebind/isd/script-qualifications --match-probes out/rebind/isd/match-probes --out packages/data/data/isd/play-admission
 ```
 
 `play-admission-v19/` re-binds v18 (deleted) to the Kaladesh bridge (`mtg-j4ucd.19`), which
@@ -228,7 +228,7 @@ change, use output `play-admission-v25/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `isd` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v24`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher (`packages/ui/tools/play.ts`) reads every supported entry at boot and
 `startBackendService` admits all of them behind one Forge identity, so
 Innistrad and AKH/HOU are routed side by side.

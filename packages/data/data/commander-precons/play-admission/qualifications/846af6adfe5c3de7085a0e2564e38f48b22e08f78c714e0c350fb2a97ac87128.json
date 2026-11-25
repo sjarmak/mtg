@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "3b6c50f48aea568714219fb6338a89165922c7f4ebf8c557888b7b41adb741cd",
+    "adapterSha256": "9d47e457381dc8705a6ad664501b48a3e7488680855677db54b17fa9ec6ba687",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "p/puppet_conjurer.txt",
+    "sha256": "846af6adfe5c3de7085a0e2564e38f48b22e08f78c714e0c350fb2a97ac87128"
+  },
+  "decisionFamilies": [
+    "combat",
+    "optional-costs",
+    "priority",
+    "replacement-trigger-choices",
+    "zone-card-selection"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-optional-costs",
+    "controller-contract-priority",
+    "controller-contract-replacement-trigger-choices",
+    "controller-contract-zone-card-selection",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "optional-costs",
+        "priority",
+        "replacement-trigger-choices",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "optional-costs-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1",
+        "zone-card-selection-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "optional-costs",
+        "priority",
+        "replacement-trigger-choices",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "optional-costs-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1",
+        "zone-card-selection-v1"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "tokenscripts/u_0_1_a_homunculus.txt",
+      "sha256": "3d684a2c855ff4bad71091ecb596bcef8b6abd4d9a4c2497ea9a4af6c31e873d"
+    }
+  ],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "86990bbad2b269c2952a83bfd2fd74b8fbc21bf0dd2022ea2f4e3f2ff64927b5"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "9df64a149aab0ee2e8d5a3445b8446533777f216ab4b9b167bdd1fddf060858b"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "optional-costs-v1",
+        "file": {
+          "path": "contracts/optional-costs-v1.json",
+          "sha256": "9f24dc60de0d314219d03742b03b358df977de5b34eb0405439fe4c29eeaee27"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "replacement-trigger-choices-v1",
+        "file": {
+          "path": "contracts/replacement-trigger-choices-v1.json",
+          "sha256": "c3c57c1f5737cf99ec295625ef85e1580d42e14631609c96022abd1d6bee20ea"
+        }
+      },
+      {
+        "contractId": "zone-card-selection-v1",
+        "file": {
+          "path": "contracts/zone-card-selection-v1.json",
+          "sha256": "2c00d04ef403291623fce69092ada0107d565b7d91aaf9f4613346012186e952"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "47372c0ce61e98935d1d08b15013ec56",
+  "recordedAt": "2026-11-22T21:42:10.511Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Marsh Casualties\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker {3} (You may pay an additional {3} as you cast this spell.)\\nCreatures target player controls get -1/-1 until end of turn. If this spell was kicked, those creatures get -2/-2 until end of turn instead.\"},{\"id\":2,\"name\":\"Mind Sludge\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards a card for each Swamp you control.\"},{\"id\":3,\"name\":\"Mindless Null\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature can't block unless you control a Vampire.\"},{\"id\":4,\"name\":\"Mire Blight\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen enchanted creature is dealt damage, destroy it.\"},{\"id\":5,\"name\":\"Needlebite Trap\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent gained life this turn, you may pay {B} rather than pay this spell's mana cost.\\nTarget player loses 5 life and you gain 5 life.\"},{\"id\":6,\"name\":\"Nimana Sell-Sword\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Warrior Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":7,\"name\":\"Ob Nixilis, the Fallen\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Landfall — Whenever a land you control enters, you may have target player lose 3 life. If you do, put three +1/+1 counters on Ob Nixilis.\"},{\"id\":8,\"name\":\"Quest for the Gravelord\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature dies, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: Create a 5/5 black Zombie Giant creature token.\"},{\"id\":9,\"name\":\"Ravenous Trap\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent had three or more cards put into their graveyard from anywhere this turn, you may pay {0} rather than pay this spell's mana cost.\\nExile target player's graveyard.\"},{\"id\":10,\"name\":\"Sadistic Sacrament\",\"manaCost\":\"{B}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker {7} (You may pay an additional {7} as you cast this spell.)\\nSearch target player's library for up to three cards, exile them, then that player shuffles. If this spell was kicked, instead search that player's library for up to fifteen cards, exile them, then that player shuffles.\"},{\"id\":11,\"name\":\"Sorin Markov\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Sorin\",\"text\":\"+2: Sorin Markov deals 2 damage to any target and you gain 2 life.\\n−3: Target opponent's life total becomes 10.\\n−7: You control target player during that player's next turn.\"},{\"id\":12,\"name\":\"Soul Stair Expedition\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, you may put a quest counter on this enchantment.\\nRemove three quest counters from this enchantment and sacrifice it: Return up to two target creature cards from your graveyard to your hand.\"},{\"id\":13,\"name\":\"Surrakar Marauder\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Surrakar\",\"text\":\"Landfall — Whenever a land you control enters, this creature gains intimidate until end of turn. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":14,\"name\":\"Vampire Hexmage\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"First strike\\nSacrifice this creature: Remove all counters from target permanent.\"},{\"id\":15,\"name\":\"Vampire Lacerator\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Vampire Warrior\",\"text\":\"At the beginning of your upkeep, you lose 1 life unless an opponent has 10 or less life.\"},{\"id\":16,\"name\":\"Vampire Nighthawk\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Flying\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":17,\"name\":\"Vampire's Bite\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {2}{B} (You may pay an additional {2}{B} as you cast this spell.)\\nTarget creature gets +3/+0 until end of turn. If this spell was kicked, that creature gains lifelink until end of turn. (Damage dealt by the creature also causes its controller to gain that much life.)\"},{\"id\":18,\"name\":\"Bladetusk Boar\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":19,\"name\":\"Burst Lightning\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {4} (You may pay an additional {4} as you cast this spell.)\\nBurst Lightning deals 2 damage to any target. If this spell was kicked, it deals 4 damage instead.\"},{\"id\":20,\"name\":\"Chandra Ablaze\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Discard a card. If a red card is discarded this way, Chandra deals 4 damage to any target.\\n−2: Each player discards their hand, then draws three cards.\\n−7: Cast any number of red instant and/or sorcery cards from your graveyard without paying their mana costs.\"},{\"id\":21,\"name\":\"Demolish\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\"},{\"id\":22,\"name\":\"Electropotence\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control enters, you may pay {2}{R}. If you do, that creature deals damage equal to its power to any target.\"},{\"id\":23,\"name\":\"Elemental Appeal\",\"manaCost\":\"{R}{R}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker {5} (You may pay an additional {5} as you cast this spell.)\\nCreate a 7/1 red Elemental creature token with trample and haste. Exile it at the beginning of the next end step. If this spell was kicked, that creature gets +7/+0 until end of turn.\"},{\"id\":24,\"name\":\"Geyser Glider\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental Beast\",\"text\":\"Landfall — Whenever a land you control enters, this creature gains flying until end of turn.\"},{\"id\":25,\"name\":\"Goblin Bushwhacker\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Kicker {R} (You may pay an additional {R} as you cast this spell.)\\nWhen this creature enters, if it was kicked, creatures you control get +1/+0 and gain haste until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1223,
+      "cacheCreationInputTokens": 32825,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7717989999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7717989999999999,
+      "pricedUsd": 0.771799,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.771799 and its own usage prices at $0.771799"
+    }
+  }
+}

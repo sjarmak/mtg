@@ -1,0 +1,161 @@
+{
+  "key": "74ded56f4f995e94408935eb8b5bb409",
+  "recordedAt": "2026-11-22T22:08:43.386Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Labyrinth Champion\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, this creature deals 2 damage to any target.\"},{\"id\":2,\"name\":\"Lightning Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Lightning Strike deals 3 damage to any target.\"},{\"id\":3,\"name\":\"Magma Jet\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Magma Jet deals 2 damage to any target. Scry 2.\"},{\"id\":4,\"name\":\"Messenger's Speed\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has trample and haste.\"},{\"id\":5,\"name\":\"Minotaur Skullcleaver\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Minotaur Berserker\",\"text\":\"Haste\\nWhen this creature enters, it gets +2/+0 until end of turn.\"},{\"id\":6,\"name\":\"Ordeal of Purphoros\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature attacks, put a +1/+1 counter on it. Then if it has three or more +1/+1 counters on it, sacrifice this Aura.\\nWhen you sacrifice this Aura, it deals 3 damage to any target.\"},{\"id\":7,\"name\":\"Peak Eruption\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target Mountain. Peak Eruption deals 3 damage to that land's controller.\"},{\"id\":8,\"name\":\"Portent of Betrayal\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":9,\"name\":\"Priest of Iroas\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{3}{W}, Sacrifice this creature: Destroy target enchantment.\"},{\"id\":10,\"name\":\"Purphoros, God of the Forge\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to red is less than five, Purphoros isn't a creature.\\nWhenever another creature you control enters, Purphoros deals 2 damage to each opponent.\\n{2}{R}: Creatures you control get +1/+0 until end of turn.\"},{\"id\":11,\"name\":\"Purphoros's Emissary\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment Creature — Ox\",\"text\":\"Bestow {6}{R} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nMenace (This creature can't be blocked except by two or more creatures.)\\nEnchanted creature gets +3/+3 and has menace.\"},{\"id\":12,\"name\":\"Rage of Purphoros\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Rage of Purphoros deals 4 damage to target creature. It can't be regenerated this turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":13,\"name\":\"Rageblood Shaman\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Minotaur Shaman\",\"text\":\"Trample\\nOther Minotaur creatures you control get +1/+1 and have trample.\"},{\"id\":14,\"name\":\"Satyr Rambler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"Trample\"},{\"id\":15,\"name\":\"Spark Jolt\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Spark Jolt deals 1 damage to any target. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":16,\"name\":\"Spearpoint Oread\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Bestow {5}{R} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nFirst strike\\nEnchanted creature gets +2/+2 and has first strike.\"},{\"id\":17,\"name\":\"Stoneshock Giant\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"{6}{R}{R}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\\nWhen this creature becomes monstrous, creatures without flying your opponents control can't block this turn.\"},{\"id\":18,\"name\":\"Stormbreath Dragon\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste, protection from white\\n{5}{R}{R}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\\nWhen this creature becomes monstrous, it deals damage to each opponent equal to the number of cards in that player's hand.\"},{\"id\":19,\"name\":\"Titan of Eternal Fire\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Each Human creature you control has \\\"{R}, {T}: This creature deals 1 damage to any target.\\\"\"},{\"id\":20,\"name\":\"Titan's Strength\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+1 until end of turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":21,\"name\":\"Two-Headed Cerberus\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Dog\",\"text\":\"Double strike (This creature deals both first-strike and regular combat damage.)\"},{\"id\":22,\"name\":\"Wild Celebrants\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"When this creature enters, you may destroy target artifact.\"},{\"id\":23,\"name\":\"Agent of Horizons\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{2}{U}: This creature can't be blocked this turn.\"},{\"id\":24,\"name\":\"Anthousa, Setessan Hero\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Legendary Creature — Human Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets Anthousa, up to three target lands you control each become 2/2 Warrior creatures until end of turn. They're still lands.\"},{\"id\":25,\"name\":\"Arbor Colossus\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Reach\\n{3}{G}{G}{G}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\\nWhen this creature becomes monstrous, destroy target creature with flying an opponent controls.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1288,
+      "cacheCreationInputTokens": 32732,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7731889999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7731889999999999,
+      "pricedUsd": 0.773189,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773189 and its own usage prices at $0.773189"
+    }
+  }
+}

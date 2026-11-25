@@ -1,0 +1,161 @@
+{
+  "key": "aac371a4774c7b33b5e452828116df32",
+  "recordedAt": "2026-11-22T21:25:57.357Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Austere Command\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose two —\\n• Destroy all artifacts.\\n• Destroy all enchantments.\\n• Destroy all creatures with mana value 3 or less.\\n• Destroy all creatures with mana value 4 or greater.\"},{\"id\":2,\"name\":\"Aven Mindcensor\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird Wizard\",\"text\":\"Flash\\nFlying\\nIf an opponent would search a library, that player searches the top four cards of that library instead.\"},{\"id\":3,\"name\":\"Containment Priest\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Flash\\nIf a nontoken creature would enter and it wasn't cast, exile it instead.\"},{\"id\":4,\"name\":\"Loyal Retainers\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"Sacrifice this creature: Return target legendary creature card from your graveyard to the battlefield. Activate only during your turn, before attackers are declared.\"},{\"id\":5,\"name\":\"Oketra the True\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Double strike, indestructible\\nOketra can't attack or block unless you control at least three other creatures.\\n{3}{W}: Create a 1/1 white Warrior creature token with vigilance.\"},{\"id\":6,\"name\":\"Worship\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"If you control a creature, damage that would reduce your life total to less than 1 reduces it to 1 instead.\"},{\"id\":7,\"name\":\"Wrath of God\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures. They can't be regenerated.\"},{\"id\":8,\"name\":\"Consecrated Sphinx\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever an opponent draws a card, you may draw two cards.\"},{\"id\":9,\"name\":\"Counterbalance\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent casts a spell, you may reveal the top card of your library. If you do, counter that spell if it has the same mana value as the revealed card.\"},{\"id\":10,\"name\":\"Counterspell\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":11,\"name\":\"Cryptic Command\",\"manaCost\":\"{1}{U}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose two —\\n• Counter target spell.\\n• Return target permanent to its owner's hand.\\n• Tap all creatures your opponents control.\\n• Draw a card.\"},{\"id\":12,\"name\":\"Daze\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"You may return an Island you control to its owner's hand rather than pay this spell's mana cost.\\nCounter target spell unless its controller pays {1}.\"},{\"id\":13,\"name\":\"Divert\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Change the target of target spell with a single target unless that spell's controller pays {2}.\"},{\"id\":14,\"name\":\"Force of Will\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"You may pay 1 life and exile a blue card from your hand rather than pay this spell's mana cost.\\nCounter target spell.\"},{\"id\":15,\"name\":\"Kefnet the Mindful\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Flying, indestructible\\nKefnet can't attack or block unless you have seven or more cards in hand.\\n{3}{U}: Draw a card, then you may return a land you control to its owner's hand.\"},{\"id\":16,\"name\":\"Pact of Negation\",\"manaCost\":\"{0}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\\nAt the beginning of your next upkeep, pay {3}{U}{U}. If you don't, you lose the game.\"},{\"id\":17,\"name\":\"Spell Pierce\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell unless its controller pays {2}.\"},{\"id\":18,\"name\":\"Stifle\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target activated or triggered ability. (Mana abilities can't be targeted.)\"},{\"id\":19,\"name\":\"Attrition\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"{B}, Sacrifice a creature: Destroy target nonblack creature.\"},{\"id\":20,\"name\":\"Bontu the Glorified\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Menace, indestructible\\nBontu can't attack or block unless a creature died under your control this turn.\\n{1}{B}, Sacrifice another creature: Scry 1. Each opponent loses 1 life and you gain 1 life.\"},{\"id\":21,\"name\":\"Dark Ritual\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Add {B}{B}{B}.\"},{\"id\":22,\"name\":\"Diabolic Intent\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nSearch your library for a card, put that card into your hand, then shuffle.\"},{\"id\":23,\"name\":\"Entomb\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Search your library for a card, put that card into your graveyard, then shuffle.\"},{\"id\":24,\"name\":\"Mind Twist\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards X cards at random.\"},{\"id\":25,\"name\":\"Aggravated Assault\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"{3}{R}{R}: Untap all creatures you control. After this main phase, there is an additional combat phase followed by an additional main phase. Activate only as a sorcery.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1678,
+      "cacheCreationInputTokens": 32290,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7838489999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7838489999999999,
+      "pricedUsd": 0.783849,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.783849 and its own usage prices at $0.783849"
+    }
+  }
+}

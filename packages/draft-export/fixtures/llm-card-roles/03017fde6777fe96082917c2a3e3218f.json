@@ -1,0 +1,161 @@
+{
+  "key": "03017fde6777fe96082917c2a3e3218f",
+  "recordedAt": "2026-11-22T21:45:53.010Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Essence Scatter\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature spell.\"},{\"id\":2,\"name\":\"Fabricate\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for an artifact card, reveal it, put it into your hand, then shuffle.\"},{\"id\":3,\"name\":\"Flashfreeze\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target red or green spell.\"},{\"id\":4,\"name\":\"Hive Mind\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a player casts an instant or sorcery spell, each other player copies that spell. Each of those players may choose new targets for their copy.\"},{\"id\":5,\"name\":\"Horned Turtle\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Turtle\",\"text\":\"\"},{\"id\":6,\"name\":\"Ice Cage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\\nWhen enchanted creature becomes the target of a spell or ability, destroy this Aura.\"},{\"id\":7,\"name\":\"Illusionary Servant\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"Flying\\nWhen this creature becomes the target of a spell or ability, sacrifice it.\"},{\"id\":8,\"name\":\"Jace Beleren\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+2: Each player draws a card.\\n−1: Target player draws a card.\\n−10: Target player mills twenty cards.\"},{\"id\":9,\"name\":\"Jump\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains flying until end of turn.\"},{\"id\":10,\"name\":\"Levitation\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control have flying.\"},{\"id\":11,\"name\":\"Merfolk Looter\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"{T}: Draw a card, then discard a card.\"},{\"id\":12,\"name\":\"Merfolk Sovereign\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Merfolk Noble\",\"text\":\"Other Merfolk creatures you control get +1/+1.\\n{T}: Target Merfolk creature can't be blocked this turn.\"},{\"id\":13,\"name\":\"Mind Control\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\"},{\"id\":14,\"name\":\"Mind Spring\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw X cards.\"},{\"id\":15,\"name\":\"Negate\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\"},{\"id\":16,\"name\":\"Phantom Warrior\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Illusion Warrior\",\"text\":\"This creature can't be blocked.\"},{\"id\":17,\"name\":\"Polymorph\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature. It can't be regenerated. Its controller reveals cards from the top of their library until they reveal a creature card. The player puts that card onto the battlefield, then shuffles all other cards revealed this way into their library.\"},{\"id\":18,\"name\":\"Ponder\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of your library, then put them back in any order. You may shuffle.\\nDraw a card.\"},{\"id\":19,\"name\":\"Sage Owl\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, look at the top four cards of your library, then put them back in any order.\"},{\"id\":20,\"name\":\"Serpent of the Endless Sea\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Serpent of the Endless Sea's power and toughness are each equal to the number of Islands you control.\\nThis creature can't attack unless defending player controls an Island.\"},{\"id\":21,\"name\":\"Sleep\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Tap all creatures target player controls. Those creatures don't untap during that player's next untap step.\"},{\"id\":22,\"name\":\"Snapping Drake\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\"},{\"id\":23,\"name\":\"Sphinx Ambassador\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, search that player's library for a card, then that player chooses a card name. If you searched for a creature card that doesn't have that name, you may put it onto the battlefield under your control. Then that player shuffles.\"},{\"id\":24,\"name\":\"Telepathy\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Your opponents play with their hands revealed.\"},{\"id\":25,\"name\":\"Time Warp\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player takes an extra turn after this one.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1136,
+      "cacheCreationInputTokens": 32105,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.753049,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.753049,
+      "pricedUsd": 0.753049,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.753049 and its own usage prices at $0.753049"
+    }
+  }
+}

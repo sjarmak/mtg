@@ -1,0 +1,161 @@
+{
+  "key": "a10674e37e52659bc8181c8089f66bd2",
+  "recordedAt": "2026-11-22T21:53:33.261Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Disperse\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand.\"},{\"id\":2,\"name\":\"Divination\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards.\"},{\"id\":3,\"name\":\"Domestication\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\\nAt the beginning of your end step, if enchanted creature's power is 4 or greater, sacrifice this Aura.\"},{\"id\":4,\"name\":\"Elite Arcanist\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may exile an instant card from your hand.\\n{X}, {T}: Copy the exiled card. You may cast the copy without paying its mana cost. X is the mana value of the exiled card.\"},{\"id\":5,\"name\":\"Essence Scatter\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature spell.\"},{\"id\":6,\"name\":\"Frost Breath\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap up to two target creatures. Those creatures don't untap during their controller's next untap step.\"},{\"id\":7,\"name\":\"Galerider Sliver\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have flying.\"},{\"id\":8,\"name\":\"Glimpse the Future\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of your library. Put one of them into your hand and the rest into your graveyard.\"},{\"id\":9,\"name\":\"Illusionary Armor\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +4/+4.\\nWhen enchanted creature becomes the target of a spell or ability, sacrifice this Aura.\"},{\"id\":10,\"name\":\"Jace, Memory Adept\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+1: Draw a card. Target player mills a card.\\n0: Target player mills ten cards.\\n−7: Any number of target players each draw twenty cards.\"},{\"id\":11,\"name\":\"Jace's Mindseeker\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Fish Illusion\",\"text\":\"Flying\\nWhen this creature enters, target opponent mills five cards. You may cast an instant or sorcery spell from among them without paying its mana cost.\"},{\"id\":12,\"name\":\"Merfolk Spy\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nWhenever this creature deals combat damage to a player, that player reveals a card at random from their hand.\"},{\"id\":13,\"name\":\"Messenger Drake\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nWhen this creature dies, draw a card.\"},{\"id\":14,\"name\":\"Negate\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\"},{\"id\":15,\"name\":\"Nephalia Seakite\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\"},{\"id\":16,\"name\":\"Opportunity\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target player draws four cards.\"},{\"id\":17,\"name\":\"Phantom Warrior\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Illusion Warrior\",\"text\":\"This creature can't be blocked.\"},{\"id\":18,\"name\":\"Quicken\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"The next sorcery spell you cast this turn can be cast as though it had flash. (It can be cast any time you could cast an instant.)\\nDraw a card.\"},{\"id\":19,\"name\":\"Scroll Thief\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"Whenever this creature deals combat damage to a player, draw a card.\"},{\"id\":20,\"name\":\"Seacoast Drake\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\"},{\"id\":21,\"name\":\"Sensory Deprivation\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -3/-0.\"},{\"id\":22,\"name\":\"Spell Blast\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell with mana value X. (For example, if that spell's mana cost is {3}{U}{U}, X is 5.)\"},{\"id\":23,\"name\":\"Tidebinder Mage\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"When this creature enters, tap target red or green creature an opponent controls. That creature doesn't untap during its controller's untap step for as long as you control this creature.\"},{\"id\":24,\"name\":\"Time Ebb\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature on top of its owner's library.\"},{\"id\":25,\"name\":\"Tome Scour\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills five cards.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1309,
+      "cacheCreationInputTokens": 32120,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7619990000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7619990000000001,
+      "pricedUsd": 0.761999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.761999 and its own usage prices at $0.761999"
+    }
+  }
+}

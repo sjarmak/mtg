@@ -1,0 +1,161 @@
+{
+  "key": "8af0445dbfa188459d542c3016d4caaa",
+  "recordedAt": "2026-11-22T22:13:15.186Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Heroes' Bane\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"This creature enters with four +1/+1 counters on it.\\n{2}{G}{G}: Put X +1/+1 counters on this creature, where X is its power.\"},{\"id\":2,\"name\":\"Humbler of Mortals\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Enchantment Creature — Elemental\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, creatures you control gain trample until end of turn.\"},{\"id\":3,\"name\":\"Hydra Broodmaster\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"{X}{X}{G}: Monstrosity X. (If this creature isn't monstrous, put X +1/+1 counters on it and it becomes monstrous.)\\nWhen this creature becomes monstrous, create X X/X green Hydra creature tokens.\"},{\"id\":4,\"name\":\"Kruphix's Insight\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top six cards of your library. Put up to three enchantment cards from among them into your hand and the rest of the revealed cards into your graveyard.\"},{\"id\":5,\"name\":\"Market Festival\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhenever enchanted land is tapped for mana, its controller adds an additional two mana in any combination of colors.\"},{\"id\":6,\"name\":\"Nature's Panoply\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{G} more to cast for each target beyond the first.\\nChoose any number of target creatures. Put a +1/+1 counter on each of them.\"},{\"id\":7,\"name\":\"Nessian Game Warden\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, look at the top X cards of your library, where X is the number of Forests you control. You may reveal a creature card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\"},{\"id\":8,\"name\":\"Oakheart Dryads\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment Creature — Nymph Dryad\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, target creature gets +1/+1 until end of turn.\"},{\"id\":9,\"name\":\"Pheres-Band Thunderhoof\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put two +1/+1 counters on this creature.\"},{\"id\":10,\"name\":\"Pheres-Band Warchief\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Vigilance, trample\\nOther Centaur creatures you control get +1/+1 and have vigilance and trample.\"},{\"id\":11,\"name\":\"Ravenous Leucrocota\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Vigilance\\n{6}{G}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\"},{\"id\":12,\"name\":\"Renowned Weaver\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{1}{G}, Sacrifice this creature: Create a 1/3 green Spider enchantment creature token with reach. (It can block creatures with flying.)\"},{\"id\":13,\"name\":\"Reviving Melody\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Return target creature card from your graveyard to your hand.\\n• Return target enchantment card from your graveyard to your hand.\"},{\"id\":14,\"name\":\"Satyr Grovedancer\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Satyr Shaman\",\"text\":\"When this creature enters, put a +1/+1 counter on target creature.\"},{\"id\":15,\"name\":\"Setessan Tactics\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {G} more to cast for each target beyond the first.\\nUntil end of turn, any number of target creatures each get +1/+1 and gain \\\"{T}: This creature fights another target creature.\\\"\"},{\"id\":16,\"name\":\"Solidarity of Heroes\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {1}{G} more to cast for each target beyond the first.\\nChoose any number of target creatures. Double the number of +1/+1 counters on each of them.\"},{\"id\":17,\"name\":\"Spirespine\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment Creature — Beast\",\"text\":\"Bestow {4}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature blocks each combat if able.\\nEnchanted creature gets +4/+1 and blocks each combat if able.\"},{\"id\":18,\"name\":\"Strength from the Fallen\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Constellation — Whenever this enchantment or another enchantment you control enters, target creature gets +X/+X until end of turn, where X is the number of creature cards in your graveyard.\"},{\"id\":19,\"name\":\"Swarmborn Giant\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Giant\",\"text\":\"When you're dealt combat damage, sacrifice this creature.\\n{4}{G}{G}: Monstrosity 2. (If this creature isn't monstrous, put two +1/+1 counters on it and it becomes monstrous.)\\nAs long as this creature is monstrous, it has reach.\"},{\"id\":20,\"name\":\"Ajani, Mentor of Heroes\",\"manaCost\":\"{3}{G}{W}\",\"typeLine\":\"Legendary Planeswalker — Ajani\",\"text\":\"+1: Distribute three +1/+1 counters among one, two, or three target creatures you control.\\n+1: Look at the top four cards of your library. You may reveal an Aura, creature, or planeswalker card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\\n−8: You gain 100 life.\"},{\"id\":21,\"name\":\"Athreos, God of Passage\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to white and black is less than seven, Athreos isn't a creature.\\nWhenever another creature you own dies, return it to your hand unless target opponent pays 3 life.\"},{\"id\":22,\"name\":\"Desperate Stand\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Strive — This spell costs {R}{W} more to cast for each target beyond the first.\\nAny number of target creatures each get +2/+0 and gain first strike and vigilance until end of turn.\"},{\"id\":23,\"name\":\"Disciple of Deceit\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may discard a nonland card. If you do, search your library for a card with the same mana value as that card, reveal it, put it into your hand, then shuffle.\"},{\"id\":24,\"name\":\"Fleetfeather Cockatrice\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Creature — Cockatrice\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying, deathtouch\\n{5}{G}{U}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\"},{\"id\":25,\"name\":\"Iroas, God of Victory\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to red and white is less than seven, Iroas isn't a creature.\\nCreatures you control have menace.\\nPrevent all damage that would be dealt to attacking creatures you control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1414,
+      "cacheCreationInputTokens": 33047,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.785789,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.785789,
+      "pricedUsd": 0.785789,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.785789 and its own usage prices at $0.785789"
+    }
+  }
+}

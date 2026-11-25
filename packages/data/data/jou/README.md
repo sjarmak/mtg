@@ -165,7 +165,7 @@ protocol 2. The commands that built it:
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/jou/probes/jou-scenario-probes-v2-config.json --out out/jou/scenario-probes-v2 --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/jou/scenario-probes-v2 --inventory out/jou/decision-inventory-v2/inventory.json --out out/jou/script-qualifications-v2
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/jou/probes/jou-match-probes-v2-config.json --out out/jou/match-probes-v2 --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/jou/jou-limited-format-v1.json --catalog packages/data/data/jou/bng-printed-catalog-v1.json --catalog packages/data/data/jou/jou-printed-catalog-v1.json --catalog packages/data/data/jou/ths-printed-catalog-v1.json --qualifications out/jou/script-qualifications-v2 --match-probes out/jou/match-probes-v2 --out packages/data/data/jou/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/jou/jou-limited-format-v1.json --catalog packages/data/data/jou/bng-printed-catalog-v1.json --catalog packages/data/data/jou/jou-printed-catalog-v1.json --catalog packages/data/data/jou/ths-printed-catalog-v1.json --qualifications out/jou/script-qualifications-v2 --match-probes out/jou/match-probes-v2 --out packages/data/data/jou/play-admission
 ```
 
 `play-admission-v2/` re-binds v1 (deleted) to the Kaladesh bridge (`mtg-j4ucd.19`), which
@@ -257,7 +257,7 @@ change, use output `play-admission-v8/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `jou` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v7`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher (`packages/ui/tools/play.ts`) reads every supported entry at boot and
 `startBackendService` admits all of them behind one Forge identity. The entry
 lists the BNG, JOU and THS catalogs, so the token printings file and both

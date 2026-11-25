@@ -1,0 +1,161 @@
+{
+  "key": "340d86affdf8eb09ff50c3cace5635e3",
+  "recordedAt": "2026-11-22T22:38:49.476Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Sygg, River Guide\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Legendary Creature — Merfolk Wizard\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\n{1}{W}: Target Merfolk you control gains protection from the color of your choice until end of turn.\"},{\"id\":2,\"name\":\"Wort, Boggart Auntie\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Legendary Creature — Goblin Shaman\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\nAt the beginning of your upkeep, you may return target Goblin card from your graveyard to your hand.\"},{\"id\":3,\"name\":\"Wydwen, the Biting Gale\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Legendary Creature — Faerie Wizard\",\"text\":\"Flash\\nFlying\\n{U}{B}, Pay 1 life: Return Wydwen to its owner's hand.\"},{\"id\":4,\"name\":\"Colfenor's Urn\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature with toughness 4 or greater is put into your graveyard from the battlefield, you may exile it.\\nAt the beginning of the end step, if three or more cards have been exiled with this artifact, sacrifice it. If you do, return those cards to the battlefield under their owner's control.\"},{\"id\":5,\"name\":\"Deathrender\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2.\\nWhenever equipped creature dies, you may put a creature card from your hand onto the battlefield and attach this Equipment to it.\\nEquip {2}\"},{\"id\":6,\"name\":\"Dolmen Gate\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Prevent all combat damage that would be dealt to attacking creatures you control.\"},{\"id\":7,\"name\":\"Herbal Poultice\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, Sacrifice this artifact: Regenerate target creature.\"},{\"id\":8,\"name\":\"Moonglove Extract\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Sacrifice this artifact: It deals 2 damage to any target.\"},{\"id\":9,\"name\":\"Rings of Brighthearth\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you activate an ability, if it isn't a mana ability, you may pay {2}. If you do, copy that ability. You may choose new targets for the copy.\"},{\"id\":10,\"name\":\"Runed Stalactite\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 and is every creature type.\\nEquip {2}\"},{\"id\":11,\"name\":\"Springleaf Drum\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Tap an untapped creature you control: Add one mana of any color.\"},{\"id\":12,\"name\":\"Thorn of Amethyst\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Noncreature spells cost {1} more to cast.\"},{\"id\":13,\"name\":\"Thousand-Year Elixir\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"You may activate abilities of creatures you control as though those creatures had haste.\\n{1}, {T}: Untap target creature.\"},{\"id\":14,\"name\":\"Twinning Glass\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: You may cast a spell from your hand without paying its mana cost if it has the same name as a spell that was cast this turn.\"},{\"id\":15,\"name\":\"Wanderer's Twig\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":16,\"name\":\"Ancient Amphitheater\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"As this land enters, you may reveal a Giant card from your hand. If you don't, this land enters tapped.\\n{T}: Add {R} or {W}.\"},{\"id\":17,\"name\":\"Auntie's Hovel\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"As this land enters, you may reveal a Goblin card from your hand. If you don't, this land enters tapped.\\n{T}: Add {B} or {R}.\"},{\"id\":18,\"name\":\"Gilt-Leaf Palace\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"As this land enters, you may reveal an Elf card from your hand. If you don't, this land enters tapped.\\n{T}: Add {B} or {G}.\"},{\"id\":19,\"name\":\"Howltooth Hollow\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Hideaway 4 (When this land enters, look at the top four cards of your library, exile one face down, then put the rest on the bottom in a random order.)\\nThis land enters tapped.\\n{T}: Add {B}.\\n{B}, {T}: You may play the exiled card without paying its mana cost if each player has no cards in hand.\"},{\"id\":20,\"name\":\"Mosswort Bridge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Hideaway 4 (When this land enters, look at the top four cards of your library, exile one face down, then put the rest on the bottom in a random order.)\\nThis land enters tapped.\\n{T}: Add {G}.\\n{G}, {T}: You may play the exiled card without paying its mana cost if creatures you control have total power 10 or greater.\"},{\"id\":21,\"name\":\"Secluded Glen\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"As this land enters, you may reveal a Faerie card from your hand. If you don't, this land enters tapped.\\n{T}: Add {U} or {B}.\"},{\"id\":22,\"name\":\"Shelldock Isle\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Hideaway 4 (When this land enters, look at the top four cards of your library, exile one face down, then put the rest on the bottom in a random order.)\\nThis land enters tapped.\\n{T}: Add {U}.\\n{U}, {T}: You may play the exiled card without paying its mana cost if a library has twenty or fewer cards in it.\"},{\"id\":23,\"name\":\"Shimmering Grotto\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{1}, {T}: Add one mana of any color.\"},{\"id\":24,\"name\":\"Spinerock Knoll\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Hideaway 4 (When this land enters, look at the top four cards of your library, exile one face down, then put the rest on the bottom in a random order.)\\nThis land enters tapped.\\n{T}: Add {R}.\\n{R}, {T}: You may play the exiled card without paying its mana cost if an opponent was dealt 7 or more damage this turn.\"},{\"id\":25,\"name\":\"Vivid Crag\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped with two charge counters on it.\\n{T}: Add {R}.\\n{T}, Remove a charge counter from this land: Add one mana of any color.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1386,
+      "cacheCreationInputTokens": 32680,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.777049,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.777049,
+      "pricedUsd": 0.777049,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.777049 and its own usage prices at $0.777049"
+    }
+  }
+}

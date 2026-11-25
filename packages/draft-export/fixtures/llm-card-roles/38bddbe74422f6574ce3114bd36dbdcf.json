@@ -1,0 +1,161 @@
+{
+  "key": "38bddbe74422f6574ce3114bd36dbdcf",
+  "recordedAt": "2026-11-22T22:02:37.224Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aerial Maneuver\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains flying and first strike until end of turn.\"},{\"id\":2,\"name\":\"Angelic Edict\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target creature or enchantment.\"},{\"id\":3,\"name\":\"Angelic Skirmisher\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nAt the beginning of each combat, choose first strike, vigilance, or lifelink. Creatures you control gain that ability until end of turn.\"},{\"id\":4,\"name\":\"Assault Griffin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\"},{\"id\":5,\"name\":\"Basilica Guards\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Defender\\nExtort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":6,\"name\":\"Blind Obedience\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\\nArtifacts and creatures your opponents control enter tapped.\"},{\"id\":7,\"name\":\"Boros Elite\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gets +2/+2 until end of turn.\"},{\"id\":8,\"name\":\"Court Street Denizen\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever another white creature you control enters, tap target creature an opponent controls.\"},{\"id\":9,\"name\":\"Daring Skyjek\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gains flying until end of turn.\"},{\"id\":10,\"name\":\"Debtor's Pulpit\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{T}: Tap target creature.\\\"\"},{\"id\":11,\"name\":\"Dutiful Thrull\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"{B}: Regenerate this creature.\"},{\"id\":12,\"name\":\"Frontline Medic\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, creatures you control gain indestructible until end of turn.\\nSacrifice this creature: Counter target spell with {X} in its mana cost unless its controller pays {3}.\"},{\"id\":13,\"name\":\"Gideon, Champion of Justice\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Gideon\",\"text\":\"+1: Put a loyalty counter on Gideon for each creature target opponent controls.\\n0: Until end of turn, Gideon becomes a Human Soldier creature with power and toughness each equal to the number of loyalty counters on him and gains indestructible. He's still a planeswalker. Prevent all damage that would be dealt to him this turn.\\n−15: Exile all other permanents.\"},{\"id\":14,\"name\":\"Guardian of the Gateless\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nThis creature can block any number of creatures.\\nWhenever this creature blocks, it gets +1/+1 until end of turn for each creature it's blocking.\"},{\"id\":15,\"name\":\"Guildscorn Ward\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has protection from multicolored.\"},{\"id\":16,\"name\":\"Hold the Gates\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control get +0/+1 for each Gate you control and have vigilance.\"},{\"id\":17,\"name\":\"Holy Mantle\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has protection from creatures.\"},{\"id\":18,\"name\":\"Knight of Obligation\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Vigilance\\nExtort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":19,\"name\":\"Knight Watch\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 2/2 white Knight creature tokens with vigilance.\"},{\"id\":20,\"name\":\"Luminate Primordial\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Vigilance\\nWhen this creature enters, for each opponent, exile up to one target creature that player controls and that player gains life equal to its power.\"},{\"id\":21,\"name\":\"Murder Investigation\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nWhen enchanted creature dies, create X 1/1 white Soldier creature tokens, where X is its power.\"},{\"id\":22,\"name\":\"Nav Squad Commandos\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gets +1/+1 until end of turn. Untap it.\"},{\"id\":23,\"name\":\"Righteous Charge\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +2/+2 until end of turn.\"},{\"id\":24,\"name\":\"Shielded Passage\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage that would be dealt to target creature this turn.\"},{\"id\":25,\"name\":\"Smite\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target blocked creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1174,
+      "cacheCreationInputTokens": 32370,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7602490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7602490000000001,
+      "pricedUsd": 0.760249,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.760249 and its own usage prices at $0.760249"
+    }
+  }
+}

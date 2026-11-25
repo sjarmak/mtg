@@ -1874,6 +1874,8 @@ ${TYPE_FIT_RULES}
 ${NAME_FIT_RULES}
 `;
 
+export const ART_LOADING_LABEL = 'Loading art';
+
 /*
  * The art window, and the one surface on the face that does not take the card's
  * identity.
@@ -1897,7 +1899,30 @@ const ART = `
 .mtg-card[data-size='full'][data-large-art='true'] > .mtg-art {
   aspect-ratio: ${cssNumber(LAND_ART_WINDOW.width)} / ${cssNumber(LAND_ART_WINDOW.height)};
 }
-.mtg-art__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mtg-art__image {
+  display: block; position: relative; width: 100%; height: 100%; object-fit: cover;
+}
+.mtg-art[data-art-state='ready'] {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--mtg-hatch) 0 1px,
+    transparent 1px 9px
+  );
+}
+.mtg-art[data-art-state='ready']::before {
+  content: '${ART_LOADING_LABEL}' / '';
+  position: absolute; inset: 0; margin: auto;
+  width: max-content; height: max-content;
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-muted);
+  background: var(--mtg-surface-raised);
+  padding: 2px var(--mtg-space-2); border-radius: var(--mtg-radius-pill);
+  border: 1px solid var(--mtg-line);
+}
+.mtg-card[data-size='board'] .mtg-art::before,
+.mtg-card[data-size='art'] .mtg-art::before {
+  content: none;
+}
 .mtg-art[data-art-state='pending'] {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: var(--mtg-space-1);

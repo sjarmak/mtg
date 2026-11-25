@@ -2,7 +2,7 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { stagePrintedFormats } from '../../tools/stage-printed-formats';
+import { stagePrintedFormats, withholdPrintedPlay } from '../../tools/stage-printed-formats';
 import { releaseDateLookup } from '../../tools/printed-release-dates';
 import { loadPrintedConstructedFormat } from '../../src/lab/printed-constructed-format';
 import { loadPrintedFormat } from '../../src/lab/printed-format';
@@ -53,7 +53,7 @@ const ktkSource = () => {
   return {
     id: 'ktk',
     directory,
-    admissionDirectory: join(data, 'play-admission-v24'),
+    admissionDirectory: join(data, 'play-admission'),
     formatFile: 'ktk-limited-format-v1.json',
     constructedFormatFile: 'ktk-constructed-format-v1.json',
     availability: {
@@ -176,6 +176,24 @@ describe('printed format staging', () => {
     const bare = await loadPrintedFormat(index.formats[0]!, read);
     expect(bare.tokens.length).toBe(loaded.tokens.length);
     expect((await loadPrintedFormat({ ...limited!, tokenPrintingsUrl: undefined }, read)).tokens).toEqual([]);
+  });
+
+  it('turns Play off for a withheld format only, keeping its draft and sealed', async () => {
+    const root = temporary();
+    const index = await stagePrintedFormats([ktkSource(), source], root, staging);
+    const reason = 'Play is off: the installed admission was built against a different bridge.';
+    const next = withholdPrintedPlay(root, index, [{ formatId: 'ktk', reason }]);
+    const ktk = next.formats.find((row) => row.id === 'ktk')!;
+    expect(ktk.availability).toEqual({
+      browse: 'available',
+      draft: 'available',
+      sealed: 'available',
+      play: { status: 'unavailable', reason },
+    });
+    expect(next.formats.find((row) => row.id === 'akh-hou')).toEqual(
+      index.formats.find((row) => row.id === 'akh-hou'),
+    );
+    expect(JSON.parse(readFileSync(join(root, 'formats/index.json'), 'utf8'))).toEqual(next);
   });
 
   it('leaves the prior index untouched when the next bundle is invalid', async () => {

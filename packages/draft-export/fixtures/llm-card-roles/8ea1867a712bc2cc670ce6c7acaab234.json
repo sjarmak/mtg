@@ -1,0 +1,161 @@
+{
+  "key": "8ea1867a712bc2cc670ce6c7acaab234",
+  "recordedAt": "2026-11-22T21:23:28.683Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Act of Heroism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature. It gets +2/+2 until end of turn and can block an additional creature this turn.\"},{\"id\":2,\"name\":\"Adorned Pouncer\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Double strike\\nEternalize {3}{W}{W} ({3}{W}{W}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Cat with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":3,\"name\":\"Angel of Condemnation\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, vigilance\\n{2}{W}, {T}: Exile another target creature. Return that card to the battlefield under its owner's control at the beginning of the next end step.\\n{2}{W}, {T}, Exert this creature: Exile another target creature until this creature leaves the battlefield. (An exerted creature won't untap during your next untap step.)\"},{\"id\":4,\"name\":\"Angel of the God-Pharaoh\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":5,\"name\":\"Aven of Enduring Hope\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Bird Cleric\",\"text\":\"Flying\\nWhen this creature enters, you gain 3 life.\"},{\"id\":6,\"name\":\"Crested Sunmare\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Horse\",\"text\":\"Other Horses you control have indestructible.\\nAt the beginning of each end step, if you gained life this turn, create a 5/5 white Horse creature token.\"},{\"id\":7,\"name\":\"Dauntless Aven\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird Warrior\",\"text\":\"Flying\\nWhenever this creature attacks, untap target creature you control.\"},{\"id\":8,\"name\":\"Desert's Hold\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, if you control a Desert or there is a Desert card in your graveyard, you gain 3 life.\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\"},{\"id\":9,\"name\":\"Disposal Mummy\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Zombie Jackal\",\"text\":\"When this creature enters, exile target card from an opponent's graveyard.\"},{\"id\":10,\"name\":\"Djeru, With Eyes Open\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Legendary Creature — Human Warrior\",\"text\":\"Vigilance\\nWhen Djeru enters, you may search your library for a planeswalker card, reveal it, put it into your hand, then shuffle.\\nIf a source would deal damage to a planeswalker you control, prevent 1 of that damage.\"},{\"id\":11,\"name\":\"Djeru's Renunciation\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Tap up to two target creatures.\\nCycling {W} ({W}, Discard this card: Draw a card.)\"},{\"id\":12,\"name\":\"Dutiful Servants\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"\"},{\"id\":13,\"name\":\"Gideon's Defeat\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target white creature that's attacking or blocking. If it was a Gideon planeswalker, you gain 5 life.\"},{\"id\":14,\"name\":\"God-Pharaoh's Faithful\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever you cast a blue, black, or red spell, you gain 1 life.\"},{\"id\":15,\"name\":\"Hour of Revelation\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell costs {3} less to cast if there are ten or more nonland permanents on the battlefield.\\nDestroy all nonland permanents.\"},{\"id\":16,\"name\":\"Mummy Paramount\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Whenever another Zombie you control enters, this creature gets +1/+1 until end of turn.\"},{\"id\":17,\"name\":\"Oketra's Avenger\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, prevent all combat damage that would be dealt to it this turn. (An exerted creature won't untap during your next untap step.)\"},{\"id\":18,\"name\":\"Oketra's Last Mercy\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Your life total becomes equal to your starting life total. Lands you control don't untap during your next untap step.\"},{\"id\":19,\"name\":\"Overwhelming Splendor\",\"manaCost\":\"{6}{W}{W}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nCreatures enchanted player controls lose all abilities and have base power and toughness 1/1.\\nEnchanted player can't activate abilities that aren't mana abilities or loyalty abilities.\"},{\"id\":20,\"name\":\"Sandblast\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Sandblast deals 5 damage to target attacking or blocking creature.\"},{\"id\":21,\"name\":\"Saving Grace\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash\\nEnchant creature you control\\nWhen this Aura enters, all damage that would be dealt this turn to you and permanents you control is dealt to enchanted creature instead.\\nEnchanted creature gets +0/+3.\"},{\"id\":22,\"name\":\"Solemnity\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Players can't get counters.\\nCounters can't be put on artifacts, creatures, enchantments, or lands.\"},{\"id\":23,\"name\":\"Solitary Camel\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Camel\",\"text\":\"This creature has lifelink as long as you control a Desert or there is a Desert card in your graveyard. (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":24,\"name\":\"Steadfast Sentinel\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Vigilance\\nEternalize {4}{W}{W} ({4}{W}{W}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Human Cleric with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":25,\"name\":\"Steward of Solidarity\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"{T}, Exert this creature: Create a 1/1 white Warrior creature token with vigilance. (An exerted creature won't untap during your next untap step.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1106,
+      "cacheCreationInputTokens": 32684,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.763129,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.763129,
+      "pricedUsd": 0.763129,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.763129 and its own usage prices at $0.763129"
+    }
+  }
+}

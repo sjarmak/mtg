@@ -1,0 +1,161 @@
+{
+  "key": "9ab5fbb7ef852912bbe18ce20c27afba",
+  "recordedAt": "2026-11-22T22:00:33.769Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Swift Justice\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature gets +1/+0 and gains first strike and lifelink.\"},{\"id\":2,\"name\":\"Trained Caracal\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":3,\"name\":\"Trostani's Judgment\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature, then populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":4,\"name\":\"Aquus Steed\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"{2}{U}, {T}: Target creature gets -2/-0 until end of turn.\"},{\"id\":5,\"name\":\"Blustersquall\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature you don't control.\\nOverload {3}{U} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":6,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":7,\"name\":\"Chronic Flooding\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhenever enchanted land becomes tapped, its controller mills three cards.\"},{\"id\":8,\"name\":\"Conjured Currency\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, you may exchange control of this enchantment and target permanent you neither own nor control.\"},{\"id\":9,\"name\":\"Crosstown Courier\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Vedalken\",\"text\":\"Whenever this creature deals combat damage to a player, that player mills that many cards.\"},{\"id\":10,\"name\":\"Cyclonic Rift\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent you don't control to its owner's hand.\\nOverload {6}{U} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":11,\"name\":\"Dispel\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target instant spell.\"},{\"id\":12,\"name\":\"Doorkeeper\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Homunculus\",\"text\":\"Defender\\n{2}{U}, {T}: Target player mills X cards, where X is the number of creatures you control with defender.\"},{\"id\":13,\"name\":\"Downsize\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you don't control gets -4/-0 until end of turn.\\nOverload {2}{U} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":14,\"name\":\"Faerie Impostor\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\nWhen this creature enters, sacrifice it unless you return another creature you control to its owner's hand.\"},{\"id\":15,\"name\":\"Hover Barrier\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Illusion Wall\",\"text\":\"Defender, flying\"},{\"id\":16,\"name\":\"Inaction Injunction\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Detain target creature an opponent controls. (Until your next turn, that creature can't attack or block and its activated abilities can't be activated.)\\nDraw a card.\"},{\"id\":17,\"name\":\"Inspiration\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target player draws two cards.\"},{\"id\":18,\"name\":\"Isperia's Skywatch\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Vedalken Knight\",\"text\":\"Flying\\nWhen this creature enters, detain target creature an opponent controls. (Until your next turn, that creature can't attack or block and its activated abilities can't be activated.)\"},{\"id\":19,\"name\":\"Jace, Architect of Thought\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+1: Until your next turn, whenever a creature an opponent controls attacks, it gets -1/-0 until end of turn.\\n−2: Reveal the top three cards of your library. An opponent separates those cards into two piles. Put one pile into your hand and the other on the bottom of your library in any order.\\n−8: For each player, search that player's library for a nonland card and exile it, then that player shuffles. You may cast those cards without paying their mana costs.\"},{\"id\":20,\"name\":\"Mizzium Skin\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +0/+1 and gains hexproof until end of turn.\\nOverload {1}{U} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":21,\"name\":\"Paralyzing Grasp\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":22,\"name\":\"Psychic Spiral\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Instant\",\"text\":\"Shuffle all cards from your graveyard into your library. Target player mills that many cards.\"},{\"id\":23,\"name\":\"Runewing\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature dies, draw a card.\"},{\"id\":24,\"name\":\"Search the City\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile the top five cards of your library.\\nWhenever you play a card with the same name as one of the exiled cards, you may put one of those cards with that name into its owner's hand. Then if there are no cards exiled with this enchantment, sacrifice it. If you do, take an extra turn after this one.\"},{\"id\":25,\"name\":\"Skyline Predator\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\",\"draw\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\",\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 435,
+      "cacheCreationInputTokens": 32401,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.723919,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.723919,
+      "pricedUsd": 0.723919,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723919 and its own usage prices at $0.723919"
+    }
+  }
+}

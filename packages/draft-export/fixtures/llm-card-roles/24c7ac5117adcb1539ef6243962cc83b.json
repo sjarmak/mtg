@@ -1,0 +1,161 @@
+{
+  "key": "24c7ac5117adcb1539ef6243962cc83b",
+  "recordedAt": "2026-11-22T22:33:34.517Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ragamuffyn\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Cleric\",\"text\":\"Hellbent — {T}, Sacrifice a creature or land: Draw a card. Activate only if you have no cards in hand.\"},{\"id\":2,\"name\":\"Ratcatcher\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Ogre Rogue\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\nAt the beginning of your upkeep, you may search your library for a Rat card, reveal it, put it into your hand, then shuffle.\"},{\"id\":3,\"name\":\"Seal of Doom\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Sacrifice this enchantment: Destroy target nonblack creature. It can't be regenerated.\"},{\"id\":4,\"name\":\"Slaughterhouse Bouncer\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Hellbent — When this creature dies, if you have no cards in hand, target creature gets -3/-3 until end of turn.\"},{\"id\":5,\"name\":\"Slithering Shade\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"Defender (This creature can't attack.)\\n{B}: This creature gets +1/+1 until end of turn.\\nHellbent — This creature can attack as though it didn't have defender as long as you have no cards in hand.\"},{\"id\":6,\"name\":\"Unliving Psychopath\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Zombie Assassin\",\"text\":\"{B}: This creature gets +1/-1 until end of turn.\\n{B}, {T}: Destroy target creature with power less than this creature's power.\"},{\"id\":7,\"name\":\"Vesper Ghoul\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Druid\",\"text\":\"{T}, Pay 1 life: Add one mana of any color.\"},{\"id\":8,\"name\":\"Wit's End\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards their hand.\"},{\"id\":9,\"name\":\"Cackling Flames\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Cackling Flames deals 3 damage to any target.\\nHellbent — Cackling Flames deals 5 damage instead if you have no cards in hand.\"},{\"id\":10,\"name\":\"Demonfire\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Demonfire deals X damage to any target. If a creature dealt damage this way would die this turn, exile it instead.\\nHellbent — If you have no cards in hand, this spell can't be countered and the damage can't be prevented.\"},{\"id\":11,\"name\":\"Flame-Kin War Scout\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental Scout\",\"text\":\"When another creature enters, sacrifice this creature. If you do, this creature deals 4 damage to that creature.\"},{\"id\":12,\"name\":\"Flaring Flame-Kin\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"As long as this creature is enchanted, it gets +2/+2, has trample, and has \\\"{R}: This creature gets +1/+0 until end of turn.\\\"\"},{\"id\":13,\"name\":\"Gnat Alley Creeper\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"This creature can't be blocked by creatures with flying.\"},{\"id\":14,\"name\":\"Ignorant Bliss\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Exile all cards from your hand face down. At the beginning of the next end step, return those cards to your hand, then draw a card.\"},{\"id\":15,\"name\":\"Kill-Suit Cultist\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"This creature attacks each combat if able.\\n{B}, Sacrifice this creature: The next time damage would be dealt to target creature this turn, destroy that creature instead.\"},{\"id\":16,\"name\":\"Kindle the Carnage\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Discard a card at random. If you do, Kindle the Carnage deals damage equal to that card's mana value to each creature. You may repeat this process any number of times.\"},{\"id\":17,\"name\":\"Ogre Gatecrasher\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Ogre Rogue\",\"text\":\"When this creature enters, destroy target creature with defender.\"},{\"id\":18,\"name\":\"Psychotic Fury\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target multicolored creature gains double strike until end of turn.\\nDraw a card.\"},{\"id\":19,\"name\":\"Rakdos Pit Dragon\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"{R}{R}: This creature gains flying until end of turn.\\n{R}: This creature gets +1/+0 until end of turn.\\nHellbent — This creature has double strike as long as you have no cards in hand.\"},{\"id\":20,\"name\":\"Sandstorm Eidolon\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{R}, Sacrifice this creature: Target creature can't block this turn.\\nWhenever you cast a multicolored spell, you may return this card from your graveyard to your hand.\"},{\"id\":21,\"name\":\"Seal of Fire\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Sacrifice this enchantment: It deals 2 damage to any target.\"},{\"id\":22,\"name\":\"Squealing Devil\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\nWhen this creature enters, you may pay {X}. If you do, target creature gets +X/+0 until end of turn.\\nWhen this creature enters, sacrifice it unless {B} was spent to cast it.\"},{\"id\":23,\"name\":\"Stalking Vengeance\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Haste\\nWhenever another creature you control dies, it deals damage equal to its power to target player or planeswalker.\"},{\"id\":24,\"name\":\"Stormscale Anarch\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Lizard Shaman\",\"text\":\"{2}{R}, Discard a card at random: This creature deals 2 damage to any target. If the discarded card was multicolored, this creature deals 4 damage instead.\"},{\"id\":25,\"name\":\"Taste for Mayhem\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+0.\\nHellbent — Enchanted creature gets an additional +2/+0 as long as you have no cards in hand.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\",\"draw\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2080,
+      "cacheCreationInputTokens": 32613,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.810409,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.810409,
+      "pricedUsd": 0.810409,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.810409 and its own usage prices at $0.810409"
+    }
+  }
+}

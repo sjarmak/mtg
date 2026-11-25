@@ -1,0 +1,161 @@
+{
+  "key": "7e7342adec8e476d9affbd8d827622b7",
+  "recordedAt": "2026-11-22T22:10:48.191Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Marshmist Titan\",\"manaCost\":\"{6}{B}\",\"typeLine\":\"Creature — Giant\",\"text\":\"This spell costs {X} less to cast, where X is your devotion to black. (Each {B} in the mana costs of permanents you control counts toward your devotion to black.)\"},{\"id\":2,\"name\":\"Necrobite\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains deathtouch until end of turn. Regenerate it. (The next time that creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":3,\"name\":\"Nyxborn Eidolon\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {4}{B} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +2/+1.\"},{\"id\":4,\"name\":\"Odunos River Trawler\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, return target enchantment creature card from your graveyard to your hand.\\n{W}, Sacrifice this creature: Return target enchantment creature card from your graveyard to your hand.\"},{\"id\":5,\"name\":\"Pain Seer\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Inspired — Whenever this creature becomes untapped, reveal the top card of your library and put that card into your hand. You lose life equal to that card's mana value.\"},{\"id\":6,\"name\":\"Sanguimancy\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"You draw X cards and you lose X life, where X is your devotion to black. (Each {B} in the mana costs of permanents you control counts toward your devotion to black.)\"},{\"id\":7,\"name\":\"Servant of Tymaret\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Inspired — Whenever this creature becomes untapped, each opponent loses 1 life. You gain life equal to the life lost this way.\\n{2}{B}: Regenerate this creature.\"},{\"id\":8,\"name\":\"Shrike Harpy\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Harpy\",\"text\":\"Flying\\nTribute 2 (As this creature enters, an opponent of your choice may put two +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, target opponent sacrifices a creature of their choice.\"},{\"id\":9,\"name\":\"Spiteful Returned\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment Creature — Zombie\",\"text\":\"Bestow {3}{B} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nWhenever this creature or enchanted creature attacks, defending player loses 2 life.\\nEnchanted creature gets +1/+1.\"},{\"id\":10,\"name\":\"Warchanter of Mogis\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Minotaur Shaman\",\"text\":\"Inspired — Whenever this creature becomes untapped, target creature you control gains intimidate until end of turn. (A creature with intimidate can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":11,\"name\":\"Weight of the Underworld\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -3/-2.\"},{\"id\":12,\"name\":\"Akroan Conscriptor\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, gain control of another target creature until end of turn. Untap that creature. It gains haste until end of turn.\"},{\"id\":13,\"name\":\"Archetype of Aggression\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Enchantment Creature — Human Warrior\",\"text\":\"Creatures you control have trample.\\nCreatures your opponents control lose trample and can't have or gain trample.\"},{\"id\":14,\"name\":\"Bolt of Keranos\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Bolt of Keranos deals 3 damage to any target. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":15,\"name\":\"Cyclops of One-Eyed Pass\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Cyclops\",\"text\":\"\"},{\"id\":16,\"name\":\"Epiphany Storm\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{R}, {T}, Discard a card: Draw a card.\\\"\"},{\"id\":17,\"name\":\"Everflame Eidolon\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {2}{R} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\n{R}: This creature gets +1/+0 until end of turn. If it's an Aura, enchanted creature gets +1/+0 until end of turn instead.\\nEnchanted creature gets +1/+1.\"},{\"id\":18,\"name\":\"Fall of the Hammer\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control deals damage equal to its power to another target creature.\"},{\"id\":19,\"name\":\"Fated Conflagration\",\"manaCost\":\"{1}{R}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Fated Conflagration deals 5 damage to target creature or planeswalker. If it's your turn, scry 2.\"},{\"id\":20,\"name\":\"Fearsome Temper\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has \\\"{2}{R}: Target creature can't block this creature this turn.\\\"\"},{\"id\":21,\"name\":\"Felhide Spiritbinder\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Shaman\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may pay {1}{R}. If you do, create a token that's a copy of another target creature, except it's an enchantment in addition to its other types. It gains haste. Exile it at the beginning of the next end step.\"},{\"id\":22,\"name\":\"Flame-Wreathed Phoenix\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying\\nTribute 2 (As this creature enters, an opponent of your choice may put two +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, it gains haste and \\\"When this creature dies, return it to its owner's hand.\\\"\"},{\"id\":23,\"name\":\"Forgestoker Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{1}{R}: This creature deals 1 damage to target creature. That creature can't block this combat. Activate only if this creature is attacking.\"},{\"id\":24,\"name\":\"Impetuous Sunchaser\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Flying, haste\\nThis creature attacks each combat if able.\"},{\"id\":25,\"name\":\"Kragma Butcher\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Inspired — Whenever this creature becomes untapped, it gets +2/+0 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1399,
+      "cacheCreationInputTokens": 32904,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.782179,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.782179,
+      "pricedUsd": 0.782179,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.782179 and its own usage prices at $0.782179"
+    }
+  }
+}

@@ -95,16 +95,16 @@ const NOT_OUR_WORDS: readonly { readonly prefix: string; readonly why: string }[
     why: 'the printed Ixalan catalog, keyed by card names as Wizards printed them (Emissary of Sunrise and Sunrise Seeker are cards, and `-rise` is an ending this gate cannot tell from a British stem); a name rewritten into the repo dialect would no longer match the Forge script it admits',
   },
   {
-    prefix: 'packages/data/data/xln/play-admission-v',
-    why: 'every version of the Ixalan play admission, which names the same Wizards-printed cards as the catalog beside it (the `sunrise` hits are card names and script paths), so a re-bind that installs the next version needs no edit here; the README next to it is our own prose and stays under the gate',
+    prefix: 'packages/data/data/xln/play-admission/',
+    why: 'the Ixalan play admission, which names the same Wizards-printed cards as the catalog beside it (the `sunrise` hits are card names and script paths); a re-bind rebuilds the directory in place, so it needs no edit here; the README next to it is our own prose and stays under the gate',
   },
   {
     prefix: 'packages/data/data/lrw/lrw-printed-catalog-v1.json',
     why: 'the printed Lorwyn catalog, keyed by card names as Wizards printed them (Sunrise Sovereign is a card, and `-rise` is an ending this gate cannot tell from a British stem); a name rewritten into the repo dialect would no longer match the Forge script it admits',
   },
   {
-    prefix: 'packages/data/data/lrw/play-admission-v',
-    why: 'every version of the Lorwyn play admission, which names the same Wizards-printed card as the catalog beside it, so a re-bind that installs the next version needs no edit here; the README next to it is our own prose and stays under the gate',
+    prefix: 'packages/data/data/lrw/play-admission/',
+    why: 'the Lorwyn play admission, which names the same Wizards-printed card as the catalog beside it; a re-bind rebuilds the directory in place, so it needs no edit here; the README next to it is our own prose and stays under the gate',
   },
   {
     prefix: 'packages/data/data/commander-precons/',
@@ -115,7 +115,7 @@ const NOT_OUR_WORDS: readonly { readonly prefix: string; readonly why: string }[
     why: 'the printed Starter Commander Decks catalog and source artifacts, kept as Wizards and Forge publish them so card names and rules text still identify the same printings',
   },
   {
-    prefix: 'packages/data/data/kld-aer/play-admission-v',
+    prefix: 'packages/data/data/kld-aer/play-admission/',
     why: "the Kaladesh / Aether Revolt play admission's generated evidence, which names Forge's own ability-API classes verbatim (DBRaiseDead is Forge's SVar name for Dark Intimations' graveyard-return clause, not ours) — no other installed format's coverage happens to reach that name, so this is the first admission to carry the string",
   },
   {

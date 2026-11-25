@@ -5,8 +5,12 @@ import {
   checkCommanderDeck,
   parsePrintedCardCatalog,
   parsePrintedConstructedFormat,
+  parsePrintedTokenPrintings,
 } from '@mtg/printed-card';
+import { FORGE_TOKEN_SCRIPTS_PATH, readForgeScriptArchive } from '../src/printed-card/forge-install';
 import { verifiedPrintedFormat } from '../src/printed-card/play-admission';
+import { catalogTokenScriptReferences } from '../src/printed-card/token-references';
+import { parseForgeTokenScript } from '../src/printed-card/token-printings';
 
 const dataRoot = new URL('../data/commander-precons/', import.meta.url);
 const readData = (file: string) => readFileSync(new URL(file, dataRoot), 'utf8');
@@ -174,4 +178,28 @@ describe('Commander Preconstructed Decks printed format sources', () => {
     expect(() => verifiedPrintedFormat(tampered, catalogInputs)).toThrow(/format checksum mismatch/u);
     expect(() => verifiedPrintedFormat(formatInput, [])).toThrow(/exactly the recipe source catalogs/u);
   });
+
+  it('gives every token the seven catalogs create a printing the board can pick by name and color', () => {
+    // The board matches a token by its engine name, then by color (`printingFor` in
+    // packages/ui/src/routes/play/backend-position.ts), so a name alone is not enough:
+    // Afterlife's white and black Spirit has no row even where a white Spirit does (#311).
+    const sheet = parsePrintedTokenPrintings(
+      JSON.parse(readData('commander-precons-token-printings-v1.json')),
+    );
+    const created = catalogTokenScriptReferences(
+      [...new Set(catalogs.flatMap((catalog) => catalog.cards.map((card) => card.forgeScript)))],
+      readForgeScriptArchive(),
+    );
+    const unbound = created.filter((reference) => {
+      const file = `${reference}.txt`;
+      const script = parseForgeTokenScript(file, readFileSync(`${FORGE_TOKEN_SCRIPTS_PATH}/${file}`, 'utf8'));
+      if (script === undefined) throw new Error(`Forge token script ${file} states no token`);
+      return !sheet.tokens.some(
+        (token) =>
+          token.observedNames.includes(script.name) && token.colors.join('') === script.colors.join(''),
+      );
+    });
+    expect(created.length).toBeGreaterThan(100);
+    expect(unbound).toEqual([]);
+  }, 180_000);
 });

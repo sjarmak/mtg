@@ -1,0 +1,161 @@
+{
+  "key": "499278d001ebe7c04a34cdfcdc9625f4",
+  "recordedAt": "2026-11-22T21:59:55.175Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Druids' Repository\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control attacks, put a charge counter on this enchantment.\\nRemove a charge counter from this enchantment: Add one mana of any color.\"},{\"id\":2,\"name\":\"Eaten by Spiders\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying and all Equipment attached to that creature.\"},{\"id\":3,\"name\":\"Flowering Lumberknot\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Treefolk\",\"text\":\"This creature can't attack or block unless it's paired with a creature with soulbond.\"},{\"id\":4,\"name\":\"Geist Trappers\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have reach.\"},{\"id\":5,\"name\":\"Gloomwidow\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\\nThis creature can block only creatures with flying.\"},{\"id\":6,\"name\":\"Grounded\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature loses flying.\"},{\"id\":7,\"name\":\"Howlgeist\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Spirit Wolf\",\"text\":\"Creatures with power less than this creature's power can't block it.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":8,\"name\":\"Joint Assault\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. If it's paired with a creature, that creature also gets +2/+2 until end of turn.\"},{\"id\":9,\"name\":\"Lair Delve\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top two cards of your library. Put all creature and land cards revealed this way into your hand and the rest on the bottom of your library in any order.\"},{\"id\":10,\"name\":\"Natural End\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment. You gain 3 life.\"},{\"id\":11,\"name\":\"Nettle Swine\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"\"},{\"id\":12,\"name\":\"Nightshade Peddler\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have deathtouch.\"},{\"id\":13,\"name\":\"Pathbreaker Wurm\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have trample.\"},{\"id\":14,\"name\":\"Primal Surge\",\"manaCost\":\"{8}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile the top card of your library. If it's a permanent card, you may put it onto the battlefield. If you do, repeat this process.\"},{\"id\":15,\"name\":\"Rain of Thorns\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or more —\\n• Destroy target artifact.\\n• Destroy target enchantment.\\n• Destroy target land.\"},{\"id\":16,\"name\":\"Revenge of the Hunted\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, target creature gets +6/+6 and gains trample, and all creatures able to block it this turn do so.\\nMiracle {G} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":17,\"name\":\"Sheltering Word\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains hexproof until end of turn. You gain life equal to that creature's toughness. (A creature with hexproof can't be the target of spells or abilities your opponents control.)\"},{\"id\":18,\"name\":\"Snare the Skies\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains reach until end of turn. (It can block creatures with flying.)\"},{\"id\":19,\"name\":\"Somberwald Sage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"{T}: Add three mana of any one color. Spend this mana only to cast creature spells.\"},{\"id\":20,\"name\":\"Soul of the Harvest\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Trample\\nWhenever another nontoken creature you control enters, you may draw a card.\"},{\"id\":21,\"name\":\"Terrifying Presence\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt by creatures other than target creature this turn.\"},{\"id\":22,\"name\":\"Timberland Guide\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"When this creature enters, put a +1/+1 counter on target creature.\"},{\"id\":23,\"name\":\"Triumph of Ferocity\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, draw a card if you control the creature with the greatest power or tied for the greatest power.\"},{\"id\":24,\"name\":\"Trusted Forcemage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, each of those creatures gets +1/+1.\"},{\"id\":25,\"name\":\"Ulvenwald Tracker\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{1}{G}, {T}: Target creature you control fights another target creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 415,
+      "cacheCreationInputTokens": 32417,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.723239,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.723239,
+      "pricedUsd": 0.723239,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723239 and its own usage prices at $0.723239"
+    }
+  }
+}

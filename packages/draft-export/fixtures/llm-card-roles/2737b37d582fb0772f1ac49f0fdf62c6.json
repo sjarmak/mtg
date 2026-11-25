@@ -1,0 +1,161 @@
+{
+  "key": "2737b37d582fb0772f1ac49f0fdf62c6",
+  "recordedAt": "2026-11-22T22:21:16.533Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Atzocan Archer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"Reach\\nWhen this creature enters, you may have it fight another target creature. (Each deals damage equal to its power to the other.)\"},{\"id\":2,\"name\":\"Blinding Fog\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage that would be dealt to creatures this turn. Creatures you control gain hexproof until end of turn. (They can't be the targets of spells or abilities your opponents control.)\"},{\"id\":3,\"name\":\"Blossom Dryad\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Dryad\",\"text\":\"{T}: Untap target land.\"},{\"id\":4,\"name\":\"Carnage Tyrant\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"This spell can't be countered.\\nTrample, hexproof\"},{\"id\":5,\"name\":\"Colossal Dreadmaw\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":6,\"name\":\"Commune with Dinosaurs\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top five cards of your library. You may reveal a Dinosaur or land card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\"},{\"id\":7,\"name\":\"Crash the Ramparts\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 and gains trample until end of turn.\"},{\"id\":8,\"name\":\"Crushing Canopy\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Destroy target creature with flying.\\n• Destroy target enchantment.\"},{\"id\":9,\"name\":\"Deathgorge Scavenger\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Whenever this creature enters or attacks, you may exile target card from a graveyard. If a creature card is exiled this way, you gain 2 life. If a noncreature card is exiled this way, this creature gets +1/+1 until end of turn.\"},{\"id\":10,\"name\":\"Deeproot Champion\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Merfolk Shaman\",\"text\":\"Whenever you cast a noncreature spell, put a +1/+1 counter on this creature.\"},{\"id\":11,\"name\":\"Deeproot Warrior\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Merfolk Warrior\",\"text\":\"Whenever this creature becomes blocked, it gets +1/+1 until end of turn.\"},{\"id\":12,\"name\":\"Drover of the Mighty\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"This creature gets +2/+2 as long as you control a Dinosaur.\\n{T}: Add one mana of any color.\"},{\"id\":13,\"name\":\"Emergent Growth\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gets +5/+5 until end of turn and must be blocked this turn if able.\"},{\"id\":14,\"name\":\"Emperor's Vanguard\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Whenever this creature deals combat damage to a player, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":15,\"name\":\"Grazing Whiptail\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Reach\"},{\"id\":16,\"name\":\"Growing Rites of Itlimoc\",\"manaCost\":null,\"typeLine\":\"Legendary Enchantment // Legendary Land\",\"text\":null,\"faces\":[{\"name\":\"Growing Rites of Itlimoc\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Enchantment\",\"text\":\"When Growing Rites of Itlimoc enters, look at the top four cards of your library. You may reveal a creature card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\\nAt the beginning of your end step, if you control four or more creatures, transform Growing Rites of Itlimoc.\"},{\"name\":\"Itlimoc, Cradle of the Sun\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"(Transforms from Growing Rites of Itlimoc.)\\n{T}: Add {G}.\\n{T}: Add {G} for each creature you control.\"}]},{\"id\":17,\"name\":\"Ixalli's Diviner\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"When this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":18,\"name\":\"Ixalli's Keeper\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{7}{G}, {T}, Sacrifice this creature: Target creature gets +5/+5 and gains trample until end of turn.\"},{\"id\":19,\"name\":\"Jade Guardian\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Merfolk Shaman\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nWhen this creature enters, put a +1/+1 counter on target Merfolk you control.\"},{\"id\":20,\"name\":\"Jungle Delver\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Merfolk Warrior\",\"text\":\"{3}{G}: Put a +1/+1 counter on this creature.\"},{\"id\":21,\"name\":\"Kumena's Speaker\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Merfolk Shaman\",\"text\":\"This creature gets +1/+1 as long as you control another Merfolk or an Island.\"},{\"id\":22,\"name\":\"Merfolk Branchwalker\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"When this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":23,\"name\":\"New Horizons\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, put a +1/+1 counter on target creature you control.\\nEnchanted land has \\\"{T}: Add two mana of any one color.\\\"\"},{\"id\":24,\"name\":\"Old-Growth Dryads\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Dryad\",\"text\":\"When this creature enters, each opponent may search their library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":25,\"name\":\"Pounce\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control fights target creature you don't control. (Each deals damage equal to its power to the other.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 398,
+      "cacheCreationInputTokens": 32723,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7285090000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7285090000000001,
+      "pricedUsd": 0.728509,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728509 and its own usage prices at $0.728509"
+    }
+  }
+}

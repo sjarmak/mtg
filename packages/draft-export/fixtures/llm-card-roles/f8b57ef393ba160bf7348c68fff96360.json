@@ -1,0 +1,161 @@
+{
+  "key": "f8b57ef393ba160bf7348c68fff96360",
+  "recordedAt": "2026-11-22T22:11:31.051Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aegis of the Gods\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment Creature — Human Soldier\",\"text\":\"You have hexproof. (You can't be the target of spells or abilities your opponents control.)\"},{\"id\":2,\"name\":\"Ajani's Presence\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{W} more to cast for each target beyond the first.\\nAny number of target creatures each get +1/+1 and gain indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy them.)\"},{\"id\":3,\"name\":\"Akroan Mastiff\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"{W}, {T}: Tap target creature.\"},{\"id\":4,\"name\":\"Armament of Nyx\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has double strike as long as it's an enchantment. Otherwise, prevent all damage that would be dealt by enchanted creature. (A creature with double strike deals both first-strike and regular combat damage.)\"},{\"id\":5,\"name\":\"Banishing Light\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile target nonland permanent an opponent controls until this enchantment leaves the battlefield.\"},{\"id\":6,\"name\":\"Dawnbringer Charioteers\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Flying, lifelink\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":7,\"name\":\"Deicide\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target enchantment. If the exiled card is a God card, search its controller's graveyard, hand, and library for any number of cards with the same name as that card and exile them. Then that player shuffles.\"},{\"id\":8,\"name\":\"Dictate of Heliod\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Flash\\nCreatures you control get +2/+2.\"},{\"id\":9,\"name\":\"Eagle of the Watch\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying, vigilance\"},{\"id\":10,\"name\":\"Eidolon of Rhetoric\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Each player can't cast more than one spell each turn.\"},{\"id\":11,\"name\":\"Font of Vigor\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"{2}{W}, Sacrifice this enchantment: You gain 7 life.\"},{\"id\":12,\"name\":\"Godsend\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Legendary Artifact — Equipment\",\"text\":\"Equipped creature gets +3/+3.\\nWhenever equipped creature blocks or becomes blocked by one or more creatures, you may exile one of those creatures.\\nYour opponents can't cast spells with the same name as a card exiled with Godsend.\\nEquip {3}\"},{\"id\":13,\"name\":\"Harvestguard Alseids\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, prevent all damage that would be dealt to target creature this turn.\"},{\"id\":14,\"name\":\"Lagonna-Band Trailblazer\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Centaur Scout\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on it.\"},{\"id\":15,\"name\":\"Launch the Fleet\",\"manaCost\":\"{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Strive — This spell costs {1} more to cast for each target beyond the first.\\nUntil end of turn, any number of target creatures each gain \\\"Whenever this creature attacks, create a 1/1 white Soldier creature token that's tapped and attacking.\\\"\"},{\"id\":16,\"name\":\"Leonin Iconoclast\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Cat Monk\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, destroy target enchantment creature an opponent controls.\"},{\"id\":17,\"name\":\"Mortal Obstinacy\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nEnchanted creature gets +1/+1.\\nWhenever enchanted creature deals combat damage to a player, you may sacrifice this Aura. If you do, destroy target enchantment.\"},{\"id\":18,\"name\":\"Nyx-Fleece Ram\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment Creature — Sheep\",\"text\":\"At the beginning of your upkeep, you gain 1 life.\"},{\"id\":19,\"name\":\"Oppressive Rays\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block unless its controller pays {3}.\\nActivated abilities of enchanted creature cost {3} more to activate.\"},{\"id\":20,\"name\":\"Oreskos Swiftclaw\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Warrior\",\"text\":\"\"},{\"id\":21,\"name\":\"Phalanx Formation\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {1}{W} more to cast for each target beyond the first.\\nAny number of target creatures each gain double strike until end of turn. (They deal both first-strike and regular combat damage.)\"},{\"id\":22,\"name\":\"Quarry Colossus\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"When this creature enters, put target creature into its owner's library just beneath the top X cards of that library, where X is the number of Plains you control.\"},{\"id\":23,\"name\":\"Reprisal\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power 4 or greater. It can't be regenerated.\"},{\"id\":24,\"name\":\"Sightless Brawler\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment Creature — Human Warrior\",\"text\":\"Bestow {4}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature can't attack alone.\\nEnchanted creature gets +3/+2 and can't attack alone.\"},{\"id\":25,\"name\":\"Skybind\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Constellation — Whenever this enchantment or another enchantment you control enters, exile target nonenchantment permanent. Return that card to the battlefield under its owner's control at the beginning of the next end step.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1122,
+      "cacheCreationInputTokens": 32602,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.762289,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.762289,
+      "pricedUsd": 0.762289,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.762289 and its own usage prices at $0.762289"
+    }
+  }
+}

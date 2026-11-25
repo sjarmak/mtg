@@ -1,0 +1,161 @@
+{
+  "key": "71d22b6aa1fd590e6003863082d41d17",
+  "recordedAt": "2026-11-22T21:57:49.743Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Profane Memento\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature card is put into an opponent's graveyard from anywhere, you gain 1 life.\"},{\"id\":2,\"name\":\"Rogue's Gloves\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever equipped creature deals combat damage to a player, you may draw a card.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":3,\"name\":\"Sacred Armory\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{2}: Target creature gets +1/+0 until end of turn.\"},{\"id\":4,\"name\":\"Scuttling Doom Engine\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature can't be blocked by creatures with power 2 or less.\\nWhen this creature dies, it deals 6 damage to target opponent or planeswalker.\"},{\"id\":5,\"name\":\"Shield of the Avatar\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"If a source would deal damage to equipped creature, prevent X of that damage, where X is the number of creatures you control.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":6,\"name\":\"Soul of New Phyrexia\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Phyrexian Avatar\",\"text\":\"Trample\\n{5}: Permanents you control gain indestructible until end of turn.\\n{5}, Exile this card from your graveyard: Permanents you control gain indestructible until end of turn.\"},{\"id\":7,\"name\":\"Staff of the Death Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a black spell or a Swamp you control enters, you gain 1 life.\"},{\"id\":8,\"name\":\"Staff of the Flame Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a red spell or a Mountain you control enters, you gain 1 life.\"},{\"id\":9,\"name\":\"Staff of the Mind Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a blue spell or an Island you control enters, you gain 1 life.\"},{\"id\":10,\"name\":\"Staff of the Sun Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a white spell or a Plains you control enters, you gain 1 life.\"},{\"id\":11,\"name\":\"Staff of the Wild Magus\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you cast a green spell or a Forest you control enters, you gain 1 life.\"},{\"id\":12,\"name\":\"Tormod's Crypt\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice this artifact: Exile target player's graveyard.\"},{\"id\":13,\"name\":\"Tyrant's Machine\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{4}, {T}: Tap target creature.\"},{\"id\":14,\"name\":\"Will-Forged Golem\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\"},{\"id\":15,\"name\":\"Battlefield Forge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {R} or {W}. This land deals 1 damage to you.\"},{\"id\":16,\"name\":\"Caves of Koilos\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {W} or {B}. This land deals 1 damage to you.\"},{\"id\":17,\"name\":\"Darksteel Citadel\",\"manaCost\":\"\",\"typeLine\":\"Artifact Land\",\"text\":\"Indestructible\\n{T}: Add {C}.\"},{\"id\":18,\"name\":\"Evolving Wilds\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":19,\"name\":\"Llanowar Wastes\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {B} or {G}. This land deals 1 damage to you.\"},{\"id\":20,\"name\":\"Radiant Fountain\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"When this land enters, you gain 2 life.\\n{T}: Add {C}.\"},{\"id\":21,\"name\":\"Shivan Reef\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {U} or {R}. This land deals 1 damage to you.\"},{\"id\":22,\"name\":\"Sliver Hive\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add one mana of any color. Spend this mana only to cast a Sliver spell.\\n{5}, {T}: Create a 1/1 colorless Sliver creature token. Activate only if you control a Sliver.\"},{\"id\":23,\"name\":\"Urborg, Tomb of Yawgmoth\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"Each land is a Swamp in addition to its other land types.\"},{\"id\":24,\"name\":\"Yavimaya Coast\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}: Add {G} or {U}. This land deals 1 damage to you.\"},{\"id\":25,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 984,
+      "cacheCreationInputTokens": 32206,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.747469,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.747469,
+      "pricedUsd": 0.747469,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.747469 and its own usage prices at $0.747469"
+    }
+  }
+}

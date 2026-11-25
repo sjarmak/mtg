@@ -1,0 +1,161 @@
+{
+  "key": "303e322226ddc5280513bab11c4e9b20",
+  "recordedAt": "2026-11-22T21:45:37.823Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Rhox Pikemaster\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Rhino Soldier\",\"text\":\"First strike (This creature deals combat damage before creatures without first strike.)\\nOther Soldier creatures you control have first strike.\"},{\"id\":2,\"name\":\"Righteousness\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target blocking creature gets +7/+7 until end of turn.\"},{\"id\":3,\"name\":\"Safe Passage\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage that would be dealt to you and creatures you control this turn.\"},{\"id\":4,\"name\":\"Serra Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":5,\"name\":\"Siege Mastodon\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"\"},{\"id\":6,\"name\":\"Silence\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Your opponents can't cast spells this turn.\"},{\"id\":7,\"name\":\"Silvercoat Lion\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"\"},{\"id\":8,\"name\":\"Solemn Offering\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or enchantment. You gain 4 life.\"},{\"id\":9,\"name\":\"Soul Warden\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Whenever another creature enters, you gain 1 life.\"},{\"id\":10,\"name\":\"Stormfront Pegasus\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Pegasus\",\"text\":\"Flying\"},{\"id\":11,\"name\":\"Tempest of Light\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy all enchantments.\"},{\"id\":12,\"name\":\"Undead Slayer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{W}, {T}: Exile target Skeleton, Vampire, or Zombie.\"},{\"id\":13,\"name\":\"Veteran Armorsmith\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Other Soldier creatures you control get +0/+1.\"},{\"id\":14,\"name\":\"Veteran Swordsmith\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Other Soldier creatures you control get +1/+0.\"},{\"id\":15,\"name\":\"Wall of Faith\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\\n{W}: This creature gets +0/+1 until end of turn.\"},{\"id\":16,\"name\":\"White Knight\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"First strike (This creature deals combat damage before creatures without first strike.)\\nProtection from black (This creature can't be blocked, targeted, dealt damage, or enchanted by anything black.)\"},{\"id\":17,\"name\":\"Air Elemental\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\"},{\"id\":18,\"name\":\"Alluring Siren\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Siren\",\"text\":\"{T}: Target creature an opponent controls attacks you this turn if able.\"},{\"id\":19,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":20,\"name\":\"Clone\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield.\"},{\"id\":21,\"name\":\"Convincing Mirage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nAs this Aura enters, choose a basic land type.\\nEnchanted land is the chosen type.\"},{\"id\":22,\"name\":\"Coral Merfolk\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk\",\"text\":\"\"},{\"id\":23,\"name\":\"Disorient\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -7/-0 until end of turn.\"},{\"id\":24,\"name\":\"Divination\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards.\"},{\"id\":25,\"name\":\"Djinn of Wishes\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"Flying\\nThis creature enters with three wish counters on it.\\n{2}{U}{U}, Remove a wish counter from this creature: Reveal the top card of your library. You may play that card without paying its mana cost. If you don't, exile it.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 417,
+      "cacheCreationInputTokens": 31916,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.713319,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.713319,
+      "pricedUsd": 0.713319,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.713319 and its own usage prices at $0.713319"
+    }
+  }
+}

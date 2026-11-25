@@ -12,6 +12,7 @@ import {
   type AgentObservation,
   type AgentView,
   type DeckList,
+  type Decision,
   type GameState,
   type ObjectId,
   type PlayerAgent,
@@ -32,6 +33,12 @@ export interface RolloutBotConfig {
   readonly maximumCandidates: number;
   readonly maximumRolloutsPerDecision: number;
   readonly turnHorizon: number;
+  /**
+   * Decision kinds the rollout may refine; every other decision plays greedy
+   * exactly. Absent means every kind, which is the policy the 2026-09-24
+   * head-to-head measured.
+   */
+  readonly decisionKinds?: readonly Decision['kind'][];
 }
 
 export const DEFAULT_ROLLOUT_CONFIG: RolloutBotConfig = {
@@ -42,6 +49,15 @@ export const DEFAULT_ROLLOUT_CONFIG: RolloutBotConfig = {
   maximumCandidates: 3,
   maximumRolloutsPerDecision: 6,
   turnHorizon: 3,
+};
+
+/**
+ * Rollout limited to combat declarations, where a replay from the true state
+ * finds a better alternative several times as often as at a priority stop.
+ */
+export const COMBAT_ROLLOUT_CONFIG: RolloutBotConfig = {
+  ...DEFAULT_ROLLOUT_CONFIG,
+  decisionKinds: ['declareAttackers', 'declareBlockers'],
 };
 
 export interface RolloutRequest {
@@ -148,6 +164,7 @@ export function decideRollout(
 ): Action {
   validateConfig(config);
   const greedy = decideGreedy(view, config.greedy);
+  if (config.decisionKinds !== undefined && !config.decisionKinds.includes(view.decision.kind)) return greedy;
   const candidates = closeCandidates(config, view, greedy);
   if (candidates.length < 2 || view.rollout === undefined) return greedy;
 

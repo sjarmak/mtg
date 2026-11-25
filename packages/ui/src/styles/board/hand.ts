@@ -548,6 +548,43 @@ const HAND_RULES_CSS = HAND_RULES_LADDER.map(
 const COMBAT_BOARD = `:has(.mtg-board__divider[data-combat='true'])`;
 
 /**
+ * The two shares of a battlefield row's width that a face is stated in, given
+ * the length that names the row's width. The one-row fit counts actual width
+ * pressure, including the long side of a tapped face; at the readable floor any
+ * residual pressure is handed to flex-wrap instead of to a scrollbar or a
+ * smaller card.
+ */
+const rowWidthShares = (rowWidth: string): string => `--hand-slot: min(
+    var(--board-width-basis-cap),
+    calc((${rowWidth} - ${String(HAND_ACROSS - 1)} * ${HAND_GAP}) / ${String(HAND_ACROSS)})
+  );
+  --board-one-row-fit: calc(
+    (${rowWidth} - (var(--board-place-count) - 1) * ${HAND_GAP}) / var(--board-width-units)
+  );`;
+
+/**
+ * A battlefield face, as the played slots and an attachment tray both state it:
+ * the row's width share, floored for legibility and capped by the row's ceiling.
+ * Off combat it is also bounded by the row's height, as `BOUNDED_BOARD_FACE`.
+ * One expression, because the tray's height is the host's and the host's width
+ * is its neighbors'.
+ */
+const BOARD_FACE = `max(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem,
+    min(var(--board-one-row-fit), var(--hand-slot), var(--board-face-max))
+  )`;
+const BOARD_ROOM = `calc(${cssNumber(BOARD_FACE_MAX_SHARE)}cqh * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)})`;
+const BOUNDED_BOARD_FACE = `max(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem,
+    min(
+      var(--board-one-row-fit),
+      var(--board-room),
+      max(var(--hand-slot), ${cssNumber(FACE_COMPLETE_REM)}rem),
+      var(--board-face-max)
+    )
+  )`;
+
+/**
  * The most cards the hand row divides itself by before it only scrolls.
  *
  * Twelve because a complete face is the floor either way: twelve 100px faces
@@ -905,26 +942,31 @@ ${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__side[data-seat='you'][data-
    available-width shape now that a concealed opposing hand is represented only
    by the public count in its seat pod.
 
-   A percentage inside a custom property is substituted rather than resolved, so
-   the 100% here still resolves against the slot's own containing block, which is
-   this row. That is the whole reason the property works: it moves *which row's*
-   width is named without moving what the percentage is measured against.
+   A custom property is substituted rather than resolved, so whatever unit is in
+   it is measured where it is read. That is why the row's width is named in cqw
+   and not as a percentage. A percentage is the reader's containing block, which
+   is this row for a bare place and the tray for the host inside an attachment
+   tray. Measured before the change, at 1920x1080 with four places, the host
+   resolved to the 72px floor beside 160px neighbors. A cqw is the nearest
+   ancestor container, which is this row for both: the row is a size container
+   off combat (see the containment rule below), and a tray is not one.
+
+   In combat the row is not a container, so it keeps the percentage. Its zone
+   body lays it beside the mana lane, which makes its width its content's, and
+   inline-size containment there was measured: the crowded-tapped combat board
+   at 1440x560 shrank the near row from 643px to 378px, wrapped twelve tapped
+   faces onto four lines and cut the last by 6.7px. So a host in a tray on a
+   combat row still reads the percentage against its tray.
 
    It carries no --mtg- prefix, for the reason ../card.ts's --name-scale
    carries none: that prefix is the design vocabulary, declared once in
    ../tokens.ts and checked against every reference by ../../../test/tokens.test.ts,
    and this is one sheet publishing a number to itself two selectors later. */
 ${TABLE} .mtg-board__spells {
-  --hand-slot: min(
-    var(--board-width-basis-cap),
-    calc((100% - ${String(HAND_ACROSS - 1)} * ${HAND_GAP}) / ${String(HAND_ACROSS)})
-  );
-  /* The one-row fit counts actual width pressure, including the long side of a
-     tapped face. At the readable floor any residual pressure is handed to
-     flex-wrap instead of to a scrollbar or a smaller card. */
-  --board-one-row-fit: calc(
-    (100% - (var(--board-place-count) - 1) * ${HAND_GAP}) / var(--board-width-units)
-  );
+  ${rowWidthShares('100cqw')}
+}
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells {
+  ${rowWidthShares('100%')}
 }
 /* The battlefield grows from the same available-width basis as the hand, with
    its own ceiling and a name-legibility floor. On a narrow screen the floor may
@@ -1121,59 +1163,69 @@ ${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells {
    with room in it drew four markers at 85% of the row, which is bigger than the
    card-sized boxes mtg-ej5 removed. */
 ${playedSlot(`${TABLE} .mtg-board__spells`)}:not([data-empty='true']) {
-  --board-face: max(
-    ${cssNumber(BOARD_FACE_MIN_REM)}rem,
-    min(var(--board-one-row-fit), var(--hand-slot), var(--board-face-max))
-  );
+  --board-face: ${BOARD_FACE};
   flex: 0 0 auto;
   width: var(--board-face);
   height: auto; min-height: 0;
   max-height: ${cssNumber(BOARD_FACE_MAX_SHARE)}%;
   align-self: center;
 }
-/* And a tray takes the half of that rule that is about being on the row rather
-   than about being a card, which is \`mtg-ijze\`'s second half.
+/* And off combat a tray is sized from the same face, which is what puts its
+   host level with the bare permanents beside it.
 
    A permanent holding an Equipment is drawn as a \`.mtg-attach\` tray with two
-   cards in it (\`../../board/Battlefield.ts\`), so it cannot take the width above
-   — that is one card's width, and \`--board-face\` carries a percentage of the
-   row that would re-resolve against the tray anyway. What it can take, and had
-   to have, is the zero shrink factor: \`./attach.ts\` starts the tray at
-   \`flex: 0 1 auto\` and both boxes inside it declare \`min-width: 0\`, so on a
-   row that overflows the tray was the one item flexbox could take the overflow
-   out of. It took all of it. Measured at 1440x900 with eight permanents on the
-   row, the tray was **6px wide** — its own padding and border with nothing
-   between them — its host was pinned at \`./fit.ts\`'s \`MIN_SLOT_WIDTH_REM\`, and
-   both cards were drawn outside the keyline whose whole purpose is to say the
-   two of them belong together. The row scrolls instead now, which is what every
-   other place on it already did.
+   cards in it (\`../../board/Battlefield.ts\`). The host is a played slot, so the
+   rule above states it at \`--board-face\` wide, and off combat that face names
+   the row's width in cqw, so it is the row's face inside the tray as well as
+   outside it. The tray declares the same face so that its own height can be the
+   host's: the face times the printed trim, plus what \`./attach.ts\` spends on
+   its keyline. \`./attach.ts\` draws the held card at 70% of that height, so the
+   whole tray follows the one number every bare place on the row is drawn at.
 
-   **The height is where the width cap reaches these cards**, and that is the
-   whole of the second bound. A tray keeps \`./fit.ts\`'s stretch rather than
-   taking \`align-self: center\`, because everything inside it is sized off its
-   height — \`./attach.ts\` draws the held card at 70% of it and the host takes
-   the rest, both of them deriving a width from \`aspect-ratio\` — so a tray is
-   height-driven where every bare place beside it is width-driven. Bound only by
-   the row's share, the two axes disagree exactly when the crowded cap bites: at
-   1280x800 with eight permanents, the cap held a bare face to 84px and the tray
-   took 96% of the row, so its host came out **100.9px, 20% larger than the
-   neighbor it is crowded against**. The bigger card on the more crowded board
-   is the same wrong picture \`mtg-ijze\` was filed for, one axis over.
+   It was the other way round until issue 213. The tray stretched to the row and
+   its host was sized off the tray's height, so the host followed the row's height
+   while its neighbors followed the row's width, and the two disagreed by up to
+   20%. Later the host was pinned to the 72px floor, because a percentage in
+   \`--board-face\` read on the host resolved against the tray rather than the
+   row. Measured at 1920x1080 with four places, that was a 72px host beside 160px
+   neighbors.
 
-   So the tray is *also* bounded by the tallest a face at the cap may be drawn:
-   the maximum width times the printed trim, plus what \`./attach.ts\` spends on
-   its own keyline. \`--board-face-max\` rather than \`--board-face\` because
-   \`--board-face\` carries a percentage of the row, which a declaration on a
-   tray's *child* re-resolves against the tray — that is what makes the width
-   above unusable here, and it is not a bound that can be moved to the tray
-   itself, because the tray's own width has two cards and a link in it. The
-   max is a \`clamp()\` upper bound and is always a length: rems in the three
-   caps here, viewport units in \`../mobile.ts\`'s combat one. Where the row is
-   the narrower constraint the row still wins, which is what \`min()\` says.
-   Measured after: 84px host against 84px bare at 1280x800, 112 against 112 at
-   1440x900. */
+   The zero shrink factor is from \`mtg-ijze\`: \`./attach.ts\` starts the tray at
+   \`flex: 0 1 auto\` with \`min-width: 0\` inside it, and an overflowing row took
+   all of its overflow out of the tray, down to 6px wide. A tray scrolls or wraps
+   with the row now, which is what every other place on it does.
+
+   The row's height still bounds the tray, as \`max-height: 100%\`, and the host
+   is bounded by the tray. Where that binds, the host letterboxes its face the way
+   a bare slot does under its own height guard. The face is already bounded by
+   the row's height share, so this binds only where the six keyline pixels do not
+   fit in the row's remaining 4%. The 72px floor is a min-height and outweighs
+   that bound. On an 844x390 phone the row is 105px tall, and a tray capped there
+   drew a 70.9px host. On a crowded row the keyline cut through the host. */
 ${TABLE} .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
   flex: 0 0 auto;
+}
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
+  align-self: center;
+  height: calc(
+    var(--board-face) * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+    + ${cssNumber(TRAY_BLOCK_CHROME_PX)}px
+  );
+  min-height: calc(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+    + ${cssNumber(TRAY_BLOCK_CHROME_PX)}px
+  );
+  max-height: 100%;
+}
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells > .mtg-attach:not([data-holds='false']) > .mtg-slot:not([data-empty='true']) {
+  max-height: 100%;
+}
+/* In combat the row is not a container (see --hand-slot), so a tray keeps the
+   arrangement it had before issue 213: it stretches to the row, bounded by the
+   tallest face the combat ceiling allows plus its keyline, and its host is
+   sized off its height. On a crowded combat row the ceiling is the 72px floor,
+   so the tray states that floor on its block axis and its host at that width. */
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
   max-height: min(
     ${cssNumber(BOARD_FACE_MAX_SHARE)}%,
     calc(
@@ -1182,12 +1234,7 @@ ${TABLE} .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
     )
   );
 }
-/* A crowded row may wrap but may not buy a fit by making the host inside an
-   attachment tray less legible than a bare permanent. Trays are height-driven,
-   so state the same 72px face floor on their block axis, plus the keyline they
-   own; the row's wrap/fan policy absorbs the extra place instead of clipping
-   either exact object. */
-${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) {
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) {
   min-height: calc(
     ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
     + ${cssNumber(TRAY_BLOCK_CHROME_PX)}px
@@ -1195,7 +1242,7 @@ ${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='
   max-height: none;
   align-self: center;
 }
-${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) > .mtg-slot {
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) > .mtg-slot {
   flex: 0 0 auto;
   width: ${cssNumber(BOARD_FACE_MIN_REM)}rem;
 }
@@ -1230,16 +1277,14 @@ ${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='
    there is no cqh to floor against, and inventing a second proxy for the room
    here would be a second opinion about the number this rule exists to read. */
 ${playedSlot(`${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells`)}:not([data-empty='true']) {
-  --board-room: calc(${cssNumber(BOARD_FACE_MAX_SHARE)}cqh * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)});
-  --board-face: max(
-    ${cssNumber(BOARD_FACE_MIN_REM)}rem,
-    min(
-      var(--board-one-row-fit),
-      var(--board-room),
-      max(var(--hand-slot), ${cssNumber(FACE_COMPLETE_REM)}rem),
-      var(--board-face-max)
-    )
-  );
+  --board-room: ${BOARD_ROOM};
+  --board-face: ${BOUNDED_BOARD_FACE};
+}
+/* The tray reads the same bounded face as the host it holds, because its own
+   height is stated from that face (see the tray rule above). */
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
+  --board-room: ${BOARD_ROOM};
+  --board-face: ${BOUNDED_BOARD_FACE};
 }
 /* And the face inside it keeps the trim's shape even where the cap above binds,
    which is the one thing the pair of them could not do on their own. Read in

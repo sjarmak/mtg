@@ -1,0 +1,161 @@
+{
+  "key": "6dafc46cb2931a2bbd23c32ee5327e11",
+  "recordedAt": "2026-11-22T22:34:25.251Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aethermage's Touch\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Instant\",\"text\":\"Reveal the top four cards of your library. You may put a creature card from among them onto the battlefield. It gains \\\"At the beginning of your end step, return this creature to its owner's hand.\\\" Then put the rest of the cards revealed this way on the bottom of your library in any order.\"},{\"id\":2,\"name\":\"Anthem of Rakdos\",\"manaCost\":\"{2}{B}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control attacks, it gets +2/+0 until end of turn and this enchantment deals 1 damage to you.\\nHellbent — As long as you have no cards in hand, if a source you control would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.\"},{\"id\":3,\"name\":\"Assault Zeppelid\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Flying, trample\"},{\"id\":4,\"name\":\"Azorius Aethermage\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever a permanent is returned to your hand, you may pay {1}. If you do, draw a card.\"},{\"id\":5,\"name\":\"Azorius First-Wing\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying, protection from enchantments\"},{\"id\":6,\"name\":\"Azorius Ploy\",\"manaCost\":\"{1}{W}{W}{U}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage target creature would deal this turn.\\nPrevent all combat damage that would be dealt to target creature this turn.\"},{\"id\":7,\"name\":\"Coiling Oracle\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Snake Elf Druid\",\"text\":\"When this creature enters, reveal the top card of your library. If it's a land card, put it onto the battlefield. Otherwise, put that card into your hand.\"},{\"id\":8,\"name\":\"Cytoshape\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose a nonlegendary creature on the battlefield. Target creature becomes a copy of that creature until end of turn.\"},{\"id\":9,\"name\":\"Dread Slag\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Trample\\nThis creature gets -4/-4 for each card in your hand.\"},{\"id\":10,\"name\":\"Experiment Kraj\",\"manaCost\":\"{2}{G}{G}{U}{U}\",\"typeLine\":\"Legendary Creature — Ooze Mutant\",\"text\":\"Experiment Kraj has all activated abilities of each other creature with a +1/+1 counter on it.\\n{T}: Put a +1/+1 counter on target creature.\"},{\"id\":11,\"name\":\"Gobhobbler Rats\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Hellbent — As long as you have no cards in hand, this creature gets +1/+0 and has \\\"{B}: Regenerate this creature.\\\" (The next time it would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":12,\"name\":\"Grand Arbiter Augustin IV\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Legendary Creature — Human Advisor\",\"text\":\"White spells you cast cost {1} less to cast.\\nBlue spells you cast cost {1} less to cast.\\nSpells your opponents cast cost {1} more to cast.\"},{\"id\":13,\"name\":\"Hellhole Rats\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Haste\\nWhen this creature enters, target player discards a card. This creature deals damage to that player equal to that card's mana value.\"},{\"id\":14,\"name\":\"Isperia the Inscrutable\",\"manaCost\":\"{1}{W}{W}{U}{U}\",\"typeLine\":\"Legendary Creature — Sphinx\",\"text\":\"Flying\\nWhenever Isperia deals combat damage to a player, choose a card name. That player reveals their hand. If a card with the chosen name is revealed this way, search your library for a creature card with flying, reveal it, put it into your hand, then shuffle.\"},{\"id\":15,\"name\":\"Jagged Poppet\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Whenever this creature is dealt damage, discard that many cards.\\nHellbent — Whenever this creature deals combat damage to a player, if you have no cards in hand, that player discards cards equal to the damage.\"},{\"id\":16,\"name\":\"Leafdrake Roost\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{G}{U}, {T}: Create a 2/2 green and blue Drake creature token with flying.\\\"\"},{\"id\":17,\"name\":\"Lyzolda, the Blood Witch\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Legendary Creature — Human Cleric\",\"text\":\"{2}, Sacrifice a creature: Lyzolda deals 2 damage to any target if the sacrificed creature was red. Draw a card if the sacrificed creature was black.\"},{\"id\":18,\"name\":\"Momir Vig, Simic Visionary\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Legendary Creature — Elf Wizard\",\"text\":\"Whenever you cast a green creature spell, you may search your library for a creature card, reveal it, then shuffle and put that card on top.\\nWhenever you cast a blue creature spell, reveal the top card of your library. If it's a creature card, put that card into your hand.\"},{\"id\":19,\"name\":\"Omnibian\",\"manaCost\":\"{1}{G}{G}{U}\",\"typeLine\":\"Creature — Frog\",\"text\":\"{T}: Target creature becomes a Frog with base power and toughness 3/3 until end of turn.\"},{\"id\":20,\"name\":\"Overrule\",\"manaCost\":\"{X}{W}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {X}. You gain X life.\"},{\"id\":21,\"name\":\"Pain Magnification\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent is dealt 3 or more damage by a single source, that player discards a card.\"},{\"id\":22,\"name\":\"Palliation Accord\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature an opponent controls becomes tapped, put a palliation counter on this enchantment.\\nRemove a palliation counter from this enchantment: Prevent the next 1 damage that would be dealt to you this turn.\"},{\"id\":23,\"name\":\"Plaxcaster Frogling\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Frog Mutant\",\"text\":\"Graft 3 (This creature enters with three +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{2}: Target creature with a +1/+1 counter on it gains shroud until end of turn. (It can't be the target of spells or abilities.)\"},{\"id\":24,\"name\":\"Plumes of Peace\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\\nForecast — {W}{U}, Reveal this card from your hand: Tap target creature. (Activate only during your upkeep and only once each turn.)\"},{\"id\":25,\"name\":\"Pride of the Clouds\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Creature — Elemental Cat\",\"text\":\"Flying\\nThis creature gets +1/+1 for each other creature on the battlefield with flying.\\nForecast — {2}{W}{U}, Reveal this creature from your hand: Create a 1/1 white and blue Bird creature token with flying. (Activate only during your upkeep and only once each turn.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2059,
+      "cacheCreationInputTokens": 32973,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.816559,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.816559,
+      "pricedUsd": 0.816559,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.816559 and its own usage prices at $0.816559"
+    }
+  }
+}

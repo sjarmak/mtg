@@ -1,0 +1,161 @@
+{
+  "key": "5fbffbe880c0aa103d47c32dc34b25d1",
+  "recordedAt": "2026-11-22T21:42:32.003Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Goblin Guide\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Scout\",\"text\":\"Haste\\nWhenever this creature attacks, defending player reveals the top card of their library. If it's a land card, that player puts it into their hand.\"},{\"id\":2,\"name\":\"Goblin Ruinblaster\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Kicker {R} (You may pay an additional {R} as you cast this spell.)\\nHaste\\nWhen this creature enters, if it was kicked, destroy target nonbasic land.\"},{\"id\":3,\"name\":\"Goblin Shortcutter\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Scout\",\"text\":\"When this creature enters, target creature can't block this turn.\"},{\"id\":4,\"name\":\"Goblin War Paint\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has haste.\"},{\"id\":5,\"name\":\"Hellfire Mongrel\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"At the beginning of each opponent's upkeep, if that player has two or fewer cards in hand, this creature deals 2 damage to that player.\"},{\"id\":6,\"name\":\"Hellkite Charger\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\\nWhenever this creature attacks, you may pay {5}{R}{R}. If you do, untap all attacking creatures and after this phase, there is an additional combat phase.\"},{\"id\":7,\"name\":\"Highland Berserker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have Ally creatures you control gain first strike until end of turn.\"},{\"id\":8,\"name\":\"Inferno Trap\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If you've been dealt damage by two or more creatures this turn, you may pay {R} rather than pay this spell's mana cost.\\nInferno Trap deals 4 damage to target creature.\"},{\"id\":9,\"name\":\"Kazuul Warlord\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Minotaur Warrior Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may put a +1/+1 counter on each Ally creature you control.\"},{\"id\":10,\"name\":\"Lavaball Trap\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent had two or more lands enter the battlefield under their control this turn, you may pay {3}{R}{R} rather than pay this spell's mana cost.\\nDestroy two target lands. Lavaball Trap deals 4 damage to each creature.\"},{\"id\":11,\"name\":\"Magma Rift\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a land.\\nMagma Rift deals 5 damage to target creature.\"},{\"id\":12,\"name\":\"Mark of Mutiny\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Put a +1/+1 counter on it and untap it. That creature gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":13,\"name\":\"Molten Ravager\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":14,\"name\":\"Murasa Pyromancer\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Human Shaman Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have this creature deal damage to target creature equal to the number of Allies you control.\"},{\"id\":15,\"name\":\"Obsidian Fireheart\",\"manaCost\":\"{1}{R}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{1}{R}{R}: Put a blaze counter on target land without a blaze counter on it. For as long as that land has a blaze counter on it, it has \\\"At the beginning of your upkeep, this land deals 1 damage to you.\\\" (The land continues to burn after this creature has left the battlefield.)\"},{\"id\":16,\"name\":\"Plated Geopede\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Insect\",\"text\":\"First strike\\nLandfall — Whenever a land you control enters, this creature gets +2/+2 until end of turn.\"},{\"id\":17,\"name\":\"Punishing Fire\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Punishing Fire deals 2 damage to any target.\\nWhenever an opponent gains life, you may pay {R}. If you do, return this card from your graveyard to your hand.\"},{\"id\":18,\"name\":\"Pyromancer Ascension\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast an instant or sorcery spell that has the same name as a card in your graveyard, you may put a quest counter on this enchantment.\\nWhenever you cast an instant or sorcery spell while this enchantment has two or more quest counters on it, you may copy that spell. You may choose new targets for the copy.\"},{\"id\":19,\"name\":\"Quest for Pure Flame\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a source you control deals damage to an opponent, you may put a quest counter on this enchantment.\\nRemove four quest counters from this enchantment and sacrifice it: If any source you control would deal damage to a permanent or player this turn, it deals double that damage to that permanent or player instead.\"},{\"id\":20,\"name\":\"Ruinous Minotaur\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Whenever this creature deals damage to an opponent, sacrifice a land.\"},{\"id\":21,\"name\":\"Runeflare Trap\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent drew three or more cards this turn, you may pay {R} rather than pay this spell's mana cost.\\nRuneflare Trap deals damage to target player equal to the number of cards in that player's hand.\"},{\"id\":22,\"name\":\"Seismic Shudder\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Seismic Shudder deals 1 damage to each creature without flying.\"},{\"id\":23,\"name\":\"Shatterskull Giant\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"\"},{\"id\":24,\"name\":\"Slaughter Cry\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":25,\"name\":\"Spire Barrage\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Spire Barrage deals damage to any target equal to the number of Mountains you control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\",\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1568,
+      "cacheCreationInputTokens": 32672,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.785989,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.785989,
+      "pricedUsd": 0.785989,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.785989 and its own usage prices at $0.785989"
+    }
+  }
+}

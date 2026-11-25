@@ -217,6 +217,11 @@ export const WORKBENCH_CSS = `
 /* A citation of an id nobody stated. Marked rather than hidden: it is a defect,
    and hiding it is how it survives. */
 .mtg-workbench__cite[data-resolved='false'] { color: var(--mtg-negative); border: 1px solid var(--mtg-negative); }
+/* The criteria every row shares, stated once above the rows. These are the
+   person's own sentences rather than ids, so they read in the body face. */
+.mtg-workbench__shared { display: flex; flex-direction: column; gap: var(--mtg-space-1); }
+.mtg-workbench__shared-lead { font-size: var(--mtg-text-sm); color: var(--mtg-ink-muted); }
+.mtg-workbench__shared .mtg-workbench__cite { font-family: inherit; }
 
 /* "align-self: start" because the section is a flex column, whose default
    stretch blew a table of five numbers out to the full 1135px pane: 83px of ink

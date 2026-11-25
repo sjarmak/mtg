@@ -1,0 +1,161 @@
+{
+  "key": "2b76c2ada1001e65c28933ff911620ab",
+  "recordedAt": "2026-11-22T22:27:05.482Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Cataclysmic Gearhulk\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Vigilance\\nWhen this creature enters, each player chooses an artifact, a creature, an enchantment, and a planeswalker from among the nonland permanents they control, then sacrifices the rest.\"},{\"id\":2,\"name\":\"Torrential Gearhulk\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Flash\\nWhen this creature enters, you may cast target instant card from your graveyard without paying its mana cost. If that spell would be put into your graveyard, exile it instead.\"},{\"id\":3,\"name\":\"Noxious Gearhulk\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Menace\\nWhen this creature enters, you may destroy another target creature. If a creature is destroyed this way, you gain life equal to its toughness.\"},{\"id\":4,\"name\":\"Combustible Gearhulk\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"First strike\\nWhen this creature enters, target opponent may have you draw three cards. If the player doesn't, you mill three cards, then this creature deals damage to that player equal to the total mana value of those cards.\"},{\"id\":5,\"name\":\"Verdurous Gearhulk\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Trample\\nWhen this creature enters, distribute four +1/+1 counters among any number of target creatures you control.\"},{\"id\":6,\"name\":\"Aether Vial\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep, you may put a charge counter on this artifact.\\n{T}: You may put a creature card with mana value equal to the number of charge counters on this artifact from your hand onto the battlefield.\"},{\"id\":7,\"name\":\"Champion's Helm\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2.\\nAs long as equipped creature is legendary, it has hexproof. (It can't be the target of spells or abilities your opponents control.)\\nEquip {1}\"},{\"id\":8,\"name\":\"Chromatic Lantern\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Lands you control have \\\"{T}: Add one mana of any color.\\\"\\n{T}: Add one mana of any color.\"},{\"id\":9,\"name\":\"Chrome Mox\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"Imprint — When this artifact enters, you may exile a nonartifact, nonland card from your hand.\\n{T}: Add one mana of any of the exiled card's colors.\"},{\"id\":10,\"name\":\"Cloudstone Curio\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a nonartifact permanent you control enters, you may return another permanent you control that shares a permanent type with it to its owner's hand.\"},{\"id\":11,\"name\":\"Crucible of Worlds\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"You may play lands from your graveyard.\"},{\"id\":12,\"name\":\"Gauntlet of Power\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a color.\\nCreatures of the chosen color get +1/+1.\\nWhenever a basic land is tapped for mana of the chosen color, its controller adds an additional one mana of that color.\"},{\"id\":13,\"name\":\"Hangarback Walker\",\"manaCost\":\"{X}{X}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nWhen this creature dies, create a 1/1 colorless Thopter artifact creature token with flying for each +1/+1 counter on this creature.\\n{1}, {T}: Put a +1/+1 counter on this creature.\"},{\"id\":14,\"name\":\"Lightning Greaves\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has haste and shroud. (It can't be the target of spells or abilities.)\\nEquip {0}\"},{\"id\":15,\"name\":\"Lotus Petal\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice this artifact: Add one mana of any color.\"},{\"id\":16,\"name\":\"Mana Crypt\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep, flip a coin. If you lose the flip, this artifact deals 3 damage to you.\\n{T}: Add {C}{C}.\"},{\"id\":17,\"name\":\"Mana Vault\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact doesn't untap during your untap step.\\nAt the beginning of your upkeep, you may pay {4}. If you do, untap this artifact.\\nAt the beginning of your draw step, if this artifact is tapped, it deals 1 damage to you.\\n{T}: Add {C}{C}{C}.\"},{\"id\":18,\"name\":\"Mind's Eye\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever an opponent draws a card, you may pay {1}. If you do, draw a card.\"},{\"id\":19,\"name\":\"Mox Opal\",\"manaCost\":\"{0}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"Metalcraft — {T}: Add one mana of any color. Activate only if you control three or more artifacts.\"},{\"id\":20,\"name\":\"Painter's Servant\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Scarecrow\",\"text\":\"As this creature enters, choose a color.\\nAll cards that aren't on the battlefield, spells, and permanents are the chosen color in addition to their other colors.\"},{\"id\":21,\"name\":\"Rings of Brighthearth\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever you activate an ability, if it isn't a mana ability, you may pay {2}. If you do, copy that ability. You may choose new targets for the copy.\"},{\"id\":22,\"name\":\"Scroll Rack\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Exile any number of cards from your hand face down. Put that many cards from the top of your library into your hand. Then look at the exiled cards and put them on top of your library in any order.\"},{\"id\":23,\"name\":\"Sculpting Steel\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"You may have this artifact enter as a copy of any artifact on the battlefield.\"},{\"id\":24,\"name\":\"Sol Ring\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {C}{C}.\"},{\"id\":25,\"name\":\"Solemn Simulacrum\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"When this creature enters, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\\nWhen this creature dies, you may draw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\",\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw", "fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 418,
+      "cacheCreationInputTokens": 32633,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.727709,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.727709,
+      "pricedUsd": 0.727709,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.727709 and its own usage prices at $0.727709"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "e1a4c31f4aaf78e411dbe9a8ecaf6faf",
+  "recordedAt": "2026-11-22T22:29:33.701Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"War-Torch Goblin\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{R}, Sacrifice this creature: It deals 2 damage to target blocking creature.\"},{\"id\":2,\"name\":\"Wojek Embermage\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Radiance — {T}: This creature deals 1 damage to target creature and each other creature that shares a color with it.\"},{\"id\":3,\"name\":\"Birds of Paradise\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\n{T}: Add one mana of any color.\"},{\"id\":4,\"name\":\"Bramble Elemental\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Whenever an Aura becomes attached to this creature, create two 1/1 green Saproling creature tokens.\"},{\"id\":5,\"name\":\"Carven Caryatid\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\nWhen this creature enters, draw a card.\"},{\"id\":6,\"name\":\"Chord of Calling\",\"manaCost\":\"{X}{G}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nSearch your library for a creature card with mana value X or less, put it onto the battlefield, then shuffle.\"},{\"id\":7,\"name\":\"Civic Wayfinder\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Druid Warrior\",\"text\":\"When this creature enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":8,\"name\":\"Doubling Season\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"If an effect would create one or more tokens under your control, it creates twice that many of those tokens instead.\\nIf an effect would put one or more counters on a permanent you control, it puts twice that many of those counters on that permanent instead.\"},{\"id\":9,\"name\":\"Dowsing Shaman\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Centaur Shaman\",\"text\":\"{2}{G}, {T}: Return target enchantment card from your graveyard to your hand.\"},{\"id\":10,\"name\":\"Dryad's Caress\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"You gain 1 life for each creature on the battlefield. If {W} was spent to cast this spell, untap all creatures you control.\"},{\"id\":11,\"name\":\"Elves of Deep Shadow\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {B}. This creature deals 1 damage to you.\"},{\"id\":12,\"name\":\"Elvish Skysweeper\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"{4}{G}, Sacrifice a creature: Destroy target creature with flying.\"},{\"id\":13,\"name\":\"Farseek\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a Plains, Island, Swamp, or Mountain card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":14,\"name\":\"Fists of Ironwood\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, create two 1/1 green Saproling creature tokens.\\nEnchanted creature has trample.\"},{\"id\":15,\"name\":\"Gather Courage\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTarget creature gets +2/+2 until end of turn.\"},{\"id\":16,\"name\":\"Golgari Brownscale\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"When this card is put into your hand from your graveyard, you gain 2 life.\\nDredge 2 (If you would draw a card, you may mill two cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":17,\"name\":\"Golgari Grave-Troll\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Troll Skeleton\",\"text\":\"This creature enters with a +1/+1 counter on it for each creature card in your graveyard.\\n{1}, Remove a +1/+1 counter from this creature: Regenerate this creature.\\nDredge 6 (If you would draw a card, you may mill six cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":18,\"name\":\"Goliath Spider\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":19,\"name\":\"Greater Mossdog\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Plant Dog\",\"text\":\"Dredge 3 (If you would draw a card, you may mill three cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":20,\"name\":\"Hunted Troll\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Troll Warrior\",\"text\":\"When this creature enters, target opponent creates four 1/1 blue Faerie creature tokens with flying.\\n{G}: Regenerate this creature.\"},{\"id\":21,\"name\":\"Ivy Dancer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Dryad Shaman\",\"text\":\"{T}: Target creature gains forestwalk until end of turn. (It can't be blocked as long as defending player controls a Forest.)\"},{\"id\":22,\"name\":\"Life from the Loam\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to three target land cards from your graveyard to your hand.\\nDredge 3 (If you would draw a card, you may mill three cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":23,\"name\":\"Moldervine Cloak\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+3.\\nDredge 2 (If you would draw a card, you may mill two cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":24,\"name\":\"Nullmage Shepherd\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"Tap four untapped creatures you control: Destroy target artifact or enchantment.\"},{\"id\":25,\"name\":\"Overwhelm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nCreatures you control get +3/+3 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"fixing\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1644,
+      "cacheCreationInputTokens": 32637,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7890889999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7890889999999999,
+      "pricedUsd": 0.789089,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.789089 and its own usage prices at $0.789089"
+    }
+  }
+}

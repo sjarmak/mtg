@@ -1,7 +1,7 @@
 /** Stage immutable source bundles, then atomically replace the small discovery index. */
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
@@ -20,6 +20,7 @@ import {
 } from '../src/lab/printed-format';
 import type { PrintedFormatIndex } from '../src/lab/printed-format';
 import type { PrintedDraftRatings } from '../src/lab/printed-draft-ratings';
+import { PrintedCardRolesSchema } from '@mtg/draft-export';
 import { formatReleaseDate } from './printed-release-dates';
 import type { ReleaseDateLookup } from './printed-release-dates';
 
@@ -35,6 +36,9 @@ export interface PrintedFormatSource {
   readonly availability: PrintedFormatIndex['formats'][number]['availability'];
   readonly catalogs: readonly { readonly code: string; readonly file: string; readonly name?: string }[];
 }
+
+/** The roles file a printed Limited format may carry in its own data directory. */
+export const PRINTED_CARD_ROLES_FILE = 'card-roles-v1.json';
 
 export interface PrintedStagingOptions {
   readonly releaseDateOf: ReleaseDateLookup;
@@ -175,6 +179,16 @@ async function prepareSource(
     draftRatingsBody === undefined
       ? undefined
       : `formats/${format.id}/draft-ratings-${createHash('sha256').update(draftRatingsBody).digest('hex')}.json`;
+  // #305: model-labeled card roles live beside the format's own data, never in its admission.
+  const cardRolesPath = join(source.directory, PRINTED_CARD_ROLES_FILE);
+  const cardRolesBody =
+    format.kind === 'printed-limited-format' && existsSync(cardRolesPath)
+      ? `${JSON.stringify(PrintedCardRolesSchema.parse(JSON.parse(readFileSync(cardRolesPath, 'utf8'))), null, 2)}\n`
+      : undefined;
+  const cardRolesUrl =
+    cardRolesBody === undefined
+      ? undefined
+      : `formats/${format.id}/card-roles-${createHash('sha256').update(cardRolesBody).digest('hex')}.json`;
   const formatWinRates =
     deckWinRates === undefined ||
     format.kind === 'printed-limited-format' ||
@@ -223,6 +237,7 @@ async function prepareSource(
     ...(tokenPrintingsUrl === undefined ? {} : { tokenPrintingsUrl }),
     ...(presentationCatalogUrl === undefined ? {} : { presentationCatalogUrl }),
     ...(draftRatingsUrl === undefined ? {} : { draftRatingsUrl }),
+    ...(cardRolesUrl === undefined ? {} : { cardRolesUrl }),
     ...(deckWinRatesUrl === undefined ? {} : { deckWinRatesUrl }),
     ...(headToHeadUrl === undefined ? {} : { headToHeadUrl }),
     catalogs,
@@ -231,6 +246,7 @@ async function prepareSource(
   PrintedFormatIndexSchema.parse({ schemaVersion: 2, formats: [row] });
   const files = [
     ...(draftRatingsBody === undefined ? [] : [{ url: row.draftRatingsUrl!, body: draftRatingsBody }]),
+    ...(cardRolesBody === undefined ? [] : [{ url: row.cardRolesUrl!, body: cardRolesBody }]),
     ...(deckWinRatesBody === undefined ? [] : [{ url: row.deckWinRatesUrl!, body: deckWinRatesBody }]),
     ...(headToHeadBody === undefined ? [] : [{ url: row.headToHeadUrl!, body: headToHeadBody }]),
     ...(displayMetadataUrl === undefined ? [] : [{ url: displayMetadataUrl, body: displayBody! }]),
@@ -288,6 +304,11 @@ export async function stagePrintedFormats(
     mkdirSync(dirname(path), { recursive: true });
     immutableWrite(path, file.body);
   }
+  writeIndex(publicRoot, index);
+  return index;
+}
+
+function writeIndex(publicRoot: string, index: PrintedFormatIndex): void {
   const target = join(publicRoot, PRINTED_FORMAT_INDEX_URL);
   mkdirSync(dirname(target), { recursive: true });
   const temporary = `${target}.${randomUUID()}.tmp`;
@@ -297,7 +318,36 @@ export async function stagePrintedFormats(
   } finally {
     rmSync(temporary, { force: true });
   }
-  return index;
+}
+
+/**
+ * Turn Play off, in the staged index, for every format the backend withheld.
+ *
+ * The registry says Play is supported when an admission is installed; only the
+ * backend's verdict over the runtime that actually started says whether that
+ * admission still holds (a rebuilt bridge, an edited adapter, no Forge). A
+ * format it withheld keeps browse, draft and sealed, and its Play control
+ * shows the backend's sentence instead of a button that fails on press (#16).
+ * Rewritten atomically, like the first write; the bundles it names are untouched.
+ */
+export function withholdPrintedPlay(
+  publicRoot: string,
+  index: PrintedFormatIndex,
+  withheld: readonly { readonly formatId: string; readonly reason: string }[],
+): PrintedFormatIndex {
+  if (withheld.length === 0) return index;
+  const reasons = new Map(withheld.map((entry) => [entry.formatId, entry.reason]));
+  const next = PrintedFormatIndexSchema.parse({
+    ...index,
+    formats: index.formats.map((row) => {
+      const reason = reasons.get(row.id);
+      return reason === undefined
+        ? row
+        : { ...row, availability: { ...row.availability, play: { status: 'unavailable', reason } } };
+    }),
+  });
+  writeIndex(publicRoot, next);
+  return next;
 }
 
 function formatId(source: PrintedFormatSource): string {

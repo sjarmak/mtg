@@ -1,0 +1,161 @@
+{
+  "key": "7987a6b19a032c219247cdec67d72b39",
+  "recordedAt": "2026-11-22T22:00:12.968Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Vorstclaw\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Elemental Horror\",\"text\":\"\"},{\"id\":2,\"name\":\"Wandering Wolf\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Creatures with power less than this creature's power can't block it.\"},{\"id\":3,\"name\":\"Wild Defiance\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control becomes the target of an instant or sorcery spell, that creature gets +3/+3 until end of turn.\"},{\"id\":4,\"name\":\"Wildwood Geist\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"During your turn, this creature gets +2/+2.\"},{\"id\":5,\"name\":\"Wolfir Avenger\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Wolf Warrior\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\n{1}{G}: Regenerate this creature.\"},{\"id\":6,\"name\":\"Wolfir Silverheart\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Wolf Warrior\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, each of those creatures gets +4/+4.\"},{\"id\":7,\"name\":\"Yew Spirit\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Spirit Treefolk\",\"text\":\"{2}{G}{G}: This creature gets +X/+X until end of turn, where X is its power.\"},{\"id\":8,\"name\":\"Bruna, Light of Alabaster\",\"manaCost\":\"{3}{W}{W}{U}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, vigilance\\nWhenever Bruna attacks or blocks, you may attach to it any number of Auras on the battlefield and you may put onto the battlefield attached to it any number of Aura cards that could enchant it from your graveyard and/or hand.\"},{\"id\":9,\"name\":\"Gisela, Blade of Goldnight\",\"manaCost\":\"{4}{R}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, first strike\\nIf a source would deal damage to an opponent or a permanent an opponent controls, that source deals double that damage to that player or permanent instead.\\nIf a source would deal damage to you or a permanent you control, prevent half that damage, rounded up.\"},{\"id\":10,\"name\":\"Sigarda, Host of Herons\",\"manaCost\":\"{2}{G}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, hexproof\\nSpells and abilities your opponents control can't cause you to sacrifice permanents.\"},{\"id\":11,\"name\":\"Angel's Tomb\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature you control enters, you may have this artifact become a 3/3 white Angel artifact creature with flying until end of turn.\"},{\"id\":12,\"name\":\"Angelic Armaments\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2, has flying, and is a white Angel in addition to its other colors and types.\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":13,\"name\":\"Bladed Bracers\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1.\\nAs long as equipped creature is a Human or an Angel, it has vigilance.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":14,\"name\":\"Conjurer's Closet\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your end step, you may exile target creature you control, then return that card to the battlefield under your control.\"},{\"id\":15,\"name\":\"Gallows at Willow Hill\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}, Tap three untapped Humans you control: Destroy target creature. Its controller creates a 1/1 white Spirit creature token with flying.\"},{\"id\":16,\"name\":\"Haunted Guardian\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Defender, first strike\"},{\"id\":17,\"name\":\"Moonsilver Spear\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has first strike.\\nWhenever equipped creature attacks, create a 4/4 white Angel creature token with flying.\\nEquip {4}\"},{\"id\":18,\"name\":\"Narstad Scrapper\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{2}: This creature gets +1/+0 until end of turn.\"},{\"id\":19,\"name\":\"Otherworld Atlas\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Book\",\"text\":\"{T}: Put a charge counter on this artifact.\\n{T}: Each player draws a card for each charge counter on this artifact.\"},{\"id\":20,\"name\":\"Scroll of Avacyn\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, Sacrifice this artifact: Draw a card. If you control an Angel, you gain 5 life.\"},{\"id\":21,\"name\":\"Scroll of Griselbrand\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, Sacrifice this artifact: Target opponent discards a card. If you control a Demon, that player loses 3 life.\"},{\"id\":22,\"name\":\"Tormentor's Trident\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +3/+0 and attacks each combat if able.\\nEquip {3}\"},{\"id\":23,\"name\":\"Vanguard's Shield\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +0/+3 and can block an additional creature each combat.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":24,\"name\":\"Vessel of Endless Rest\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, put target card from a graveyard on the bottom of its owner's library.\\n{T}: Add one mana of any color.\"},{\"id\":25,\"name\":\"Alchemist's Refuge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{G}{U}, {T}: You may cast spells this turn as though they had flash.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1336,
+      "cacheCreationInputTokens": 32520,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.771349,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.771349,
+      "pricedUsd": 0.771349,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.771349 and its own usage prices at $0.771349"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "key": "321073349f4d9c86a67682257abb959b",
+  "recordedAt": "2026-11-22T21:38:19.380Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Pristine Talisman\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {C}. You gain 1 life.\"},{\"id\":2,\"name\":\"Shrine of Boundless Growth\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep and whenever you cast a green spell, put a charge counter on this artifact.\\n{T}, Sacrifice this artifact: Add {C} for each charge counter on this artifact.\"},{\"id\":3,\"name\":\"Shrine of Burning Rage\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep and whenever you cast a red spell, put a charge counter on this artifact.\\n{3}, {T}, Sacrifice this artifact: It deals damage equal to the number of charge counters on it to any target.\"},{\"id\":4,\"name\":\"Shrine of Limitless Power\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep and whenever you cast a black spell, put a charge counter on this artifact.\\n{4}, {T}, Sacrifice this artifact: Target player discards a card for each charge counter on this artifact.\"},{\"id\":5,\"name\":\"Shrine of Loyal Legions\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep and whenever you cast a white spell, put a charge counter on this artifact.\\n{3}, {T}, Sacrifice this artifact: Create a 1/1 colorless Phyrexian Myr artifact creature token for each charge counter on this artifact.\"},{\"id\":6,\"name\":\"Shrine of Piercing Vision\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep and whenever you cast a blue spell, put a charge counter on this artifact.\\n{T}, Sacrifice this artifact: Look at the top X cards of your library, where X is the number of charge counters on this artifact. Put one of those cards into your hand and the rest on the bottom of your library in any order.\"},{\"id\":7,\"name\":\"Sickleslicer\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +2/+2.\\nEquip {4}\"},{\"id\":8,\"name\":\"Soul Conduit\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"{6}, {T}: Two target players exchange life totals.\"},{\"id\":9,\"name\":\"Spellskite\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"{U/P}: Change a target of target spell or ability to this creature. ({U/P} can be paid with either {U} or 2 life.)\"},{\"id\":10,\"name\":\"Surge Node\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with six charge counters on it.\\n{1}, {T}, Remove a charge counter from this artifact: Put a charge counter on target artifact.\"},{\"id\":11,\"name\":\"Sword of War and Peace\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has protection from red and from white.\\nWhenever equipped creature deals combat damage to a player, this Equipment deals damage to that player equal to the number of cards in their hand and you gain 1 life for each card in your hand.\\nEquip {2}\"},{\"id\":12,\"name\":\"Torpor Orb\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Creatures entering don't cause abilities to trigger.\"},{\"id\":13,\"name\":\"Trespassing Souleater\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Phyrexian Construct\",\"text\":\"{U/P}: This creature can't be blocked this turn. ({U/P} can be paid with either {U} or 2 life.)\"},{\"id\":14,\"name\":\"Unwinding Clock\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Untap all artifacts you control during each other player's untap step.\"},{\"id\":15,\"name\":\"Phyrexia's Core\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{1}, {T}, Sacrifice an artifact: You gain 1 life.\"},{\"id\":16,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"},{\"id\":17,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":18,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":19,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":20,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 993,
+      "cacheCreationInputTokens": 31946,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.742719,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.742719,
+      "pricedUsd": 0.742719,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.742719 and its own usage prices at $0.742719"
+    }
+  }
+}

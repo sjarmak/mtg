@@ -1,0 +1,161 @@
+{
+  "key": "300333cb3b362119546408f7e1b52cff",
+  "recordedAt": "2026-11-22T22:14:12.713Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Riverwheel Aerialists\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Djinn Monk\",\"text\":\"Flying\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":2,\"name\":\"Scaldkin\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\n{2}{R}, Sacrifice this creature: It deals 2 damage to any target.\"},{\"id\":3,\"name\":\"Scion of Glaciers\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{U}: This creature gets +1/-1 until end of turn.\"},{\"id\":4,\"name\":\"Set Adrift\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nPut target nonland permanent on top of its owner's library.\"},{\"id\":5,\"name\":\"Singing Bell Strike\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, tap enchanted creature.\\nEnchanted creature doesn't untap during its controller's untap step.\\nEnchanted creature has \\\"{6}: Untap this creature.\\\"\"},{\"id\":6,\"name\":\"Stubborn Denial\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell unless its controller pays {1}.\\nFerocious — If you control a creature with power 4 or greater, counter that spell instead.\"},{\"id\":7,\"name\":\"Taigam's Scheming\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Surveil 5. (Look at the top five cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)\"},{\"id\":8,\"name\":\"Thousand Winds\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nMorph {5}{U}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, return all other tapped creatures to their owners' hands.\"},{\"id\":9,\"name\":\"Treasure Cruise\",\"manaCost\":\"{7}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nDraw three cards.\"},{\"id\":10,\"name\":\"Waterwhirl\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return up to two target creatures to their owners' hands.\"},{\"id\":11,\"name\":\"Weave Fate\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw two cards.\"},{\"id\":12,\"name\":\"Wetland Sambar\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Elk\",\"text\":\"\"},{\"id\":13,\"name\":\"Whirlwind Adept\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Djinn Monk\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":14,\"name\":\"Bellowing Saddlebrute\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Orc Warrior\",\"text\":\"Raid — When this creature enters, you lose 4 life unless you attacked this turn.\"},{\"id\":15,\"name\":\"Bitter Revelation\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top four cards of your library. Put two of them into your hand and the rest into your graveyard. You lose 2 life.\"},{\"id\":16,\"name\":\"Bloodsoaked Champion\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"This creature can't block.\\nRaid — {1}{B}: Return this card from your graveyard to the battlefield. Activate only if you attacked this turn.\"},{\"id\":17,\"name\":\"Dead Drop\",\"manaCost\":\"{9}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nTarget player sacrifices two creatures of their choice.\"},{\"id\":18,\"name\":\"Debilitating Injury\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-2.\"},{\"id\":19,\"name\":\"Despise\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a creature or planeswalker card from it. That player discards that card.\"},{\"id\":20,\"name\":\"Disowned Ancestor\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Spirit Warrior\",\"text\":\"Outlast {1}{B} ({1}{B}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\"},{\"id\":21,\"name\":\"Dutiful Return\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target creature cards from your graveyard to your hand.\"},{\"id\":22,\"name\":\"Empty the Pits\",\"manaCost\":\"{X}{X}{B}{B}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nCreate X tapped 2/2 black Zombie creature tokens.\"},{\"id\":23,\"name\":\"Grim Haruspex\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Morph {B} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhenever another nontoken creature you control dies, draw a card.\"},{\"id\":24,\"name\":\"Gurmag Swiftwing\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying, first strike, haste\"},{\"id\":25,\"name\":\"Kheru Bloodsucker\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Whenever a creature you control with toughness 4 or greater dies, each opponent loses 2 life and you gain 2 life.\\n{2}{B}, Sacrifice another creature: Put a +1/+1 counter on this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1273,
+      "cacheCreationInputTokens": 32460,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.766999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.766999,
+      "pricedUsd": 0.766999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.766999 and its own usage prices at $0.766999"
+    }
+  }
+}

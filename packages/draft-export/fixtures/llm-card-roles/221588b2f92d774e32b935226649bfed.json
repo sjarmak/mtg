@@ -1,0 +1,161 @@
+{
+  "key": "221588b2f92d774e32b935226649bfed",
+  "recordedAt": "2026-11-22T21:26:16.126Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Chain Lightning\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Chain Lightning deals 3 damage to any target. Then that player or that permanent's controller may pay {R}{R}. If the player does, they may copy this spell and may choose a new target for that copy.\"},{\"id\":2,\"name\":\"Hazoret the Fervent\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Indestructible, haste\\nHazoret can't attack or block unless you have one or fewer cards in hand.\\n{2}{R}, Discard a card: Hazoret deals 2 damage to each opponent.\"},{\"id\":3,\"name\":\"Rhonas the Indomitable\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Deathtouch, indestructible\\nRhonas can't attack or block unless you control another creature with power 4 or greater.\\n{2}{G}: Another target creature gets +2/+0 and gains trample until end of turn.\"},{\"id\":4,\"name\":\"Maelstrom Pulse\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target nonland permanent and all other permanents with the same name as that permanent.\"},{\"id\":5,\"name\":\"Vindicate\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target permanent.\"},{\"id\":6,\"name\":\"Armageddon\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all lands.\"},{\"id\":7,\"name\":\"Capsize\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Buyback {3} (You may pay an additional {3} as you cast this spell. If you do, put this card into your hand as it resolves.)\\nReturn target permanent to its owner's hand.\"},{\"id\":8,\"name\":\"Forbid\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Buyback—Discard two cards. (You may discard two cards in addition to any other costs as you cast this spell. If you do, put this card into your hand as it resolves.)\\nCounter target spell.\"},{\"id\":9,\"name\":\"Omniscience\",\"manaCost\":\"{7}{U}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"You may cast spells from your hand without paying their mana costs.\"},{\"id\":10,\"name\":\"Opposition\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Tap an untapped creature you control: Tap target artifact, creature, or land.\"},{\"id\":11,\"name\":\"Sunder\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return all lands to their owners' hands.\"},{\"id\":12,\"name\":\"Threads of Disloyalty\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature with mana value 2 or less\\nYou control enchanted creature.\"},{\"id\":13,\"name\":\"Avatar of Woe\",\"manaCost\":\"{6}{B}{B}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"If there are ten or more creature cards total in all graveyards, this spell costs {6} less to cast.\\nFear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\n{T}: Destroy target creature. It can't be regenerated.\"},{\"id\":14,\"name\":\"Damnation\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures. They can't be regenerated.\"},{\"id\":15,\"name\":\"Desolation Angel\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Kicker {W}{W} (You may pay an additional {W}{W} as you cast this spell.)\\nFlying\\nWhen this creature enters, destroy all lands you control. If it was kicked, destroy all lands instead.\"},{\"id\":16,\"name\":\"Diabolic Edict\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices a creature of their choice.\"},{\"id\":17,\"name\":\"Doomsday\",\"manaCost\":\"{B}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library and graveyard for five cards and exile the rest. Put the chosen cards on top of your library in any order. You lose half your life, rounded up.\"},{\"id\":18,\"name\":\"No Mercy\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature deals damage to you, destroy it.\"},{\"id\":19,\"name\":\"Slaughter Pact\",\"manaCost\":\"{0}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonblack creature.\\nAt the beginning of your next upkeep, pay {2}{B}. If you don't, you lose the game.\"},{\"id\":20,\"name\":\"Thoughtseize\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand. You choose a nonland card from it. That player discards that card. You lose 2 life.\"},{\"id\":21,\"name\":\"Blood Moon\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Nonbasic lands are Mountains.\"},{\"id\":22,\"name\":\"Boil\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy all Islands.\"},{\"id\":23,\"name\":\"Shatterstorm\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all artifacts. They can't be regenerated.\"},{\"id\":24,\"name\":\"Through the Breach\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant — Arcane\",\"text\":\"You may put a creature card from your hand onto the battlefield. That creature gains haste. Sacrifice that creature at the beginning of the next end step.\\nSplice onto Arcane {2}{R}{R} (As you cast an Arcane spell, you may reveal this card from your hand and pay its splice cost. If you do, add this card's effects to that spell.)\"},{\"id\":25,\"name\":\"Choke\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Islands don't untap during their controllers' untap steps.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1428,
+      "cacheCreationInputTokens": 32328,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.772109,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.772109,
+      "pricedUsd": 0.772109,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.772109 and its own usage prices at $0.772109"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "c9717e6ff8de2cccfa6ee7dff6e24494",
+  "recordedAt": "2026-11-22T22:36:23.407Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Amoeboid Changeling\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\n{T}: Target creature gains all creature types until end of turn.\\n{T}: Target creature loses all creature types until end of turn.\"},{\"id\":2,\"name\":\"Aquitect's Will\",\"manaCost\":\"{U}\",\"typeLine\":\"Kindred Sorcery — Merfolk\",\"text\":\"Put a flood counter on target land. That land is an Island in addition to its other types for as long as it has a flood counter on it. If you control a Merfolk, draw a card.\"},{\"id\":3,\"name\":\"Benthicore\",\"manaCost\":\"{6}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, create two 1/1 blue Merfolk Wizard creature tokens.\\nTap two untapped Merfolk you control: Untap this creature. It gains shroud until end of turn. (It can't be the target of spells or abilities.)\"},{\"id\":4,\"name\":\"Broken Ambitions\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {X}. Clash with an opponent. If you win, that spell's controller mills four cards. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":5,\"name\":\"Captivating Glance\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of your end step, clash with an opponent. If you win, gain control of enchanted creature. Otherwise, that player gains control of enchanted creature. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":6,\"name\":\"Cryptic Command\",\"manaCost\":\"{1}{U}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose two —\\n• Counter target spell.\\n• Return target permanent to its owner's hand.\\n• Tap all creatures your opponents control.\\n• Draw a card.\"},{\"id\":7,\"name\":\"Deeptread Merrow\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"{U}: This creature gains islandwalk until end of turn. (It can't be blocked as long as defending player controls an Island.)\"},{\"id\":8,\"name\":\"Drowner of Secrets\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Tap an untapped Merfolk you control: Target player mills a card.\"},{\"id\":9,\"name\":\"Ego Erasure\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Kindred Instant — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nCreatures target player controls get -2/-0 and lose all creature types until end of turn.\"},{\"id\":10,\"name\":\"Ethereal Whiskergill\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nThis creature can't attack unless defending player controls an Island.\"},{\"id\":11,\"name\":\"Faerie Harbinger\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flash\\nFlying\\nWhen this creature enters, you may search your library for a Faerie card, reveal it, then shuffle and put that card on top.\"},{\"id\":12,\"name\":\"Faerie Trickery\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Kindred Instant — Faerie\",\"text\":\"Counter target non-Faerie spell. If that spell is countered this way, exile it instead of putting it into its owner's graveyard.\"},{\"id\":13,\"name\":\"Fallowsage\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Whenever this creature becomes tapped, you may draw a card.\"},{\"id\":14,\"name\":\"Familiar's Ruse\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, return a creature you control to its owner's hand.\\nCounter target spell.\"},{\"id\":15,\"name\":\"Fathom Trawl\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal cards from the top of your library until you reveal three nonland cards. Put the nonland cards revealed this way into your hand, then put the rest of the revealed cards on the bottom of your library in any order.\"},{\"id\":16,\"name\":\"Forced Fruition\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent casts a spell, that player draws seven cards.\"},{\"id\":17,\"name\":\"Glen Elendra Pranksters\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flying\\nWhenever you cast a spell during an opponent's turn, you may return target creature you control to its owner's hand.\"},{\"id\":18,\"name\":\"Glimmerdust Nap\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant tapped creature\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":19,\"name\":\"Guile\",\"manaCost\":\"{3}{U}{U}{U}\",\"typeLine\":\"Creature — Elemental Incarnation\",\"text\":\"This creature can't be blocked except by three or more creatures.\\nIf a spell or ability you control would counter a spell, instead exile that spell and you may play that card without paying its mana cost.\\nWhen Guile is put into a graveyard from anywhere, shuffle it into its owner's library.\"},{\"id\":20,\"name\":\"Inkfathom Divers\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Merfolk Soldier\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nWhen this creature enters, look at the top four cards of your library, then put them back in any order.\"},{\"id\":21,\"name\":\"Jace Beleren\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+2: Each player draws a card.\\n−1: Target player draws a card.\\n−10: Target player mills twenty cards.\"},{\"id\":22,\"name\":\"Merrow Commerce\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Kindred Enchantment — Merfolk\",\"text\":\"At the beginning of your end step, untap all Merfolk you control.\"},{\"id\":23,\"name\":\"Merrow Harbinger\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nWhen this creature enters, you may search your library for a Merfolk card, reveal it, then shuffle and put that card on top.\"},{\"id\":24,\"name\":\"Merrow Reejerey\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Soldier\",\"text\":\"Other Merfolk creatures you control get +1/+1.\\nWhenever you cast a Merfolk spell, you may tap or untap target permanent.\"},{\"id\":25,\"name\":\"Mistbind Clique\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flash\\nFlying\\nChampion a Faerie (When this enters, sacrifice it unless you exile another Faerie you control. When this leaves the battlefield, that card returns to the battlefield.)\\nWhen a Faerie is championed with this creature, tap all lands target player controls.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\",\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1937,
+      "cacheCreationInputTokens": 32838,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.807759,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.807759,
+      "pricedUsd": 0.807759,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.807759 and its own usage prices at $0.807759"
+    }
+  }
+}

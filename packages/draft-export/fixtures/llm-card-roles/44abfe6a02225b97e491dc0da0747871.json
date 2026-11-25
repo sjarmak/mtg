@@ -1,0 +1,161 @@
+{
+  "key": "44abfe6a02225b97e491dc0da0747871",
+  "recordedAt": "2026-11-22T21:31:17.836Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Stormbound Geist\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nThis creature can block only creatures with flying.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":2,\"name\":\"Thought Scour\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target player mills two cards.\\nDraw a card.\"},{\"id\":3,\"name\":\"Tower Geist\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhen this creature enters, look at the top two cards of your library. Put one of them into your hand and the other into your graveyard.\"},{\"id\":4,\"name\":\"Black Cat\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Cat\",\"text\":\"When this creature dies, target opponent discards a card at random.\"},{\"id\":5,\"name\":\"Chosen of Markov\",\"manaCost\":null,\"typeLine\":\"Creature — Human // Creature — Vampire\",\"text\":null,\"faces\":[{\"name\":\"Chosen of Markov\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human\",\"text\":\"{T}, Tap an untapped Vampire you control: Transform this creature.\"},{\"name\":\"Markov's Servant\",\"manaCost\":\"\",\"typeLine\":\"Creature — Vampire\",\"text\":\"\"}]},{\"id\":6,\"name\":\"Curse of Misfortunes\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of your upkeep, you may search your library for a Curse card that doesn't have the same name as a Curse attached to enchanted player, put it onto the battlefield attached to that player, then shuffle.\"},{\"id\":7,\"name\":\"Curse of Thirst\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of enchanted player's upkeep, this Aura deals damage to that player equal to the number of Curses attached to them.\"},{\"id\":8,\"name\":\"Deadly Allure\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gains deathtouch until end of turn and must be blocked this turn if able.\\nFlashback {G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":9,\"name\":\"Death's Caress\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature. If that creature was a Human, you gain life equal to its toughness.\"},{\"id\":10,\"name\":\"Falkenrath Torturer\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Sacrifice a creature: This creature gains flying until end of turn. If the sacrificed creature was a Human, put a +1/+1 counter on this creature.\"},{\"id\":11,\"name\":\"Farbog Boneflinger\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, target creature gets -2/-2 until end of turn.\"},{\"id\":12,\"name\":\"Fiend of the Shadows\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Vampire Wizard\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, that player exiles a card from their hand. You may play that card for as long as it remains exiled.\\nSacrifice a Human: Regenerate this creature.\"},{\"id\":13,\"name\":\"Geralf's Messenger\",\"manaCost\":\"{B}{B}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature enters tapped.\\nWhen this creature enters, target opponent loses 2 life.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":14,\"name\":\"Gravecrawler\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature can't block.\\nYou may cast this card from your graveyard as long as you control a Zombie.\"},{\"id\":15,\"name\":\"Gravepurge\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Put any number of target creature cards from your graveyard on top of your library.\\nDraw a card.\"},{\"id\":16,\"name\":\"Gruesome Discovery\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\\nMorbid — If a creature died this turn, instead that player reveals their hand, you choose two cards from it, then that player discards those cards.\"},{\"id\":17,\"name\":\"Harrowing Journey\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws three cards and loses 3 life.\"},{\"id\":18,\"name\":\"Highborn Ghoul\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":19,\"name\":\"Increasing Ambition\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a card and put that card into your hand. If this spell was cast from a graveyard, instead search your library for two cards and put those cards into your hand. Then shuffle.\\nFlashback {7}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":20,\"name\":\"Mikaeus, the Unhallowed\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Legendary Creature — Zombie Cleric\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhenever a Human deals damage to you, destroy it.\\nOther non-Human creatures you control get +1/+1 and have undying. (When a creature with undying dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":21,\"name\":\"Ravenous Demon\",\"manaCost\":null,\"typeLine\":\"Creature — Demon // Creature — Demon\",\"text\":null,\"faces\":[{\"name\":\"Ravenous Demon\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Sacrifice a Human: Transform this creature. Activate only as a sorcery.\"},{\"name\":\"Archdemon of Greed\",\"manaCost\":\"\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying, trample\\nAt the beginning of your upkeep, sacrifice a Human. If you can't, tap this creature and it deals 9 damage to you.\"}]},{\"id\":22,\"name\":\"Reap the Seagraf\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 2/2 black Zombie creature token.\\nFlashback {4}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":23,\"name\":\"Sightless Ghoul\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Soldier\",\"text\":\"This creature can't block.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":24,\"name\":\"Skirsdag Flayer\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{3}{B}, {T}, Sacrifice a Human: Destroy target creature.\"},{\"id\":25,\"name\":\"Spiteful Shadows\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature is dealt damage, it deals that much damage to its controller.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2154,
+      "cacheCreationInputTokens": 32940,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.820649,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.820649,
+      "pricedUsd": 0.820649,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.820649 and its own usage prices at $0.820649"
+    }
+  }
+}

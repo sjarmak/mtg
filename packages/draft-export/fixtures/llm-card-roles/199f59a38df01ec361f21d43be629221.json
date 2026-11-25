@@ -1,0 +1,161 @@
+{
+  "key": "199f59a38df01ec361f21d43be629221",
+  "recordedAt": "2026-11-22T22:01:02.407Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Shrieking Affliction\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each opponent's upkeep, if that player has one or fewer cards in hand, they lose 3 life.\"},{\"id\":2,\"name\":\"Slum Reaper\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"When this creature enters, each player sacrifices a creature of their choice.\"},{\"id\":3,\"name\":\"Stab Wound\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-2.\\nAt the beginning of the upkeep of enchanted creature's controller, that player loses 2 life.\"},{\"id\":4,\"name\":\"Tavern Swindler\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{T}, Pay 3 life: Flip a coin. If you win the flip, you gain 6 life.\"},{\"id\":5,\"name\":\"Terrus Wurm\",\"manaCost\":\"{6}{B}\",\"typeLine\":\"Creature — Zombie Wurm\",\"text\":\"Scavenge {6}{B} ({6}{B}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":6,\"name\":\"Thrill-Kill Assassin\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"Deathtouch\\nUnleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":7,\"name\":\"Ultimate Price\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target monocolored creature.\"},{\"id\":8,\"name\":\"Underworld Connections\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{T}, Pay 1 life: Draw a card.\\\"\"},{\"id\":9,\"name\":\"Zanikev Locust\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Flying\\nScavenge {2}{B}{B} ({2}{B}{B}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":10,\"name\":\"Annihilating Fire\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Annihilating Fire deals 3 damage to any target. If a creature dealt damage this way would die this turn, exile it instead.\"},{\"id\":11,\"name\":\"Ash Zealot\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"First strike, haste\\nWhenever a player casts a spell from a graveyard, this creature deals 3 damage to that player.\"},{\"id\":12,\"name\":\"Batterhorn\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, you may destroy target artifact.\"},{\"id\":13,\"name\":\"Bellows Lizard\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":14,\"name\":\"Bloodfray Giant\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Trample\\nUnleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":15,\"name\":\"Chaos Imps\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\nUnleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\\nThis creature has trample as long as it has a +1/+1 counter on it.\"},{\"id\":16,\"name\":\"Cobblebrute\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"\"},{\"id\":17,\"name\":\"Dynacharge\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +2/+0 until end of turn.\\nOverload {2}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":18,\"name\":\"Electrickery\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Electrickery deals 1 damage to target creature you don't control.\\nOverload {1}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":19,\"name\":\"Explosive Impact\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Instant\",\"text\":\"Explosive Impact deals 5 damage to any target.\"},{\"id\":20,\"name\":\"Goblin Rally\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create four 1/1 red Goblin creature tokens.\"},{\"id\":21,\"name\":\"Gore-House Chainwalker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Unleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":22,\"name\":\"Guild Feud\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, target opponent reveals the top three cards of their library, may put a creature card from among them onto the battlefield, then puts the rest into their graveyard. You do the same with the top three cards of your library. If two creatures are put onto the battlefield this way, those creatures fight each other.\"},{\"id\":23,\"name\":\"Guttersnipe\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Whenever you cast an instant or sorcery spell, this creature deals 2 damage to each opponent.\"},{\"id\":24,\"name\":\"Lobber Crew\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Defender\\n{T}: This creature deals 1 damage to each opponent.\\nWhenever you cast a multicolored spell, untap this creature.\"},{\"id\":25,\"name\":\"Minotaur Aggressor\",\"manaCost\":\"{6}{R}\",\"typeLine\":\"Creature — Minotaur Berserker\",\"text\":\"First strike, haste\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 409,
+      "cacheCreationInputTokens": 32470,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.723999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.723999,
+      "pricedUsd": 0.723999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723999 and its own usage prices at $0.723999"
+    }
+  }
+}

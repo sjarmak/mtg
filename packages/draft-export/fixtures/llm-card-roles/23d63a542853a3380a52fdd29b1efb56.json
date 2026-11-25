@@ -1,0 +1,161 @@
+{
+  "key": "23d63a542853a3380a52fdd29b1efb56",
+  "recordedAt": "2026-11-22T22:13:55.525Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Take Up Arms\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create three 1/1 white Warrior creature tokens.\"},{\"id\":2,\"name\":\"Timely Hordemate\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Raid — When this creature enters, if you attacked this turn, return target creature card with mana value 2 or less from your graveyard to the battlefield.\"},{\"id\":3,\"name\":\"Venerable Lammasu\",\"manaCost\":\"{6}{W}\",\"typeLine\":\"Creature — Lammasu\",\"text\":\"Flying\"},{\"id\":4,\"name\":\"War Behemoth\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Morph {4}{W} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":5,\"name\":\"Watcher of the Roost\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird Soldier\",\"text\":\"Flying\\nMorph—Reveal a white card in your hand. (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, you gain 2 life.\"},{\"id\":6,\"name\":\"Wingmate Roc\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nRaid — When this creature enters, if you attacked this turn, create a 3/4 white Bird creature token with flying.\\nWhenever this creature attacks, you gain 1 life for each attacking creature.\"},{\"id\":7,\"name\":\"Blinding Spray\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -4/-0 until end of turn.\\nDraw a card.\"},{\"id\":8,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":9,\"name\":\"Clever Impersonator\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any nonland permanent on the battlefield.\"},{\"id\":10,\"name\":\"Crippling Chill\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature. It doesn't untap during its controller's next untap step.\\nDraw a card.\"},{\"id\":11,\"name\":\"Dig Through Time\",\"manaCost\":\"{6}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nLook at the top seven cards of your library. Put two of them into your hand and the rest on the bottom of your library in any order.\"},{\"id\":12,\"name\":\"Disdainful Stroke\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell with mana value 4 or greater.\"},{\"id\":13,\"name\":\"Dragon's Eye Savants\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Morph—Reveal a blue card in your hand. (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, look at target opponent's hand.\"},{\"id\":14,\"name\":\"Embodiment of Spring\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{1}{G}, {T}, Sacrifice this creature: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":15,\"name\":\"Force Away\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature to its owner's hand.\\nFerocious — If you control a creature with power 4 or greater, you may draw a card. If you do, discard a card.\"},{\"id\":16,\"name\":\"Glacial Stalker\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Morph {4}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":17,\"name\":\"Icy Blast\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap X target creatures.\\nFerocious — If you control a creature with power 4 or greater, those creatures don't untap during their controllers' next untap steps.\"},{\"id\":18,\"name\":\"Jeskai Elder\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nWhenever this creature deals combat damage to a player, you may draw a card. If you do, discard a card.\"},{\"id\":19,\"name\":\"Jeskai Windscout\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Bird Scout\",\"text\":\"Flying\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":20,\"name\":\"Kheru Spellsnatcher\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Snake Wizard\",\"text\":\"Morph {4}{U}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, counter target spell. If that spell is countered this way, exile it instead of putting it into its owner's graveyard. You may cast that card without paying its mana cost for as long as it remains exiled.\"},{\"id\":21,\"name\":\"Mistfire Weaver\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Djinn Wizard\",\"text\":\"Flying\\nMorph {2}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, target creature you control gains hexproof until end of turn.\"},{\"id\":22,\"name\":\"Monastery Flock\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Defender, flying\\nMorph {U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":23,\"name\":\"Mystic of the Hidden Way\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"This creature can't be blocked.\\nMorph {2}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":24,\"name\":\"Pearl Lake Ancient\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Flash\\nThis spell can't be countered.\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nReturn three lands you control to their owner's hand: Return this creature to its owner's hand.\"},{\"id\":25,\"name\":\"Quiet Contemplation\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a noncreature spell, you may pay {1}. If you do, tap target creature an opponent controls and it doesn't untap during its controller's next untap step.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1292,
+      "cacheCreationInputTokens": 32740,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7735489999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7735489999999999,
+      "pricedUsd": 0.773549,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773549 and its own usage prices at $0.773549"
+    }
+  }
+}

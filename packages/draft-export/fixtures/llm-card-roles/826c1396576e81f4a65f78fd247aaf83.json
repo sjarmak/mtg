@@ -1,0 +1,161 @@
+{
+  "key": "826c1396576e81f4a65f78fd247aaf83",
+  "recordedAt": "2026-11-22T21:54:31.358Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Scourge of Valkas\",\"manaCost\":\"{2}{R}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhenever this creature or another Dragon you control enters, it deals X damage to any target, where X is the number of Dragons you control.\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":2,\"name\":\"Seismic Stomp\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures without flying can't block this turn.\"},{\"id\":3,\"name\":\"Shiv's Embrace\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has flying.\\n{R}: Enchanted creature gets +1/+0 until end of turn.\"},{\"id\":4,\"name\":\"Shivan Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":5,\"name\":\"Shock\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Shock deals 2 damage to any target.\"},{\"id\":6,\"name\":\"Smelt\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\"},{\"id\":7,\"name\":\"Striking Sliver\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have first strike. (They deal combat damage before creatures without first strike.)\"},{\"id\":8,\"name\":\"Thorncaster Sliver\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have \\\"Whenever this creature attacks, it deals 1 damage to any target.\\\"\"},{\"id\":9,\"name\":\"Thunder Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":10,\"name\":\"Volcanic Geyser\",\"manaCost\":\"{X}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Volcanic Geyser deals X damage to any target.\"},{\"id\":11,\"name\":\"Wild Guess\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, discard a card.\\nDraw two cards.\"},{\"id\":12,\"name\":\"Wild Ricochet\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"You may choose new targets for target instant or sorcery spell. Then copy that spell. You may choose new targets for the copy.\"},{\"id\":13,\"name\":\"Young Pyromancer\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Whenever you cast an instant or sorcery spell, create a 1/1 red Elemental creature token.\"},{\"id\":14,\"name\":\"Advocate of the Beast\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"At the beginning of your end step, put a +1/+1 counter on target Beast creature you control.\"},{\"id\":15,\"name\":\"Bramblecrush\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target noncreature permanent.\"},{\"id\":16,\"name\":\"Briarpack Alpha\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, target creature gets +2/+2 until end of turn.\"},{\"id\":17,\"name\":\"Brindle Boar\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Sacrifice this creature: You gain 4 life.\"},{\"id\":18,\"name\":\"Deadly Recluse\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":19,\"name\":\"Elvish Mystic\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":20,\"name\":\"Enlarge\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gets +7/+7 and gains trample until end of turn. It must be blocked this turn if able. (A creature with trample can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":21,\"name\":\"Fog\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\"},{\"id\":22,\"name\":\"Garruk, Caller of Beasts\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Reveal the top five cards of your library. Put all creature cards revealed this way into your hand and the rest on the bottom of your library in any order.\\n−3: You may put a green creature card from your hand onto the battlefield.\\n−7: You get an emblem with \\\"Whenever you cast a creature spell, you may search your library for a creature card, put it onto the battlefield, then shuffle.\\\"\"},{\"id\":23,\"name\":\"Garruk's Horde\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nPlay with the top card of your library revealed.\\nYou may cast creature spells from the top of your library. (Do this only any time you could cast that creature spell. You still pay the spell's costs.)\"},{\"id\":24,\"name\":\"Giant Growth\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 until end of turn.\"},{\"id\":25,\"name\":\"Giant Spider\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 420,
+      "cacheCreationInputTokens": 32292,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.720989,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.720989,
+      "pricedUsd": 0.720989,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.720989 and its own usage prices at $0.720989"
+    }
+  }
+}

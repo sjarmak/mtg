@@ -9,10 +9,11 @@
  *   node packages/data/tools/printed-admission-rebind-all.mjs install <run directory>
  *
  * `build` never stops at a failed format: it prints one BUILT or FAILED line per format, writes
- * play-admission-v<N+1> beside the installed vN, and checks the new admission against the old one
- * (same cards, same decisions, same probe ids, only sha256 values differ). `install` then points
- * the registry, the per-format tests and the registry test at each BUILT format's new directory
- * and deletes the superseded one. The probe runs boot Forge and take the host Forge lock.
+ * the new admission under the run directory (<run directory>/<id>/play-admission), and checks it
+ * against the installed one (same cards, same decisions, same probe ids, only sha256 values
+ * differ). `install` then replaces each BUILT format's packages/data/data/<id>/play-admission with
+ * the new one. The directory name never changes, so neither the registry nor any test moves with
+ * a re-bind. The probe runs boot Forge and take the host Forge lock.
  */
 import { spawnSync } from 'node:child_process';
 import console from 'node:console';
@@ -33,8 +34,6 @@ if ((mode !== 'build' && mode !== 'install') || runDir === undefined) {
   throw new Error('usage: build|install <run directory> [format id ...]');
 }
 const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8')).formats;
-const nextDirectory = (entry) =>
-  `play-admission-v${Number(/^play-admission-v(\d+)$/u.exec(entry.admissionDirectory)[1]) + 1}`;
 
 const git = (...args) => spawnSync('git', args, { encoding: 'utf8' });
 const sha = /^[0-9a-f]{64}$/u;
@@ -70,7 +69,7 @@ function rebind(entry, results) {
   fs.mkdirSync(dir, { recursive: true });
   const log = fs.openSync(path.join(dir, 'log.txt'), 'a');
   const oldDirectory = `${data}${id}/${entry.admissionDirectory}`;
-  const newDirectory = `${data}${id}/${nextDirectory(entry)}`;
+  const newDirectory = path.join(dir, 'play-admission');
   const existingAdmission = JSON.parse(fs.readFileSync(`${oldDirectory}/admission.json`, 'utf8'));
   const catalogs = entry.catalogs.flatMap((c) => ['--catalog', `${data}${id}/${c.file}`]);
   const step = (label, command, args) => {
@@ -124,9 +123,9 @@ function rebind(entry, results) {
     const drift = differences(shapeOf(before), shapeOf(after));
     if (drift.length > 0) throw new Error(`admission differs beyond digests: ${drift.join('; ')}`);
     const seconds = Math.round((Date.now() - started) / 1000);
-    results.push({ id, status: 'BUILT', from: entry.admissionDirectory, to: nextDirectory(entry) });
+    results.push({ id, status: 'BUILT', built: newDirectory, installed: oldDirectory });
     console.log(
-      `BUILT  ${id}  ${entry.admissionDirectory} -> ${nextDirectory(entry)}  ` +
+      `BUILT  ${id}  ` +
         `${after.cards.length} cards, ${after.probes.length} probes, moved: ${subjectMoved.join(',')}  ${seconds}s`,
     );
   } catch (error) {
@@ -157,45 +156,14 @@ function build() {
 
 function install() {
   const { results } = JSON.parse(fs.readFileSync(path.join(runDir, 'results.json'), 'utf8'));
-  let registryText = fs.readFileSync(registryPath, 'utf8');
-  const replaceIn = (file, from, to) => {
-    if (!fs.existsSync(file)) return;
-    const text = fs.readFileSync(file, 'utf8');
-    if (text.includes(from)) fs.writeFileSync(file, text.replaceAll(from, to));
-  };
-  for (const { id, status, from, to } of results) {
+  for (const { id, status, built, installed } of results) {
     if (status !== 'BUILT') continue;
-    const entryPattern = new RegExp(`("id": "${id}"[\\s\\S]*?"admissionDirectory": ")${from}(")`, 'u');
-    if (!entryPattern.test(registryText)) throw new Error(`${id}: registry does not name ${from}`);
-    registryText = registryText.replace(entryPattern, `$1${to}$2`);
-    replaceIn(`packages/data/test/${id}-printed-format.test.ts`, `${from}/`, `${to}/`);
-    if (['rtr', 'm11', 'm13'].includes(id)) {
-      replaceIn('packages/data/test/rtr-m11-m13-printed-formats.test.ts', `${from}'`, `${to}'`);
-    }
-    replaceIn(
-      'packages/ui/test/tools/printed-format-registry.test.ts',
-      `data/${id}/${from}'`,
-      `data/${id}/${to}'`,
-    );
-    replaceIn(
-      'packages/ui/test/tools/admitted-printed-backend-runtime-mismatch.test.ts',
-      `data/${id}/${from}/`,
-      `data/${id}/${to}/`,
-    );
-    replaceIn(
-      'packages/ui/test/tools/stage-printed-formats.test.ts',
-      `data, '${from}'`,
-      `data, '${to}'`,
-    );
-    replaceIn(
-      'packages/ui/test/lab/printed-limited-constructed.test.ts',
-      `\${data}/${from}/`,
-      `\${data}/${to}/`,
-    );
-    fs.rmSync(`${data}${id}/${from}`, { recursive: true });
-    console.log(`installed ${id}: ${from} -> ${to}`);
+    if (!fs.existsSync(path.join(built, 'admission.json')))
+      throw new Error(`${id}: ${built} has no admission`);
+    fs.rmSync(installed, { recursive: true });
+    fs.cpSync(built, installed, { recursive: true });
+    console.log(`installed ${id}: ${built} -> ${installed}`);
   }
-  fs.writeFileSync(registryPath, registryText);
 }
 
 if (mode === 'build') build();

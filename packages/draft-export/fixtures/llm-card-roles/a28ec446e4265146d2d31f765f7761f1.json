@@ -1,0 +1,161 @@
+{
+  "key": "a28ec446e4265146d2d31f765f7761f1",
+  "recordedAt": "2026-11-22T21:43:05.899Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Primal Bellow\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 until end of turn for each Forest you control.\"},{\"id\":2,\"name\":\"Quest for the Gemblades\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control deals combat damage to a creature, you may put a quest counter on this enchantment.\\nRemove a quest counter from this enchantment and sacrifice it: Put four +1/+1 counters on target creature.\"},{\"id\":3,\"name\":\"Rampaging Baloths\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nLandfall — Whenever a land you control enters, create a 4/4 green Beast creature token.\"},{\"id\":4,\"name\":\"Relic Crush\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment and up to one other target artifact or enchantment.\"},{\"id\":5,\"name\":\"River Boa\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\n{G}: Regenerate this creature.\"},{\"id\":6,\"name\":\"Savage Silhouette\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has \\\"{1}{G}: Regenerate this creature.\\\"\"},{\"id\":7,\"name\":\"Scute Mob\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"At the beginning of your upkeep, if you control five or more lands, put four +1/+1 counters on this creature.\"},{\"id\":8,\"name\":\"Scythe Tiger\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Shroud (This creature can't be the target of spells or abilities.)\\nWhen this creature enters, sacrifice it unless you sacrifice a land.\"},{\"id\":9,\"name\":\"Summoning Trap\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If a creature spell you cast this turn was countered by a spell or ability an opponent controlled, you may pay {0} rather than pay this spell's mana cost.\\nLook at the top seven cards of your library. You may put a creature card from among them onto the battlefield. Put the rest on the bottom of your library in any order.\"},{\"id\":10,\"name\":\"Tajuru Archer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Archer Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have this creature deal damage to target creature with flying equal to the number of Allies you control.\"},{\"id\":11,\"name\":\"Tanglesap\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn by creatures without trample.\"},{\"id\":12,\"name\":\"Terra Stomper\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"This spell can't be countered.\\nTrample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":13,\"name\":\"Territorial Baloth\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Landfall — Whenever a land you control enters, this creature gets +2/+2 until end of turn.\"},{\"id\":14,\"name\":\"Timbermaw Larva\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Whenever this creature attacks, it gets +1/+1 until end of turn for each Forest you control.\"},{\"id\":15,\"name\":\"Turntimber Basilisk\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Basilisk\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nLandfall — Whenever a land you control enters, you may have target creature block this creature this turn if able.\"},{\"id\":16,\"name\":\"Turntimber Ranger\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elf Scout Ranger Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may create a 2/2 green Wolf creature token. If you do, put a +1/+1 counter on this creature.\"},{\"id\":17,\"name\":\"Vastwood Gorger\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"},{\"id\":18,\"name\":\"Vines of Vastwood\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Kicker {G} (You may pay an additional {G} as you cast this spell.)\\nTarget creature can't be the target of spells or abilities your opponents control this turn. If this spell was kicked, that creature gets +4/+4 until end of turn.\"},{\"id\":19,\"name\":\"Zendikar Farguide\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\"},{\"id\":20,\"name\":\"Adventuring Gear\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Landfall — Whenever a land you control enters, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":21,\"name\":\"Blade of the Bloodchief\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever a creature dies, put a +1/+1 counter on equipped creature. If equipped creature is a Vampire, put two +1/+1 counters on it instead.\\nEquip {1}\"},{\"id\":22,\"name\":\"Blazing Torch\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can't be blocked by Vampires or Zombies.\\nEquipped creature has \\\"{T}, Sacrifice Blazing Torch: Blazing Torch deals 2 damage to any target.\\\"\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":23,\"name\":\"Carnage Altar\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, Sacrifice a creature: Draw a card.\"},{\"id\":24,\"name\":\"Eldrazi Monument\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"Creatures you control get +1/+1 and have flying and indestructible.\\nAt the beginning of your upkeep, sacrifice a creature. If you can't, sacrifice this artifact.\"},{\"id\":25,\"name\":\"Eternity Vessel\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with X charge counters on it, where X is your life total.\\nLandfall — Whenever a land you control enters, you may have your life total become the number of charge counters on this artifact.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1292,
+      "cacheCreationInputTokens": 32616,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.771069,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.771069,
+      "pricedUsd": 0.771069,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.771069 and its own usage prices at $0.771069"
+    }
+  }
+}

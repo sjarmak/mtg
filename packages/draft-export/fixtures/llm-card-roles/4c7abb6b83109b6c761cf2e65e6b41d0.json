@@ -1,0 +1,161 @@
+{
+  "key": "4c7abb6b83109b6c761cf2e65e6b41d0",
+  "recordedAt": "2026-11-22T22:14:32.745Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Bloodfire Expert\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Efreet Monk\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":2,\"name\":\"Bloodfire Mentor\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Efreet Shaman\",\"text\":\"{2}{U}, {T}: Draw a card, then discard a card.\"},{\"id\":3,\"name\":\"Bring Low\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Bring Low deals 3 damage to target creature. If that creature has a +1/+1 counter on it, Bring Low deals 5 damage to it instead.\"},{\"id\":4,\"name\":\"Burn Away\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Burn Away deals 6 damage to target creature. When that creature dies this turn, exile its controller's graveyard.\"},{\"id\":5,\"name\":\"Canyon Lurkers\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Morph {3}{R} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":6,\"name\":\"Crater's Claws\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Crater's Claws deals X damage to any target.\\nFerocious — Crater's Claws deals X plus 2 damage instead if you control a creature with power 4 or greater.\"},{\"id\":7,\"name\":\"Dragon Grip\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Ferocious — If you control a creature with power 4 or greater, you may cast this spell as though it had flash. (You may cast it any time you could cast an instant.)\\nEnchant creature\\nEnchanted creature gets +2/+0 and has first strike.\"},{\"id\":8,\"name\":\"Dragon-Style Twins\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Double strike\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":9,\"name\":\"Goblinslide\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a noncreature spell, you may pay {1}. If you do, create a 1/1 red Goblin creature token with haste.\"},{\"id\":10,\"name\":\"Horde Ambusher\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Whenever this creature blocks, it deals 1 damage to you.\\nMorph—Reveal a red card in your hand. (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, target creature can't block this turn.\"},{\"id\":11,\"name\":\"Hordeling Outburst\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create three 1/1 red Goblin creature tokens.\"},{\"id\":12,\"name\":\"Howl of the Horde\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"When you next cast an instant or sorcery spell this turn, copy that spell. You may choose new targets for the copy.\\nRaid — If you attacked this turn, when you next cast an instant or sorcery spell this turn, copy that spell an additional time. You may choose new targets for the copy.\"},{\"id\":13,\"name\":\"Jeering Instigator\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"Morph {2}{R} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, if it's your turn, gain control of another target creature until end of turn. Untap that creature. It gains haste until end of turn.\"},{\"id\":14,\"name\":\"Leaping Master\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"{2}{W}: This creature gains flying until end of turn.\"},{\"id\":15,\"name\":\"Mardu Blazebringer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"When this creature attacks or blocks, sacrifice it at end of combat.\"},{\"id\":16,\"name\":\"Mardu Heart-Piercer\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"Raid — When this creature enters, if you attacked this turn, this creature deals 2 damage to any target.\"},{\"id\":17,\"name\":\"Mardu Warshrieker\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Orc Shaman\",\"text\":\"Raid — When this creature enters, if you attacked this turn, add {R}{W}{B}.\"},{\"id\":18,\"name\":\"Monastery Swiftspear\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Haste\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":19,\"name\":\"Sarkhan, the Dragonspeaker\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Sarkhan\",\"text\":\"+1: Until end of turn, Sarkhan becomes a legendary 4/4 red Dragon creature with flying, indestructible, and haste. (He doesn't lose loyalty while he's not a planeswalker.)\\n−3: Sarkhan deals 4 damage to target creature.\\n−6: You get an emblem with \\\"At the beginning of your draw step, draw two additional cards\\\" and \\\"At the beginning of your end step, discard your hand.\\\"\"},{\"id\":20,\"name\":\"Shatter\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\"},{\"id\":21,\"name\":\"Summit Prowler\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Yeti\",\"text\":\"\"},{\"id\":22,\"name\":\"Swift Kick\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +1/+0 until end of turn. It fights target creature you don't control.\"},{\"id\":23,\"name\":\"Tormenting Voice\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, discard a card.\\nDraw two cards.\"},{\"id\":24,\"name\":\"Trumpet Blast\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures get +2/+0 until end of turn.\"},{\"id\":25,\"name\":\"Valley Dasher\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Haste\\nThis creature attacks each combat if able.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 414,
+      "cacheCreationInputTokens": 32588,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7266090000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7266090000000001,
+      "pricedUsd": 0.726609,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.726609 and its own usage prices at $0.726609"
+    }
+  }
+}

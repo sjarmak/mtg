@@ -1,0 +1,161 @@
+{
+  "key": "65d31a5c1df5295296b0e0d896d666c6",
+  "recordedAt": "2026-11-22T21:28:06.939Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Delver of Secrets\",\"manaCost\":null,\"typeLine\":\"Creature — Human Wizard // Creature — Human Insect\",\"text\":null,\"faces\":[{\"name\":\"Delver of Secrets\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"At the beginning of your upkeep, look at the top card of your library. You may reveal that card. If an instant or sorcery card is revealed this way, transform this creature.\"},{\"name\":\"Insectile Aberration\",\"manaCost\":\"\",\"typeLine\":\"Creature — Human Insect\",\"text\":\"Flying\"}]},{\"id\":2,\"name\":\"Deranged Assistant\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}, Mill a card: Add {C}. (Activate only as an instant. To mill a card, put the top card of your library into your graveyard.)\"},{\"id\":3,\"name\":\"Dissipate\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. If that spell is countered this way, exile it instead of putting it into its owner's graveyard.\"},{\"id\":4,\"name\":\"Dream Twist\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target player mills three cards.\\nFlashback {1}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":5,\"name\":\"Forbidden Alchemy\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Look at the top four cards of your library. Put one of them into your hand and the rest into your graveyard.\\nFlashback {6}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":6,\"name\":\"Fortress Crab\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Crab\",\"text\":\"\"},{\"id\":7,\"name\":\"Frightful Delusion\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {1}. That player discards a card.\"},{\"id\":8,\"name\":\"Grasp of Phantoms\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature on top of its owner's library.\\nFlashback {7}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":9,\"name\":\"Hysterical Blindness\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -4/-0 until end of turn.\"},{\"id\":10,\"name\":\"Invisible Stalker\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nThis creature can't be blocked.\"},{\"id\":11,\"name\":\"Laboratory Maniac\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"If you would draw a card while your library has no cards in it, you win the game instead.\"},{\"id\":12,\"name\":\"Lantern Spirit\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\n{U}: Return this creature to its owner's hand.\"},{\"id\":13,\"name\":\"Lost in the Mist\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Return target permanent to its owner's hand.\"},{\"id\":14,\"name\":\"Ludevic's Test Subject\",\"manaCost\":null,\"typeLine\":\"Creature — Lizard Egg // Creature — Lizard Horror\",\"text\":null,\"faces\":[{\"name\":\"Ludevic's Test Subject\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Lizard Egg\",\"text\":\"Defender\\n{1}{U}: Put a hatchling counter on this creature. Then if there are five or more hatchling counters on it, remove all of them and transform it.\"},{\"name\":\"Ludevic's Abomination\",\"manaCost\":\"\",\"typeLine\":\"Creature — Lizard Horror\",\"text\":\"Trample\"}]},{\"id\":15,\"name\":\"Makeshift Mauler\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Zombie Horror\",\"text\":\"As an additional cost to cast this spell, exile a creature card from your graveyard.\"},{\"id\":16,\"name\":\"Memory's Journey\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target player shuffles up to three target cards from their graveyard into their library.\\nFlashback {G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":17,\"name\":\"Mindshrieker\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Spirit Bird\",\"text\":\"Flying\\n{2}: Target player mills a card. This creature gets +X/+X until end of turn, where X is the milled card's mana value.\"},{\"id\":18,\"name\":\"Mirror-Mad Phantasm\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\n{1}{U}: This creature's owner shuffles it into their library. If that player does, they reveal cards from the top of that library until a card named Mirror-Mad Phantasm is revealed. The player puts that card onto the battlefield and all other cards revealed this way into their graveyard.\"},{\"id\":19,\"name\":\"Moon Heron\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Spirit Bird\",\"text\":\"Flying\"},{\"id\":20,\"name\":\"Murder of Crows\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhenever another creature dies, you may draw a card. If you do, discard a card.\"},{\"id\":21,\"name\":\"Rooftop Storm\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"You may pay {0} rather than pay the mana cost for Zombie creature spells you cast.\"},{\"id\":22,\"name\":\"Runic Repetition\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target exiled card with flashback you own to your hand.\"},{\"id\":23,\"name\":\"Selhoff Occultist\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Whenever this creature or another creature dies, target player mills a card.\"},{\"id\":24,\"name\":\"Sensory Deprivation\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -3/-0.\"},{\"id\":25,\"name\":\"Silent Departure\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature to its owner's hand.\\nFlashback {4}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1437,
+      "cacheCreationInputTokens": 32550,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776999,
+      "pricedUsd": 0.776999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776999 and its own usage prices at $0.776999"
+    }
+  }
+}

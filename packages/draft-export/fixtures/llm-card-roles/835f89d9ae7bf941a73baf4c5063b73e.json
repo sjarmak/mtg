@@ -1,0 +1,161 @@
+{
+  "key": "835f89d9ae7bf941a73baf4c5063b73e",
+  "recordedAt": "2026-11-22T22:10:00.839Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Silent Sentinel\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Archon\",\"text\":\"Flying\\nWhenever this creature attacks, you may return target enchantment card from your graveyard to the battlefield.\"},{\"id\":2,\"name\":\"Spirit of the Labyrinth\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Each player can't draw more than one card each turn.\"},{\"id\":3,\"name\":\"Sunbond\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"Whenever you gain life, put that many +1/+1 counters on this creature.\\\"\"},{\"id\":4,\"name\":\"Vanguard of Brimaz\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Cat Soldier\",\"text\":\"Vigilance\\nHeroic — Whenever you cast a spell that targets this creature, create a 1/1 white Cat Soldier creature token with vigilance.\"},{\"id\":5,\"name\":\"Aerie Worshippers\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may pay {2}{U}. If you do, create a 2/2 blue Bird enchantment creature token with flying.\"},{\"id\":6,\"name\":\"Arbiter of the Ideal\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nInspired — Whenever this creature becomes untapped, reveal the top card of your library. If it's an artifact, creature, or land card, you may put it onto the battlefield with a manifestation counter on it. That permanent is an enchantment in addition to its other types.\"},{\"id\":7,\"name\":\"Archetype of Imagination\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Enchantment Creature — Human Wizard\",\"text\":\"Creatures you control have flying.\\nCreatures your opponents control lose flying and can't have or gain flying.\"},{\"id\":8,\"name\":\"Chorus of the Tides\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Siren\",\"text\":\"Flying\\nHeroic — Whenever you cast a spell that targets this creature, scry 1. (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\"},{\"id\":9,\"name\":\"Crypsis\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains protection from creatures your opponents control until end of turn. Untap it.\"},{\"id\":10,\"name\":\"Deepwater Hypnotist\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Inspired — Whenever this creature becomes untapped, target creature an opponent controls gets -3/-0 until end of turn.\"},{\"id\":11,\"name\":\"Divination\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards.\"},{\"id\":12,\"name\":\"Eternity Snare\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw a card.\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":13,\"name\":\"Evanescent Intellect\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{1}{U}, {T}: Target player mills three cards.\\\"\"},{\"id\":14,\"name\":\"Fated Infatuation\",\"manaCost\":\"{U}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Create a token that's a copy of target creature you control. If it's your turn, scry 2.\"},{\"id\":15,\"name\":\"Flitterstep Eidolon\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {5}{U} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nThis creature can't be blocked.\\nEnchanted creature gets +1/+1 and can't be blocked.\"},{\"id\":16,\"name\":\"Floodtide Serpent\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"This creature can't attack unless you return an enchantment you control to its owner's hand. (This cost is paid as attackers are declared.)\"},{\"id\":17,\"name\":\"Kraken of the Straits\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Kraken\",\"text\":\"Creatures with power less than the number of Islands you control can't block this creature.\"},{\"id\":18,\"name\":\"Meletis Astronomer\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, look at the top three cards of your library. You may reveal an enchantment card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\"},{\"id\":19,\"name\":\"Mindreaver\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, exile the top three cards of target player's library.\\n{U}{U}, Sacrifice this creature: Counter target spell with the same name as a card exiled with this creature.\"},{\"id\":20,\"name\":\"Nullify\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature or Aura spell.\"},{\"id\":21,\"name\":\"Nyxborn Triton\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment Creature — Merfolk\",\"text\":\"Bestow {4}{U} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +2/+3.\"},{\"id\":22,\"name\":\"Oracle's Insight\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: Scry 1, then draw a card.\\\" (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\"},{\"id\":23,\"name\":\"Perplexing Chimera\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment Creature — Chimera\",\"text\":\"Whenever an opponent casts a spell, you may exchange control of this creature and that spell. If you do, you may choose new targets for the spell. (If the spell becomes a permanent, you control that permanent.)\"},{\"id\":24,\"name\":\"Retraction Helix\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature gains \\\"{T}: Return target nonland permanent to its owner's hand.\\\"\"},{\"id\":25,\"name\":\"Siren of the Fanged Coast\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Siren\",\"text\":\"Flying\\nTribute 3 (As this creature enters, an opponent of your choice may put three +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, gain control of target creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[\"interaction\",\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 425,
+      "cacheCreationInputTokens": 32688,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.729159,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.729159,
+      "pricedUsd": 0.729159,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.729159 and its own usage prices at $0.729159"
+    }
+  }
+}

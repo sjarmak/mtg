@@ -1,0 +1,161 @@
+{
+  "key": "44776557bcfb89632ad475292bf8ae18",
+  "recordedAt": "2026-11-22T21:52:49.257Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Chronomaton\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"{1}, {T}: Put a +1/+1 counter on this creature.\"},{\"id\":2,\"name\":\"Clock of Omens\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Tap two untapped artifacts you control: Untap target artifact.\"},{\"id\":3,\"name\":\"Door to Nothingness\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters tapped.\\n{W}{W}{U}{U}{B}{B}{R}{R}{G}{G}, {T}, Sacrifice this artifact: Target player loses the game.\"},{\"id\":4,\"name\":\"Elixir of Immortality\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: You gain 5 life. Shuffle this artifact and your graveyard into their owner's library.\"},{\"id\":5,\"name\":\"Gem of Becoming\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}, Sacrifice this artifact: Search your library for an Island card, a Swamp card, and a Mountain card. Reveal those cards, put them into your hand, then shuffle.\"},{\"id\":6,\"name\":\"Gilded Lotus\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add three mana of any one color.\"},{\"id\":7,\"name\":\"Jayemdae Tome\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Book\",\"text\":\"{4}, {T}: Draw a card.\"},{\"id\":8,\"name\":\"Kitesail\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 and has flying.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":9,\"name\":\"Phyrexian Hulk\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Phyrexian Golem\",\"text\":\"\"},{\"id\":10,\"name\":\"Primal Clay\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Shapeshifter\",\"text\":\"As this creature enters, it becomes your choice of a 3/3 artifact creature, a 2/2 artifact creature with flying, or a 1/6 Wall artifact creature with defender in addition to its other types. (A creature with defender can't attack.)\"},{\"id\":11,\"name\":\"Ring of Evos Isle\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"{2}: Equipped creature gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\\nAt the beginning of your upkeep, put a +1/+1 counter on equipped creature if it's blue.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":12,\"name\":\"Ring of Kalonia\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\\nAt the beginning of your upkeep, put a +1/+1 counter on equipped creature if it's green.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":13,\"name\":\"Ring of Thune\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has vigilance. (Attacking doesn't cause it to tap.)\\nAt the beginning of your upkeep, put a +1/+1 counter on equipped creature if it's white.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":14,\"name\":\"Ring of Valkas\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has haste. (It can attack and {T} no matter when it came under your control.)\\nAt the beginning of your upkeep, put a +1/+1 counter on equipped creature if it's red.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":15,\"name\":\"Ring of Xathrid\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"{2}: Regenerate equipped creature. (The next time that creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\\nAt the beginning of your upkeep, put a +1/+1 counter on equipped creature if it's black.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":16,\"name\":\"Sands of Delirium\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{X}, {T}: Target player mills X cards.\"},{\"id\":17,\"name\":\"Staff of Nin\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"At the beginning of your upkeep, draw a card.\\n{T}: This artifact deals 1 damage to any target.\"},{\"id\":18,\"name\":\"Stuffy Doll\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Indestructible\\nAs this creature enters, choose a player.\\nWhenever this creature is dealt damage, it deals that much damage to the chosen player.\\n{T}: This creature deals 1 damage to itself.\"},{\"id\":19,\"name\":\"Tormod's Crypt\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice this artifact: Exile target player's graveyard.\"},{\"id\":20,\"name\":\"Trading Post\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}, Discard a card: You gain 4 life.\\n{1}, {T}, Pay 1 life: Create a 0/1 white Goat creature token.\\n{1}, {T}, Sacrifice a creature: Return target artifact card from your graveyard to your hand.\\n{1}, {T}, Sacrifice an artifact: Draw a card.\"},{\"id\":21,\"name\":\"Cathedral of War\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\\n{T}: Add {C}.\"},{\"id\":22,\"name\":\"Dragonskull Summit\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control a Swamp or a Mountain.\\n{T}: Add {B} or {R}.\"},{\"id\":23,\"name\":\"Drowned Catacomb\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control an Island or a Swamp.\\n{T}: Add {U} or {B}.\"},{\"id\":24,\"name\":\"Evolving Wilds\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":25,\"name\":\"Glacial Fortress\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control a Plains or an Island.\\n{T}: Add {W} or {U}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[\"fixing\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\",\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1143,
+      "cacheCreationInputTokens": 32725,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7657989999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7657989999999999,
+      "pricedUsd": 0.765799,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.765799 and its own usage prices at $0.765799"
+    }
+  }
+}

@@ -1,0 +1,2640 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-card-roles",
+  "formatId": "gtc",
+  "source": {
+    "kind": "model-oracle-reading",
+    "model": "claude-fable-5",
+    "promptSha256": "cdb396dd257dc651275645574e5643087d4a654478803660cd59d712209b596d",
+    "vocabulary": ["interaction", "draw", "fixing"]
+  },
+  "catalogs": [
+    {
+      "code": "GTC",
+      "catalogSha256": "bf7b418c9e0de05b4b7c21b53ef8631d1f02f8b9b61905a077850bc02a2204d3",
+      "cards": [
+        {
+          "physicalId": "gtc-printed-v1:0001:c63e9c49-3fa4-41ad-9eed-19801df103c6",
+          "sourceFingerprint": 3682624888,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0002:e24b62d3-c200-4330-a255-92d77f01ba44",
+          "sourceFingerprint": 2368654449,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0003:beb04702-5cb2-4590-b675-9409ba52a395",
+          "sourceFingerprint": 404472584,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0004:704286a5-e3a8-4517-85e5-6447c5c2530f",
+          "sourceFingerprint": 1738510373,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0005:2be39fed-4b39-4027-9c80-f2186f7dd941",
+          "sourceFingerprint": 3973559860,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0006:07c3e78d-d917-4552-842f-feff99c059e0",
+          "sourceFingerprint": 1674798568,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0007:a03974e6-aced-4664-8c5c-3190bb1eb233",
+          "sourceFingerprint": 2801410995,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0008:ca6a5cb3-b6e5-4879-83b5-4ad590a5467a",
+          "sourceFingerprint": 4197269911,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0009:6c28412d-9add-4911-8487-c84559006fb0",
+          "sourceFingerprint": 2882891590,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0010:fafb0372-6860-4b0b-b92e-873735489006",
+          "sourceFingerprint": 2373990133,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0011:8d586143-fac0-463f-96ec-c6b9fd582194",
+          "sourceFingerprint": 1848625085,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0012:711a5eca-531d-4b07-b7df-9b06bad491be",
+          "sourceFingerprint": 2053483789,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0013:93d0509a-a863-4d9c-b39f-625a8cc1a547",
+          "sourceFingerprint": 2850221827,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0014:86940635-7001-4ecf-b4ee-25aa1e2d81fc",
+          "sourceFingerprint": 73824681,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0015:89c5c496-0a3e-40e1-84ac-8ad3a9d8352b",
+          "sourceFingerprint": 710814277,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0016:48fd52d0-0e41-48d5-b96f-4c6409788c18",
+          "sourceFingerprint": 2597544099,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0017:95567596-c5b1-426f-bc2c-43306f7221b0",
+          "sourceFingerprint": 68673804,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0018:0c2a1100-a2e6-4ef5-a8e3-2aca552d6b66",
+          "sourceFingerprint": 1323552962,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0019:cd492072-9a8c-4d55-ac71-3c8efaa3fc87",
+          "sourceFingerprint": 4185186845,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0020:b0747b12-c75a-4fdf-a881-f2383a23ccdd",
+          "sourceFingerprint": 2524975618,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0021:1f3bb284-d10e-4265-92a4-8dcaf118f3c8",
+          "sourceFingerprint": 3076577198,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0022:9d81d7f8-375f-40f5-98cd-08be08580bef",
+          "sourceFingerprint": 2598487033,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0023:f52cb325-4f16-4cf3-9999-feafe0fde8c2",
+          "sourceFingerprint": 3346784599,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0024:6546b6c4-73b2-41b3-9ff9-316e9ce916e5",
+          "sourceFingerprint": 1605920563,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0025:ff799e40-fd40-4f6a-8fa8-c22d77476168",
+          "sourceFingerprint": 3819089173,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0026:2bafaa3b-eeaa-427f-9a73-6a1c98d257ca",
+          "sourceFingerprint": 866145694,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0027:acf932ac-5ea5-491b-b555-5e9ea971d93d",
+          "sourceFingerprint": 2540663358,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0028:7bf5efe4-d9a0-4704-b5ba-3213c946df37",
+          "sourceFingerprint": 3489567845,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0029:33303859-c6e0-4ebd-bb5f-44be7f5d7459",
+          "sourceFingerprint": 881118638,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0030:e1a3efab-ee0a-4770-a323-e4bac38e4287",
+          "sourceFingerprint": 2052599268,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0031:4e183069-096d-4977-8154-e7b60f17a787",
+          "sourceFingerprint": 389973565,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0032:e2931f27-43f9-4e52-aab3-967c26739e43",
+          "sourceFingerprint": 593743954,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0033:0b7c34af-91de-44c6-a3e2-f48dbb0ce9fd",
+          "sourceFingerprint": 2148695249,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0034:612beb8f-2ab1-4a8b-84c5-c47d19d400ab",
+          "sourceFingerprint": 1000717317,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0035:d9f3a08f-403e-4d6c-87c7-add8170bde8b",
+          "sourceFingerprint": 2571818286,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0036:b4f5c126-3df9-4771-9e74-4ca33161ac08",
+          "sourceFingerprint": 3076846055,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0037:afeef50a-f5c9-47ab-ad04-645f49bbae6b",
+          "sourceFingerprint": 1976645256,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0038:290e56e0-e699-413a-9d6a-e740bf460b35",
+          "sourceFingerprint": 768654136,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0039:970ee9a3-a862-46a7-9aa5-7b6fc4ffa1ab",
+          "sourceFingerprint": 1914467771,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0040:c6033d07-124c-4001-81e1-c6eb99e07fdd",
+          "sourceFingerprint": 4283477380,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0041:e0867865-d9eb-45d2-a359-064f0f61197b",
+          "sourceFingerprint": 3997211917,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0042:5f349013-0846-4bec-bdf9-47a3706d9989",
+          "sourceFingerprint": 3157882079,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0043:947f44b0-91be-4115-b499-57893f0f69a9",
+          "sourceFingerprint": 2713934158,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0044:83557f55-f1ab-4995-9cc1-37be895a59db",
+          "sourceFingerprint": 3668712905,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0045:989c76b2-d130-443d-8534-6525fef404c2",
+          "sourceFingerprint": 193104455,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0046:063e6df9-2287-485a-ab46-fa4a38783884",
+          "sourceFingerprint": 742948236,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0047:d0fe14cf-5d34-47d1-9071-4a532819719b",
+          "sourceFingerprint": 3316421574,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0048:32ed969f-2c8e-4421-9448-dc5a2afdc81d",
+          "sourceFingerprint": 3264745596,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0049:50633b59-6051-4f47-9e27-538fda03b5dd",
+          "sourceFingerprint": 1143590966,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0050:e3dff9e6-5e0c-4e5b-8184-f0ae9cf347b3",
+          "sourceFingerprint": 2321440464,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0051:7ab5bf75-762f-46ef-8304-aacdb248bc5b",
+          "sourceFingerprint": 167480124,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0052:7267fcec-0879-4743-a45f-35057ccb2596",
+          "sourceFingerprint": 2212033100,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0053:4e058447-7cee-4670-b86b-c95bd6b68144",
+          "sourceFingerprint": 4270304840,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0054:ec8e4142-7c46-4d2f-aaa6-6410f323d9f0",
+          "sourceFingerprint": 2242025643,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0055:611d0e10-e767-4e66-b1f1-02f1624fab2b",
+          "sourceFingerprint": 645509462,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0056:b249ca81-bd8d-4d3d-81d6-15e8d669c416",
+          "sourceFingerprint": 618389154,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0057:df8a3f05-864d-401d-a2f1-5f58358fe089",
+          "sourceFingerprint": 2730751667,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0058:d233c6bc-c4dd-482d-b0f4-87359acab7cb",
+          "sourceFingerprint": 2184369827,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0059:c2384356-0a62-499a-8b28-085974331368",
+          "sourceFingerprint": 3973503282,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0060:84234e51-e5d6-43d9-89d0-f0398fc6b7fd",
+          "sourceFingerprint": 34699564,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0061:3795a4e7-646f-4bb7-b154-2610eb740e8d",
+          "sourceFingerprint": 4140181819,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0062:b0f69c6f-522d-42c8-be7c-ea6d7ffb6a90",
+          "sourceFingerprint": 3697248613,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0063:88c42ebd-114a-430d-b3a4-ff2fb3093bf5",
+          "sourceFingerprint": 4289051994,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0064:b46e83d3-c66d-42fb-8435-b6c448db01ae",
+          "sourceFingerprint": 4055462488,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0065:aa33fc15-3a4f-48bc-be7c-fdec1cb49c10",
+          "sourceFingerprint": 851520319,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0066:c26d0f6e-e7bd-4206-a0da-1c9c203a73f2",
+          "sourceFingerprint": 1411671216,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0067:830c7c77-20c4-429f-88c7-b85ab7a0e38b",
+          "sourceFingerprint": 571719766,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0068:f5d36c9d-967e-42dc-890c-0485b12f704f",
+          "sourceFingerprint": 3184601952,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0069:989a68c1-3b76-4c2d-9db3-23c45be3f9ff",
+          "sourceFingerprint": 2255654057,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0070:f7a4d87d-b844-4f20-8b14-4fd32c53dea5",
+          "sourceFingerprint": 1282017135,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0071:75b83fe5-fd00-4532-bc67-07836abfc99c",
+          "sourceFingerprint": 2701659591,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0072:076e7c58-a6fe-4882-8f8d-698be9a7f22d",
+          "sourceFingerprint": 691127592,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0073:4df40471-1118-4429-83bf-8225ea50b69f",
+          "sourceFingerprint": 4219987868,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0074:29727bd1-9415-408a-99de-dd992e26e767",
+          "sourceFingerprint": 3683718571,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0075:eb0865cd-d9b4-43ea-87d2-ad5c65fc0459",
+          "sourceFingerprint": 4154575100,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0076:985997ae-59bc-49d7-87ca-e63ed9706fdf",
+          "sourceFingerprint": 576262859,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0077:0497fbf4-cf09-4028-af16-349ed12ca360",
+          "sourceFingerprint": 2758898725,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0078:51528a3e-beba-47f8-a524-ad99b1fec308",
+          "sourceFingerprint": 3304623803,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0079:667871d3-0d1b-496b-afbd-7504989798e4",
+          "sourceFingerprint": 1658313604,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0080:cde6ee2e-a114-4935-8345-d3e264f9fc26",
+          "sourceFingerprint": 743290867,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0081:c38dfb08-ab41-4759-9967-b5a25f18518a",
+          "sourceFingerprint": 3875381589,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0082:822d0f73-cfb0-41d9-b4eb-09c605112a13",
+          "sourceFingerprint": 1621060744,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0083:7b25d3bc-33e9-4d1a-855d-38580e67b6cc",
+          "sourceFingerprint": 2110409220,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0084:b04644ba-5962-4e64-bc53-92941c5b6715",
+          "sourceFingerprint": 1729922256,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0085:a04c8c6f-14e9-427c-918e-208ccd39ec4a",
+          "sourceFingerprint": 4245639421,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0086:9b1675f2-e950-4f3c-9dd3-29ead615ff23",
+          "sourceFingerprint": 2588654215,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0087:8bbf10ce-69e0-4984-91a3-f65df919830d",
+          "sourceFingerprint": 2058333582,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0088:3323c86c-73bd-4e23-9f80-54bf5c1dd0bc",
+          "sourceFingerprint": 191034104,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0089:8a6d9cab-b07b-456b-9562-7ea7f6bec7f3",
+          "sourceFingerprint": 126922872,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0090:ccbc2f22-4500-4c74-a1a2-51d8238c1d16",
+          "sourceFingerprint": 2063229245,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0091:fb550d0c-2261-4f41-a2b1-d185f0bce86a",
+          "sourceFingerprint": 4243352957,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0092:0befed63-07ba-4728-9078-57bbccbeeeb1",
+          "sourceFingerprint": 1931455235,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0093:4eeea013-1cf8-4c77-a097-aa69e141e3f4",
+          "sourceFingerprint": 3271908649,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0094:0bc3401f-935b-45ce-b1e6-300a5d9dfd4f",
+          "sourceFingerprint": 498200877,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0095:156941e7-9169-47aa-b04d-37ca78c54f7c",
+          "sourceFingerprint": 3427449269,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0096:d6535816-8fa4-4c8b-8677-ac80f769f528",
+          "sourceFingerprint": 871573436,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0097:b47f639e-4635-4c26-bb2a-4925f0582c21",
+          "sourceFingerprint": 2483450393,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0098:67ef2667-40f6-4c1c-af81-3e45d2437d5f",
+          "sourceFingerprint": 2799750178,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0099:45498dbd-a512-4299-800b-06c15a4fd94e",
+          "sourceFingerprint": 876654206,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0100:8b16fbd8-fb62-4f75-92b3-a6295d95b327",
+          "sourceFingerprint": 1663529711,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0101:a8f5c7e2-f4da-4cee-a7d0-80b29bb73acd",
+          "sourceFingerprint": 1740561585,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0102:05ca502f-73a3-42f3-b7ad-f69aa239900a",
+          "sourceFingerprint": 4137152713,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0103:3b7d5daf-404d-46e9-b622-e89a1f55e908",
+          "sourceFingerprint": 194080653,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0104:14ac6bde-1fef-45f4-b505-80a66b03140a",
+          "sourceFingerprint": 3047590324,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0105:fe4f9b6c-3ba9-4f4f-8135-f5236195e507",
+          "sourceFingerprint": 4021477977,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0106:8068a146-f6fe-46f3-a42e-822fbc3502e6",
+          "sourceFingerprint": 1643941880,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0107:d10da484-db67-4afc-90ef-6caf7d2e3a75",
+          "sourceFingerprint": 4251463606,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0108:1c1f543b-2222-4ef5-b4f7-2c3d2ea27fdc",
+          "sourceFingerprint": 3827808817,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0109:d68e9280-cb1a-48e1-a91e-217e101f19c5",
+          "sourceFingerprint": 894730085,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0110:f5dd72d5-548a-4b0e-95bb-e6b8d2de0fbe",
+          "sourceFingerprint": 2797248800,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0111:d8a5f801-9e55-4e14-85b0-5719521cd9d6",
+          "sourceFingerprint": 1888648460,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0112:87f1a27c-c576-4c34-873f-6faf020c2773",
+          "sourceFingerprint": 3357256725,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0113:0d3c0c43-2d6d-49b8-a112-07611a23ae69",
+          "sourceFingerprint": 2162990249,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0114:fbc42ca6-db90-41d0-8a4b-3217fb2c114c",
+          "sourceFingerprint": 3712939976,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0115:d1cbd617-9f2e-4882-b8f0-dfc2fced2281",
+          "sourceFingerprint": 342908669,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0116:b459a988-97b0-4370-b89a-2565f8721b60",
+          "sourceFingerprint": 4200413099,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0117:a7eacc64-f418-4df0-bd8a-6b0036d0d2a1",
+          "sourceFingerprint": 1492716375,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0118:3c62b3ee-db2b-45c3-87d5-5d917ea4baeb",
+          "sourceFingerprint": 2489455374,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0119:2cc1d8d0-bb43-4962-ad29-bb6478aa986b",
+          "sourceFingerprint": 3086714959,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0120:a6527d61-e9d3-44d0-833e-19c072309270",
+          "sourceFingerprint": 2038012317,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0121:8bae725f-e582-4377-a855-51af035cdac3",
+          "sourceFingerprint": 3141035245,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0122:e825cb2d-98d7-423d-9ba1-b4d04027027e",
+          "sourceFingerprint": 3661324157,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0123:6345376a-3d2d-4fff-9430-5e90a96e2f0f",
+          "sourceFingerprint": 1920630347,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0124:f6b85a09-6d43-4798-8164-131d35b65836",
+          "sourceFingerprint": 1488861925,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0125:b95be874-93c0-4e05-9e5a-fe8f38bcb445",
+          "sourceFingerprint": 527508289,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0126:128d0584-89d2-499b-b6c2-2425c4ffcd13",
+          "sourceFingerprint": 1766184179,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0127:4adf36ca-56ca-4987-ac93-248d43c9c401",
+          "sourceFingerprint": 2159833492,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0128:e9554369-7961-4cea-9da0-a1235805a26a",
+          "sourceFingerprint": 3799135880,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0129:47324ab7-df78-4859-be0b-2eef5d4f8082",
+          "sourceFingerprint": 2728383721,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0130:c57335b5-30e2-431f-ab50-d5f1981783c3",
+          "sourceFingerprint": 1309868168,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0131:964c88d3-3141-44ab-8856-44a3f08331ea",
+          "sourceFingerprint": 3957270930,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0132:0f3da4b8-9dd6-455d-b24a-3d0207ae5ee8",
+          "sourceFingerprint": 789864279,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0133:2b2dcafd-eb72-4f3a-9c1c-ba17fe30bf0f",
+          "sourceFingerprint": 4259889602,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0134:fb3fcc7a-ff5b-4695-aa86-9166f6cba565",
+          "sourceFingerprint": 3679919518,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0135:428b0d43-94c9-4f7f-b042-ea63f88ac697",
+          "sourceFingerprint": 4045581243,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0136:0483c869-38dc-4b0b-82f3-dd08a1ab985f",
+          "sourceFingerprint": 2839284299,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0137:857e1eb2-f3f2-4c7f-9965-da9d7e385223",
+          "sourceFingerprint": 2738843616,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0138:c59109a0-fdab-49cb-bbf6-d405de4d1645",
+          "sourceFingerprint": 3365021927,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0139:e4a5b2b8-3890-485f-8731-8f178a2da3d7",
+          "sourceFingerprint": 3998813472,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0140:713a93a1-4442-4d5b-ad7a-136b87b5f7ab",
+          "sourceFingerprint": 3866828352,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0141:ce441759-cd4c-4bcc-925e-08e8b60853c0",
+          "sourceFingerprint": 2414815924,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0142:43675ed7-ece1-4414-965e-9ebadcbf3dfb",
+          "sourceFingerprint": 854464639,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0143:4ec18e35-05e4-4bfc-b32b-c3e71c95a71d",
+          "sourceFingerprint": 3952488537,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0144:1a3465b6-ee7f-4553-bbf1-85fae9734b67",
+          "sourceFingerprint": 3924510248,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0145:7996df7f-70f5-412c-9573-9512e4e131ac",
+          "sourceFingerprint": 4222513798,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0146:2000b4e8-7887-454e-9d52-211516613dd0",
+          "sourceFingerprint": 4026063286,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0147:8644c60f-7d06-4026-bcf3-df054701ca0a",
+          "sourceFingerprint": 1159839201,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0148:d4ddf9cc-40a7-4b4f-bb51-b08171453c9a",
+          "sourceFingerprint": 1225856234,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0149:ef30a570-b988-42e8-8910-41fe39ffa260",
+          "sourceFingerprint": 3244388936,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0150:25bcfbc0-1401-4e5e-8145-c8936c4ff725",
+          "sourceFingerprint": 2776513132,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0151:efa05298-9c94-4179-b75a-49ee2ca92920",
+          "sourceFingerprint": 3491810862,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0152:6354de66-f7f8-4e33-98d0-52624d3d7828",
+          "sourceFingerprint": 2602178969,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0153:81cfc3c5-6d69-443e-a506-76b94178979b",
+          "sourceFingerprint": 4244721178,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0154:f3f4cfa7-8ee4-4a85-9e6a-65a7541f62c1",
+          "sourceFingerprint": 3904874406,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0155:398df5e6-6bda-467a-81e2-91be7e21d715",
+          "sourceFingerprint": 1378103370,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0156:21b48170-99dd-440f-9954-fc229d6094d3",
+          "sourceFingerprint": 3954294917,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0157:016d1d17-ba5c-4168-9a3d-232bdcc98c80",
+          "sourceFingerprint": 7262171,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0158:9a1509ff-387e-4ccd-bda0-86e8738a98fb",
+          "sourceFingerprint": 2269182216,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0159:63711861-87e0-4a63-8b7b-f834aa5f3f18",
+          "sourceFingerprint": 1279687434,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0160:dd62e422-e5e2-4736-9ed3-d2dc693f6f8f",
+          "sourceFingerprint": 2583323549,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0161:2122586d-9b23-47c2-8b00-e673aa0310f0",
+          "sourceFingerprint": 1960447820,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0162:4fa311f1-f11e-492d-9f18-e7489f950be7",
+          "sourceFingerprint": 717181090,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0163:e244c198-efdc-492a-9c52-76aac006de9d",
+          "sourceFingerprint": 445670618,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0164:39f835f0-abba-402c-bdae-be03ad3fb658",
+          "sourceFingerprint": 2101732141,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0165:84e39703-db78-4d3d-aacd-5396848253ed",
+          "sourceFingerprint": 2091387176,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0166:03bce9a7-6215-43ff-b4d0-55f96f683aba",
+          "sourceFingerprint": 1462594439,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0167:382048ec-0bf5-49a5-90d5-f80fbda08962",
+          "sourceFingerprint": 2452886362,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0168:a4220348-f030-4639-b1a9-6f61ac6bb6a8",
+          "sourceFingerprint": 104260216,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0169:9235afe5-0a6b-43c2-921c-18524cf032f1",
+          "sourceFingerprint": 2802556082,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0170:080ef367-7904-4e5c-a8b4-1fb62f951f3e",
+          "sourceFingerprint": 506760375,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0171:84a3ff8d-6d7e-49f0-8d30-7f8c23db568b",
+          "sourceFingerprint": 2469286784,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0172:2c4e1f41-4aed-451b-bbaa-6cc6780cd6c9",
+          "sourceFingerprint": 3076899456,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0173:3465cf63-4f10-4b53-9703-69746364dbc7",
+          "sourceFingerprint": 1135076359,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0174:69c8fcdb-4798-4961-995a-e128a3ff431a",
+          "sourceFingerprint": 2072144422,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0175:3690c96c-70a3-45e5-84d7-5c82809a8f45",
+          "sourceFingerprint": 123620234,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0176:1a47da7c-80f3-4b98-aaac-778c34a35cb6",
+          "sourceFingerprint": 2053510880,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0177:d9876a4c-714b-47e5-9589-148a623af96a",
+          "sourceFingerprint": 445808906,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0178:671eb9e8-1a69-4570-8972-2e7de371cef4",
+          "sourceFingerprint": 740540162,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0179:d644eb6e-cc49-4834-bc2c-53f6a4ceb451",
+          "sourceFingerprint": 4144686857,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0180:ae1dd1ac-1a1e-485d-a11f-d1323a69f95e",
+          "sourceFingerprint": 724639031,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0181:d691cd3b-afe5-4f28-95a9-125475515126",
+          "sourceFingerprint": 1011222724,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0182:4cc198d8-1f27-482d-8f5d-21e02c59797a",
+          "sourceFingerprint": 3315779657,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0183:eef2d548-477b-4be1-b946-6df6aac2ee6e",
+          "sourceFingerprint": 2532545234,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0184:20fea3f6-e64a-4964-86bc-c0b8fef0ab25",
+          "sourceFingerprint": 4158736064,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0185:8ca44265-5e1b-4fbf-9002-52b2ce9b7448",
+          "sourceFingerprint": 3435867182,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0186:af406038-91ce-41fe-8b6d-55408a96d0a2",
+          "sourceFingerprint": 3718628420,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0187:2dd518e8-047a-4df0-a0b8-ba116d048fa8",
+          "sourceFingerprint": 958409131,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0188:f30dfb8e-f540-45ab-a4e8-63425099646a",
+          "sourceFingerprint": 3965799028,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0189:0d87927c-80a6-4146-92a5-58c510ce7958",
+          "sourceFingerprint": 2705116181,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0190:937ee156-0105-4291-8c67-d03a59c24679",
+          "sourceFingerprint": 297663716,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0191:8c502590-f780-4512-8067-7c66f16f8c9d",
+          "sourceFingerprint": 2848218440,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0192:ce04d1ee-2605-472d-b3ee-24800342e9af",
+          "sourceFingerprint": 3072557111,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0193:07855a17-4e68-4257-af7f-275c9fb0a9b8",
+          "sourceFingerprint": 4279098425,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0194:34261992-db62-49e3-95bc-1b2960868de4",
+          "sourceFingerprint": 657712640,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0195:97c27bdd-77f5-4e93-8f54-93a204fc980a",
+          "sourceFingerprint": 1779911070,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0196:00f206c0-a8a7-4ca0-b88f-4736c3dac588",
+          "sourceFingerprint": 1285918766,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0197:ae8c9948-b52e-4d07-a72a-99ab6be05cc6",
+          "sourceFingerprint": 4145551955,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0198:fd705732-cce9-4d11-85ca-be49381dbaa8",
+          "sourceFingerprint": 2798633000,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0199:09eb69b5-b8e2-48c6-8c27-cb0108df8dad",
+          "sourceFingerprint": 926379775,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0200:42d1122a-099b-49bf-9b53-52429658816a",
+          "sourceFingerprint": 3352161936,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0201:f013e6f0-85d0-4c8e-a10b-7beea572c32d",
+          "sourceFingerprint": 2246992772,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0202:39610192-6d3c-4d03-9c3e-cda966c924b1",
+          "sourceFingerprint": 233765566,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0203:65e10a22-6070-48d7-99ab-45f770f16fd1",
+          "sourceFingerprint": 1541726330,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0204:9fcd6fac-2cde-4a89-b484-b910be2dcecf",
+          "sourceFingerprint": 3895314147,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0205:cac639b9-6c20-45ac-a61f-082bdcebdb83",
+          "sourceFingerprint": 3223770215,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0206:41f505a3-2c54-43a9-b4a9-43a1451b36f6",
+          "sourceFingerprint": 3115132736,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0207:64e4b0cc-e611-4a4b-8392-b37bfc3a77e1",
+          "sourceFingerprint": 3477504606,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0208:423f0870-dc1c-4cd8-b92c-6d5f92abbaec",
+          "sourceFingerprint": 1026786069,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0209:feeaf99b-7720-42e3-8cb1-23218b646458",
+          "sourceFingerprint": 633665010,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0210:cef93050-2f24-4c85-a00b-796e53868ac1",
+          "sourceFingerprint": 4140266132,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0211:c64a15f4-6e2f-4479-95da-8805ce2091fa",
+          "sourceFingerprint": 615346335,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0212:8b2ef9c5-ca6f-4243-bd38-2b325257831c",
+          "sourceFingerprint": 747466677,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0213:fbe0a11d-0390-437e-8ece-3229863c76db",
+          "sourceFingerprint": 2380079820,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0214:6e18f7a9-2af6-467a-8f62-5f7da83a3c92",
+          "sourceFingerprint": 2554997885,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0215:82a18b07-38b8-4854-9735-3cfe83b11bf1",
+          "sourceFingerprint": 4006526583,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0216:899d5f35-3613-4c69-9176-13baf442fb50",
+          "sourceFingerprint": 1721081286,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0217:d76102f1-b05f-472b-81cf-eae424c55638",
+          "sourceFingerprint": 2379366463,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0218:a4c186d2-e631-4811-83ea-fdb54e730a5d",
+          "sourceFingerprint": 2912358979,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0219:3d759ef8-cb04-4769-9944-85793af3f6e8",
+          "sourceFingerprint": 1080860757,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0220:88366762-4be0-422a-a0ff-ed046d30afe1",
+          "sourceFingerprint": 2007721153,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0221:bddb2e15-a53e-4647-a627-6c7032429fca",
+          "sourceFingerprint": 2412250510,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0222:e3754b8c-16d2-41e3-b41b-4b2e70833e82",
+          "sourceFingerprint": 2312421492,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0223:3624332e-60fc-4819-a0f1-d7ec41c6518b",
+          "sourceFingerprint": 1855032110,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0224:2dec7d6a-2362-4c62-bd81-35bba6086f7d",
+          "sourceFingerprint": 3935849390,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0225:a77058d9-d2b5-424a-bfe2-070b754051cb",
+          "sourceFingerprint": 3506077002,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0226:f8cf8f6c-217e-4d51-aa63-859c2d38d438",
+          "sourceFingerprint": 2585959224,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0227:c4b65847-fee2-4e00-b598-7363059ec3ff",
+          "sourceFingerprint": 3313088443,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0228:4d91bb34-5d8d-48c9-ad19-d28884e083bc",
+          "sourceFingerprint": 2424292085,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0229:a6070239-54a7-49d4-bd3c-d5c4cda971db",
+          "sourceFingerprint": 170443559,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0230:7cf96f1c-066e-4fde-acb8-4674842fb6c2",
+          "sourceFingerprint": 1420627663,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0231:cc06cf32-5d66-4772-845d-ff7649396092",
+          "sourceFingerprint": 2771226956,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0232:98d1bc6e-84aa-4973-924a-6688b742bafa",
+          "sourceFingerprint": 4005539600,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0233:fd5c0f38-916a-4f6c-b678-7447cb0709e0",
+          "sourceFingerprint": 2246049433,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0234:b15b29a2-9e6f-45b7-8af5-f09779aae58e",
+          "sourceFingerprint": 398245108,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0235:24619d3f-1051-4d8e-9c8d-70a12621b282",
+          "sourceFingerprint": 1526002338,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0236:d3be1289-76f9-40b3-9387-b76a8b8d8797",
+          "sourceFingerprint": 3644112398,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0237:d039aae6-38f5-42b5-a530-e0dd03abc7d5",
+          "sourceFingerprint": 305581744,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0238:d1602ee8-019d-4dde-8d31-042207017615",
+          "sourceFingerprint": 1176666035,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0239:a0b447a8-524b-4bda-b975-7e194fd741fb",
+          "sourceFingerprint": 3989091712,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0240:ece3bcdd-cb33-4923-b919-ba57a327d3cd",
+          "sourceFingerprint": 4197213527,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0241:4951bf75-1a88-4c85-b4e9-063d84f1dabf",
+          "sourceFingerprint": 2127253502,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0242:6fd672bb-18cf-44e3-8dda-5310b1e0fffe",
+          "sourceFingerprint": 515042018,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0243:99c54269-8798-4023-836f-640103e08ce0",
+          "sourceFingerprint": 1254570328,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0244:000d609c-deb7-4bd7-9c1d-e20fb3ed4f5f",
+          "sourceFingerprint": 1982557466,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0245:0a26d900-c652-4f9c-8681-a35c5f8b1937",
+          "sourceFingerprint": 921268026,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0246:1ce3f6f2-c52c-4fb8-afa0-b1ea723bb4c6",
+          "sourceFingerprint": 4079700051,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0247:f29f3415-971c-4a5d-aae9-3893f4bdab1e",
+          "sourceFingerprint": 316716776,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "gtc-printed-v1:0248:b6f27909-e5cd-44c0-91c4-21624f692fd9",
+          "sourceFingerprint": 2981090372,
+          "roles": []
+        },
+        {
+          "physicalId": "gtc-printed-v1:0249:47fde349-010e-4a2e-838e-e924dbeec355",
+          "sourceFingerprint": 1414377586,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    {
+      "code": "RTR",
+      "catalogSha256": "b0c21d818619151dbaf1ca6493f91216ea8aa9efb270640c3607c12dece6392c",
+      "cards": [
+        {
+          "physicalId": "rtr-printed-v1:0001:f10d82f7-7759-457e-a9bb-f9a5bd968f82",
+          "sourceFingerprint": 2853796798,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0002:c03498c1-b7f7-41fb-8e2a-1c087d4e9990",
+          "sourceFingerprint": 1050354743,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0003:498f74a2-7e5e-4082-97e7-b938d703f869",
+          "sourceFingerprint": 2066230749,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0004:696678ff-44dc-4fe4-bf17-024e86cd0220",
+          "sourceFingerprint": 2691127351,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0005:199f7563-563e-483c-8317-5380a83db955",
+          "sourceFingerprint": 606998597,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0006:9f56272e-c05e-446b-8871-e3783dd29a8b",
+          "sourceFingerprint": 735083210,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0007:b07bb2fe-3a9b-47d0-864b-99a662d9544b",
+          "sourceFingerprint": 2860673386,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0008:f0333d0b-ae42-48aa-83d8-a4f2c7483a46",
+          "sourceFingerprint": 1220555388,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0009:76960e65-e5c7-4414-b9a5-37d7b2ded4a0",
+          "sourceFingerprint": 2315708163,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0010:befef095-3429-4dd7-aa01-2f7f619675d4",
+          "sourceFingerprint": 1970674714,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0011:a42d3066-f4ec-4d28-83ab-e48141206c72",
+          "sourceFingerprint": 2235239030,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0012:657b242c-46cb-44d1-86fd-fb2485144a5b",
+          "sourceFingerprint": 301481396,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0013:122d821f-c8dd-4a3c-a6d7-b42fe5491f02",
+          "sourceFingerprint": 88284913,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0014:21078b6f-a39d-4ec8-879e-ad10d97c3ff6",
+          "sourceFingerprint": 361214664,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0015:fdfd37ca-e4c9-4674-a75f-15d8ebcce72b",
+          "sourceFingerprint": 2260430049,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0016:11f42791-070a-4e3a-91c8-b801980abb76",
+          "sourceFingerprint": 246428987,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0017:5f1f6178-4071-401f-bd0d-cac0c5967661",
+          "sourceFingerprint": 405576308,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0018:37c2b1d1-faa0-40fd-82f4-216604ce7635",
+          "sourceFingerprint": 2659747884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0019:deccfa48-b8df-4dcc-ba1b-920f8352def7",
+          "sourceFingerprint": 266707575,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0020:e6250b31-8592-48b2-a877-3637c9ee7d49",
+          "sourceFingerprint": 3402641081,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0021:9c34c1f5-d509-4c66-ba41-c7958ef5ee44",
+          "sourceFingerprint": 3416943890,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0022:2a41edbe-4c5a-4535-a082-235dc3ffe60a",
+          "sourceFingerprint": 2908179050,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0023:77e546ce-f498-4136-9015-bb262c301716",
+          "sourceFingerprint": 147198150,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0024:ce3bd0d8-7e44-4cf2-9012-8ff0bc39417f",
+          "sourceFingerprint": 3594938225,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0025:1388ce6e-8199-46c1-8ee3-71266b0929bf",
+          "sourceFingerprint": 3048225666,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0026:a94801ba-0295-4611-abda-4c6508d69cc3",
+          "sourceFingerprint": 2582954565,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0027:797e45d1-d17d-40c0-bfdf-ec533784e676",
+          "sourceFingerprint": 3349933769,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0028:d707bdb1-1f8c-4cc0-be01-496f3f03b878",
+          "sourceFingerprint": 1930401794,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0029:af643949-7a9b-4195-8ab8-d43b1928b85a",
+          "sourceFingerprint": 2727621040,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0030:d998847b-323d-406a-b08e-0da66edcc7b3",
+          "sourceFingerprint": 1810893983,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0031:fd994a26-65ff-43be-8d52-476e887d3ed2",
+          "sourceFingerprint": 2067298979,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0032:1a757425-3cf2-4aca-b415-5ec2d5f753fe",
+          "sourceFingerprint": 4018427676,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0033:a7c2ea6e-7d29-4526-b135-9bbb1eed9d4a",
+          "sourceFingerprint": 213328448,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0034:8c8875a3-9f56-4947-9655-aa5d95f06de0",
+          "sourceFingerprint": 3940433651,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0035:205c4689-8b02-4d40-9274-3c1fcafa8b82",
+          "sourceFingerprint": 3395705098,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0036:08d4a8d7-c136-472f-8146-a1100701ca4f",
+          "sourceFingerprint": 1477558967,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0037:5c31221f-3753-4d5c-905a-6b558ab648ae",
+          "sourceFingerprint": 2733460670,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0038:e8408a52-d34a-4e03-9312-700dec75d844",
+          "sourceFingerprint": 2772974951,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0039:7dfddc9d-85f6-4b37-9973-14c69f6818ec",
+          "sourceFingerprint": 616557072,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0040:884afdb3-0d5f-45a1-b57e-6c3760aa0031",
+          "sourceFingerprint": 2460018565,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0041:5342ec3c-9d26-474a-9df5-c21ac90bb233",
+          "sourceFingerprint": 4207940880,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0042:e3cf9dc0-0a12-459c-88e2-97ed94653058",
+          "sourceFingerprint": 3065512046,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0043:019ba84d-d236-45c5-a8ad-75def7736d0c",
+          "sourceFingerprint": 465679464,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0044:d4df3a38-678e-42dc-a3fd-d1d399368f07",
+          "sourceFingerprint": 3869497075,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0045:d9859344-4efc-4b87-a3fb-147e496cee68",
+          "sourceFingerprint": 1946571505,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0046:3dfd97b3-d83e-406f-af45-40eec6347462",
+          "sourceFingerprint": 1539099405,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0047:59b09c16-f611-4c90-a990-e22bf46bd0e2",
+          "sourceFingerprint": 1594601179,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0048:749961e6-b135-4629-ae9d-124de0d70db9",
+          "sourceFingerprint": 543651862,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0049:9cd77575-fedc-45b1-a53b-dfed0f34c875",
+          "sourceFingerprint": 4084337667,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0050:5839556c-6635-44c4-96ed-666e4466b929",
+          "sourceFingerprint": 673136207,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0051:32602ed9-c0a7-4498-a333-235eaae628df",
+          "sourceFingerprint": 3989988801,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0052:31a0cae5-925f-4d00-a4da-1db8bae5511b",
+          "sourceFingerprint": 977029317,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0053:30ae7001-4d0f-4160-b41c-2fcb83fdb60b",
+          "sourceFingerprint": 4264436501,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0054:ba6f218f-83b0-4b68-a00f-0327cd79f32a",
+          "sourceFingerprint": 3401752091,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0055:5d759d6f-daf0-47f4-8a35-81c9d6437495",
+          "sourceFingerprint": 3042568356,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0056:23723bc7-a68e-4810-bc87-60df916cbb8a",
+          "sourceFingerprint": 105068818,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0057:f796e320-9898-45d4-9d7a-6d35de53c9ab",
+          "sourceFingerprint": 1160163138,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0058:53b36fba-6a0e-4f03-8bee-03919062537f",
+          "sourceFingerprint": 1900834135,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0059:013d5260-f906-4f6a-97ed-725197743b60",
+          "sourceFingerprint": 2743194699,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0060:70639887-bdba-4879-a3f8-c716f97fc325",
+          "sourceFingerprint": 2513775996,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0061:2167cc6d-ddb5-4f13-8905-a0c5123b852a",
+          "sourceFingerprint": 1331612340,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0062:909a0a38-2c22-4b49-8938-1a8162c077e6",
+          "sourceFingerprint": 151640468,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0063:8242fade-754c-4404-b3fb-f3cccf84b3b6",
+          "sourceFingerprint": 3695769680,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0064:bca53097-108d-457e-831c-e3d6cb499a41",
+          "sourceFingerprint": 3318933525,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0065:e150896e-8745-42ac-894b-8f42a92bd7a7",
+          "sourceFingerprint": 362090683,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0066:4d7251f3-df66-4611-a84c-1897f74431f7",
+          "sourceFingerprint": 2303569775,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0067:47b38c68-8e72-4afc-bb5e-0b40880fdda9",
+          "sourceFingerprint": 313399977,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0068:1a5ae3f5-5466-4058-a2cd-1a036cb38a8e",
+          "sourceFingerprint": 375889948,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0069:53f29821-902e-41bc-97a2-6fc7a710cbdb",
+          "sourceFingerprint": 1911784048,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0070:5261ab4b-dfe7-4761-a71c-44a893fc4a69",
+          "sourceFingerprint": 1526912015,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0071:b421dcc9-0299-416d-86bc-c70ef49bcf98",
+          "sourceFingerprint": 3577872329,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0072:9a96c83d-96d9-4f8f-8020-77990130ad81",
+          "sourceFingerprint": 117758388,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0073:170693f5-13db-4191-99b1-e527ffb5b88e",
+          "sourceFingerprint": 2919270264,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0074:2c101171-a988-4c1d-9954-634e2f1c6f01",
+          "sourceFingerprint": 3147683186,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0075:0ae7ba14-c901-4266-ae31-812e001916d3",
+          "sourceFingerprint": 3674962884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0076:dfd08894-2534-4114-9365-40809ba95eb2",
+          "sourceFingerprint": 1909365709,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0077:6f0fea13-63cf-4574-8752-3c357eee4524",
+          "sourceFingerprint": 810014720,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0078:7b562269-e6ec-4f8d-844e-26b272248d9d",
+          "sourceFingerprint": 206190213,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0079:47240ed3-f256-45fb-ab38-7b07e672d2ed",
+          "sourceFingerprint": 1170371880,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0080:1998135c-7b7f-402b-a8a5-4f4af131b1bc",
+          "sourceFingerprint": 1437051169,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0081:a9f32204-eda7-4184-92e5-9da8b15b2359",
+          "sourceFingerprint": 3978690777,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0082:d2b4912a-83a2-4870-8fac-81fa79da2830",
+          "sourceFingerprint": 82535488,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0083:19c52e3b-b3b8-4243-96fe-fa4c8eea7c59",
+          "sourceFingerprint": 1726154057,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0084:adcbd7ee-8958-46fe-abb0-e899e7d2e654",
+          "sourceFingerprint": 3302324130,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0085:ae12fd10-c13e-4777-a233-96204ec75ac1",
+          "sourceFingerprint": 680510015,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0086:1f61b1a3-4b3b-4490-a9dc-17aac258cbda",
+          "sourceFingerprint": 623152748,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0087:a7b40f74-893f-4bfc-87b2-7f8df4c912d8",
+          "sourceFingerprint": 4024579584,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0088:5da4a644-9809-4591-9007-6b70b5f9d923",
+          "sourceFingerprint": 3568573231,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0089:a8c468cd-1255-4257-9a69-c6b40a27c427",
+          "sourceFingerprint": 3472614339,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0090:c70a702a-c9be-4bee-9087-22b5905f783a",
+          "sourceFingerprint": 1742827861,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0091:4e038376-801f-454e-a635-0e2d58ccbf7c",
+          "sourceFingerprint": 2006329329,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0092:e612a032-39be-44cd-a78c-29f89dc384b0",
+          "sourceFingerprint": 3846212157,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0093:5ed81ee8-d5e4-4127-876e-9bff81f9c726",
+          "sourceFingerprint": 133012777,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0094:3a3e2b45-b086-4ffd-aa1a-1d03046e0d61",
+          "sourceFingerprint": 3880492286,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0095:e4ec8ada-09a6-449a-ac4a-7d3acbd08014",
+          "sourceFingerprint": 3015963623,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0096:56ba132f-95fc-4b99-a1dc-ebe6f622bb41",
+          "sourceFingerprint": 2859165907,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0097:8e622878-0aea-4401-873e-d34bf05ee98d",
+          "sourceFingerprint": 590447228,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0098:9d8590ea-512c-4e09-97cc-7f07d0706f2b",
+          "sourceFingerprint": 334799135,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0099:b9d4aa15-a3c2-42a3-a87a-443e7dd20c04",
+          "sourceFingerprint": 195426105,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0100:e22959dc-8759-454e-80b9-623a799af354",
+          "sourceFingerprint": 726173679,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0101:d4ded88d-2688-4f5e-a8b2-16216cf9c792",
+          "sourceFingerprint": 3594388786,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0102:37a6290c-a0a8-4032-972b-84a7eef04dae",
+          "sourceFingerprint": 58293988,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0103:6cff95b7-79eb-4796-9a01-31ff355681ab",
+          "sourceFingerprint": 3345260407,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0104:15d13d35-b5f7-4d3d-a1fa-84178b28acae",
+          "sourceFingerprint": 1809133477,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0105:7c511805-3392-4033-8679-811711a0aaca",
+          "sourceFingerprint": 2030601079,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0106:9a19d3b8-80d0-480f-8900-47be527d0e53",
+          "sourceFingerprint": 261495107,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0107:a6e750f9-ad86-4d60-98a3-78d11cd52cd1",
+          "sourceFingerprint": 749946597,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0108:44af9170-bd99-4fde-b673-62d988312b2d",
+          "sourceFingerprint": 4124483005,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0109:d4456951-844a-4847-b933-c32cfafbfef0",
+          "sourceFingerprint": 2336235484,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0110:f17c6478-dd80-4854-9560-bfc5ef597872",
+          "sourceFingerprint": 1897042424,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0111:5925c559-3e3c-481b-ba95-20a405cbffce",
+          "sourceFingerprint": 3152355793,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0112:bf4c2d22-9c36-42cc-854d-f96410bb5cf1",
+          "sourceFingerprint": 1979896594,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0113:ec3c023c-037e-495a-b7df-32be42a75f36",
+          "sourceFingerprint": 3454594301,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0114:f99dc8ff-932c-4d56-9253-99ce9e145306",
+          "sourceFingerprint": 4090664893,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0115:725584fe-9e97-4020-89b1-5e5b45a5beb2",
+          "sourceFingerprint": 32347776,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0116:bfce7c02-ccc3-44cd-8087-627eaa6a072e",
+          "sourceFingerprint": 1246591592,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0117:59bd1534-52d1-4946-b430-d26f039a9067",
+          "sourceFingerprint": 2468567766,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0118:08598b2b-6fd2-4a1d-8d74-7ca6d93ad382",
+          "sourceFingerprint": 642644866,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0119:214dc9c1-154d-4c35-845d-dd2928f1e142",
+          "sourceFingerprint": 1217757794,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0120:6ad03e99-25d3-4a09-819b-9192dfd8c9d2",
+          "sourceFingerprint": 4051065374,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0121:fa82c57d-4bb9-407c-b973-7abc793b6f47",
+          "sourceFingerprint": 201823982,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0122:e4812e81-beca-4afc-b2f2-24d5ab27abff",
+          "sourceFingerprint": 3074356596,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0123:83b35961-f4d5-4e14-a793-335147110627",
+          "sourceFingerprint": 2979952298,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0124:5dabcc2f-7536-44e3-a495-bbfc526fdc5d",
+          "sourceFingerprint": 3782455106,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0125:7b1f6503-e4b2-4085-92cd-e9c522b4b10d",
+          "sourceFingerprint": 392936249,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0126:465d8a63-0ced-4aec-be34-2098b72c8af6",
+          "sourceFingerprint": 1970894937,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0127:511a42a8-71ce-476f-98fa-fc0dc822edcf",
+          "sourceFingerprint": 978127864,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0128:7b8d33ed-9ca2-41d1-ba35-fdeb5b88ad44",
+          "sourceFingerprint": 492748534,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0129:2f319d57-7a54-4b10-86d4-58d7b3994844",
+          "sourceFingerprint": 2910036982,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0130:d7592d88-64e8-4a31-b00a-f65d4b1867fc",
+          "sourceFingerprint": 4237375741,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0131:08274d1b-52b7-46c1-8f93-7631d2e21def",
+          "sourceFingerprint": 2765396520,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0132:51daaf9b-d8a8-49a6-94e1-0c8be2c6188b",
+          "sourceFingerprint": 2900032726,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0133:0fa74aae-e857-410c-8836-953c8623d0b0",
+          "sourceFingerprint": 2824837454,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0134:b6f52ac7-933f-4b31-8576-338f5dcf4285",
+          "sourceFingerprint": 3684469986,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0135:44a439e8-d586-4995-abfc-3dee5c860968",
+          "sourceFingerprint": 63202061,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0136:a2517d74-0589-49dc-88f1-1fc02b27bc9d",
+          "sourceFingerprint": 1532867056,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0137:c6049e92-6c52-44be-a3c7-aa8e8bf9c10a",
+          "sourceFingerprint": 4274667576,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0138:393c230f-5bc3-4b71-b5ac-81d5ce227df5",
+          "sourceFingerprint": 404140965,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0139:a4d4ef98-949b-49db-b4f9-a070f8b4ff47",
+          "sourceFingerprint": 3288460245,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0140:543d55cb-3a6b-4620-af25-10ae74ed32c4",
+          "sourceFingerprint": 3259188100,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0141:3b1e92b4-6e53-4dba-a572-c67e01965ac5",
+          "sourceFingerprint": 1957311466,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0142:bf91d847-4a87-4a65-8d6d-e20d538c5cec",
+          "sourceFingerprint": 2460476800,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0143:50cb4bf3-70d1-4acc-a1fb-49f4ea74ca16",
+          "sourceFingerprint": 369841794,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0144:9580a40b-b413-4f0d-9b38-13903a9d367d",
+          "sourceFingerprint": 1284464471,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0145:26adc211-d089-4102-91e5-225bbeb5f382",
+          "sourceFingerprint": 3423374926,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0146:c6df8f4d-a07a-4664-878d-efec8b2affb9",
+          "sourceFingerprint": 4081367802,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0147:d8ada7ce-c693-48f0-a6e3-766f61d93370",
+          "sourceFingerprint": 926004127,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0148:833835d1-9beb-4ad8-b675-7adebdbd7d82",
+          "sourceFingerprint": 3458969231,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0149:dbfc2748-351f-4b5d-8a7e-bc51851578bb",
+          "sourceFingerprint": 3882590512,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0150:53c84c4d-e6d6-4eac-9d14-5b6cba914c3d",
+          "sourceFingerprint": 20530884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0151:59965953-1522-4103-9a6c-5534205d34d9",
+          "sourceFingerprint": 4051007323,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0152:b35a8efe-2a3e-4060-9134-d4150e4bdf28",
+          "sourceFingerprint": 4042770988,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0153:94e4b773-40a4-4272-85dd-f728ada22748",
+          "sourceFingerprint": 1777352159,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0154:f027ceb0-5d2b-4cf6-87ad-e6b9b1e20634",
+          "sourceFingerprint": 3601696372,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0155:afee5464-83b7-4d7a-b407-9ee7de21535b",
+          "sourceFingerprint": 512951809,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0156:041afd23-1ecc-4cca-9244-fe42203ad689",
+          "sourceFingerprint": 2209191592,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0157:a83945c6-4dc6-4d9a-9bc2-2d4a264e5422",
+          "sourceFingerprint": 1515710558,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0158:28d42d6a-e9a0-449e-9b31-436c09b7c1ba",
+          "sourceFingerprint": 2181427647,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0159:42f0b68a-de4b-4c0c-98ac-a812017f88a7",
+          "sourceFingerprint": 609855546,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0160:a98609dc-ea90-4c7e-a191-5e5d0ba16847",
+          "sourceFingerprint": 3468419070,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0161:64f42848-963b-4b16-aeec-66d0f349758b",
+          "sourceFingerprint": 1820327113,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0162:9cb5cb63-e7ec-4fc3-a389-4d8b5a4b96b9",
+          "sourceFingerprint": 3035056849,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0163:79fb620f-4057-4f60-94b9-56ab855be974",
+          "sourceFingerprint": 3933256454,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0164:48fce388-eefc-4234-8dd9-1260c1ba97eb",
+          "sourceFingerprint": 82033470,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0165:dcb5eb2a-ae7a-4416-970c-6e9306689c88",
+          "sourceFingerprint": 1152968714,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0166:04560623-c768-4273-a40d-7e3f39e832cf",
+          "sourceFingerprint": 3005058132,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0167:4984a089-84af-4387-9a0d-819b119b5565",
+          "sourceFingerprint": 3530077580,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0168:99b56515-f688-495c-b721-2b9abc6628c2",
+          "sourceFingerprint": 2002009264,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0169:dd775231-e1e0-41e2-ad9a-0726624f57f9",
+          "sourceFingerprint": 514607142,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0170:f024b19a-923a-4313-be06-e743d3fbab46",
+          "sourceFingerprint": 2714377211,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0171:b2cce2d4-3944-4ff0-98e8-80f19697f108",
+          "sourceFingerprint": 559539882,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0172:1e3a5af6-5423-442b-a207-364e97a871d8",
+          "sourceFingerprint": 1330852332,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0173:190ac2fe-532d-4d7e-9d74-07ae6850aac8",
+          "sourceFingerprint": 275419432,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0174:02ef18d1-fd05-4dbc-9fa7-a383799b34e9",
+          "sourceFingerprint": 2846171450,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0175:c59171ce-7dc6-4dd9-a124-3c2c3028d93d",
+          "sourceFingerprint": 3919174866,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0176:761c16aa-d4a7-492d-9275-98d0e07de45a",
+          "sourceFingerprint": 3348945184,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0177:3b628197-f26c-457a-b9a4-c1f1d3e02f3d",
+          "sourceFingerprint": 1729586037,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0178:69247168-2bfb-4cce-a2a6-61459a0fbce4",
+          "sourceFingerprint": 1081380219,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0179:11cbeb3b-1579-4318-a024-4a2c06896eaf",
+          "sourceFingerprint": 3514645087,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0180:881728ce-4b18-410e-9cdb-4d439ce0b21d",
+          "sourceFingerprint": 385530196,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0181:698b47d1-c72e-4dc3-b28b-7421e0163f22",
+          "sourceFingerprint": 1575367036,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0182:9d3fde47-8d9e-4a84-b8a5-dcfe0c1d443c",
+          "sourceFingerprint": 1930925910,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0183:c345e475-8095-41b5-90b4-771fcf80b939",
+          "sourceFingerprint": 4095706004,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0184:0fcd4394-d22d-4eec-ad73-ffaf10ad60de",
+          "sourceFingerprint": 4095512428,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0185:bb36840a-3f85-4fca-87ab-379dfce8e542",
+          "sourceFingerprint": 2192942737,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0186:6b54fbe8-324a-4066-bed1-dda1dca319fc",
+          "sourceFingerprint": 586998644,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0187:04f3db71-802f-488c-b40d-ac90df2d660a",
+          "sourceFingerprint": 3145835078,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0188:d72981c0-1632-4d64-9341-2a76047d9b36",
+          "sourceFingerprint": 1967327836,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0189:6695e5bb-56a9-49ab-8940-72336e845875",
+          "sourceFingerprint": 983086107,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0190:a0b6c136-2bbe-48c1-ac53-2a8221b96936",
+          "sourceFingerprint": 3529549559,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0191:115d504f-3aec-4374-8cd8-732d56c448f2",
+          "sourceFingerprint": 2726925114,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0192:eb737465-5de8-4015-befe-2bf386da2a89",
+          "sourceFingerprint": 3213932474,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0193:d55f625a-6e9e-40ba-ae46-cf6bafc0a41b",
+          "sourceFingerprint": 2069456688,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0194:a9848eab-1d3a-4ab0-adf6-c20858aa3afb",
+          "sourceFingerprint": 4253329716,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0195:1c8efb23-bac0-41d2-b4ee-27a6b1fe3134",
+          "sourceFingerprint": 1948745777,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0196:60601296-2229-4c48-94cc-1903926750ce",
+          "sourceFingerprint": 2200999226,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0197:bf37391d-db35-40a7-908a-abb53895793c",
+          "sourceFingerprint": 3891097936,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0198:7b6dbadf-a6f7-4876-9c3f-44e4a33b2bee",
+          "sourceFingerprint": 485331110,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0199:6196e702-7f76-49db-8ee4-bd343359d498",
+          "sourceFingerprint": 3485673367,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0200:404d9413-ef57-4b6e-8584-48a1dc7fe6f1",
+          "sourceFingerprint": 3282949009,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0201:4e9648f9-7a67-4717-bca1-861d1f7fed43",
+          "sourceFingerprint": 2926856784,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0202:e438c718-ac18-45d5-824e-5b697c5f0692",
+          "sourceFingerprint": 2771460952,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0203:d90514aa-e356-4502-9e0e-76ab7644a07a",
+          "sourceFingerprint": 328223197,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0204:a2c0e00b-2290-493f-a3fc-3b9bff2830cc",
+          "sourceFingerprint": 1002424884,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0205:6d224279-83f3-4a29-9fd9-86b72407b87a",
+          "sourceFingerprint": 1971471632,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0206:9d1d9d86-5666-4e59-9766-137657b4e040",
+          "sourceFingerprint": 3353484221,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0207:e54f8e61-550f-4493-b8ba-65f81b2457d3",
+          "sourceFingerprint": 639086092,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0208:8971938c-cd26-4b83-96d7-1408cd0b0de6",
+          "sourceFingerprint": 2963027479,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0209:2125e6aa-f916-4dfa-a9fe-82bb546012af",
+          "sourceFingerprint": 1787854635,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0210:61e82934-546b-4734-a715-b22ace4c5a9b",
+          "sourceFingerprint": 3327642665,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0211:d2a8e716-ea33-4ae2-9ff8-5e78b0e50459",
+          "sourceFingerprint": 2346746509,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0212:8ffd77d7-3fe6-4493-96eb-f62183c0358d",
+          "sourceFingerprint": 4427991,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0213:70496f16-c4c0-4c03-beef-454eb4824cd1",
+          "sourceFingerprint": 3924291948,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0214:2bb8cb8c-0d03-4cbf-b7f2-a97324817698",
+          "sourceFingerprint": 3866741130,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0215:ba5a68d3-6bc9-4de8-bc06-e1106cf9b3d4",
+          "sourceFingerprint": 1286118183,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0216:d44058ba-3419-4777-8d59-05dea5e864e1",
+          "sourceFingerprint": 1328866612,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0217:12f31616-1249-4964-b81a-4435405a2449",
+          "sourceFingerprint": 3968654434,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0218:0fc51899-3970-416b-b7de-fadbc9678955",
+          "sourceFingerprint": 765799615,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0219:b1892003-2e4c-43bd-8a37-3a97a76f113a",
+          "sourceFingerprint": 628921400,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0220:5f873c0b-e779-4f09-8e9c-94a1765eb5da",
+          "sourceFingerprint": 2863841223,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0221:06899549-5534-4d11-86c1-afd1796e18b1",
+          "sourceFingerprint": 2889108589,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0222:d9327905-a254-4885-8310-69fc153ec52f",
+          "sourceFingerprint": 4186382683,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0223:14d5048e-cb76-48c4-8a95-70dcc14775f6",
+          "sourceFingerprint": 2342850792,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0224:dfc61748-029f-4bae-a7ec-e08b7059226d",
+          "sourceFingerprint": 2749189569,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0225:23a05db7-dcae-4180-8ad1-60ba6fb30816",
+          "sourceFingerprint": 776979430,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0226:57f4e0f0-13d1-43ed-8d95-13cff94a26e7",
+          "sourceFingerprint": 1333451459,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0227:29c9247e-05f4-44bb-86e3-90a60e880374",
+          "sourceFingerprint": 3881106703,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0228:8f7b632b-ee20-4082-8376-1dae53f91b70",
+          "sourceFingerprint": 283503627,
+          "roles": ["draw"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0229:913b803f-ba82-4660-86be-49677d1e32c9",
+          "sourceFingerprint": 1155441971,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0230:83e4e83b-cbb8-4efd-b6c4-4459a29177ac",
+          "sourceFingerprint": 13208227,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0231:786c1e91-9d75-46a3-9e0d-56d29fcb01a7",
+          "sourceFingerprint": 3445500617,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0232:f6124b4c-49a1-42e3-a6ff-62de231c7823",
+          "sourceFingerprint": 2923458760,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0233:1645eafd-cd17-463a-9d7e-42f5f7b5196f",
+          "sourceFingerprint": 1819156506,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0234:4a62827a-183f-4bef-b6ce-20a4577f6d30",
+          "sourceFingerprint": 2647118848,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0235:6b006384-6fb6-4129-b1d2-7674d1141f8f",
+          "sourceFingerprint": 3473113530,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0236:5055ed18-b234-4702-92eb-4d483431ff47",
+          "sourceFingerprint": 1806741378,
+          "roles": ["interaction"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0237:984e37df-0734-493a-a958-f519a0c98580",
+          "sourceFingerprint": 3373614543,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0238:8bd5828b-8dcd-4ce6-b834-ebe9cbaa12d1",
+          "sourceFingerprint": 1135270183,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0239:8fe2fd1a-f7d3-48b4-bad8-be5ee45d6121",
+          "sourceFingerprint": 3562146340,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0240:3cf60ca0-e01f-499c-8d04-d59050f38c33",
+          "sourceFingerprint": 3282550418,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0241:af7091c9-5f98-4078-a42b-c9e057346d9b",
+          "sourceFingerprint": 3658912147,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0242:6951d84f-2d3c-4203-8d31-e08f4bc707f0",
+          "sourceFingerprint": 3940425058,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0243:1c7d50d6-b63a-4d8c-88fa-1d78ae693a45",
+          "sourceFingerprint": 1541284232,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0244:207048f5-268b-4cdb-b4e7-c8282cac1b28",
+          "sourceFingerprint": 1863540411,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0245:f416e36a-15cb-43c8-b27f-82f65a95ddef",
+          "sourceFingerprint": 1740852110,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0246:ff61d4e4-3c8c-48f7-a994-ec2317bbd9a0",
+          "sourceFingerprint": 4166097007,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0247:de911c88-f5c8-4955-9fa5-1f28a9b17236",
+          "sourceFingerprint": 4007738894,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0248:b821e604-f9fd-47a4-b5ff-bfb5022834c2",
+          "sourceFingerprint": 1171857181,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0249:90ce8115-41fe-44c2-8719-741ba87bcb17",
+          "sourceFingerprint": 815338,
+          "roles": ["fixing"]
+        },
+        {
+          "physicalId": "rtr-printed-v1:0250:ac754820-343e-4c01-bcfa-89fa5c8c7e1d",
+          "sourceFingerprint": 3173084884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0251:34044cf5-79ed-479c-abdc-3718ec193dd3",
+          "sourceFingerprint": 3173084884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0252:b0b9bcca-b41a-4a6a-b380-36bfea9f0715",
+          "sourceFingerprint": 3173084884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0253:d293ea0f-8b87-4d8a-ad8f-650131c83c20",
+          "sourceFingerprint": 3173084884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0254:be0334fe-3de3-4779-a31d-d021db50b62b",
+          "sourceFingerprint": 3173084884,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0255:78f35064-c662-48ff-a2a9-d26f594500f5",
+          "sourceFingerprint": 2931913838,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0256:8dc5e0d9-1c8f-4d38-9915-40469988983d",
+          "sourceFingerprint": 2931913838,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0257:f10e5b17-6099-445d-9a7b-484eeff7cea8",
+          "sourceFingerprint": 2931913838,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0258:7869f14e-d1d5-4a99-bc2c-f3a0d63077a5",
+          "sourceFingerprint": 2931913838,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0259:e070e97c-142a-4d5d-ae89-c0c6d85a97ac",
+          "sourceFingerprint": 2931913838,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0260:2d8c3f29-121e-42d1-be21-29f403f97708",
+          "sourceFingerprint": 3788869713,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0261:be73b50e-8230-41e5-8492-db8f749d00a4",
+          "sourceFingerprint": 3788869713,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0262:46908606-f572-4b2d-9562-ed9c6f50f1ad",
+          "sourceFingerprint": 3788869713,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0263:f7cd375e-f41c-42b1-bbd4-36032d4fb92d",
+          "sourceFingerprint": 3788869713,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0264:745b1731-af31-44d2-ad50-b3e43b620913",
+          "sourceFingerprint": 3788869713,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0265:3b4a196f-de7e-4100-ad65-56cf8b0a8b23",
+          "sourceFingerprint": 2462050497,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0266:a5b2d0ed-0b47-459a-8f5c-554dd816c03a",
+          "sourceFingerprint": 2462050497,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0267:5353e8b2-3280-48ec-9bc2-8c8e7a15b460",
+          "sourceFingerprint": 2462050497,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0268:24b61852-860e-4f89-a1b2-6429168f0c02",
+          "sourceFingerprint": 2462050497,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0269:96614dc1-9386-4861-b792-b83bcc6c5811",
+          "sourceFingerprint": 2462050497,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0270:f00849dd-c1ba-4171-a503-603fe77c0a43",
+          "sourceFingerprint": 1320675284,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0271:1428575c-f18e-41a0-b58a-259d2feafd06",
+          "sourceFingerprint": 1320675284,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0272:e6850740-6219-4f82-a705-2e7b20ede751",
+          "sourceFingerprint": 1320675284,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0273:edc50993-1fd4-4dba-9d2f-ae7a18559829",
+          "sourceFingerprint": 1320675284,
+          "roles": []
+        },
+        {
+          "physicalId": "rtr-printed-v1:0274:ddfcde62-1b20-48ce-8ba0-7929edcd26fc",
+          "sourceFingerprint": 1320675284,
+          "roles": []
+        }
+      ]
+    }
+  ]
+}

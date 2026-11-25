@@ -1,0 +1,161 @@
+{
+  "key": "880e8ed93a20cea6a4f5ab83341816ba",
+  "recordedAt": "2026-11-22T21:21:32.481Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Winds of Rebuke\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand. Each player mills two cards.\"},{\"id\":2,\"name\":\"Zenith Seeker\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Bird Wizard\",\"text\":\"Flying\\nWhenever you cycle or discard a card, target creature gains flying until end of turn.\"},{\"id\":3,\"name\":\"Archfiend of Ifnir\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nWhenever you cycle or discard another card, put a -1/-1 counter on each creature your opponents control.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":4,\"name\":\"Baleful Ammit\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Crocodile Demon\",\"text\":\"Lifelink\\nWhen this creature enters, put a -1/-1 counter on target creature you control.\"},{\"id\":5,\"name\":\"Blighted Bat\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Bat\",\"text\":\"Flying\\n{1}: This creature gains haste until end of turn.\"},{\"id\":6,\"name\":\"Bone Picker\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Bird\",\"text\":\"This spell costs {3} less to cast if a creature died this turn.\\nFlying, deathtouch\"},{\"id\":7,\"name\":\"Bontu the Glorified\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Menace, indestructible\\nBontu can't attack or block unless a creature died under your control this turn.\\n{1}{B}, Sacrifice another creature: Scry 1. Each opponent loses 1 life and you gain 1 life.\"},{\"id\":8,\"name\":\"Cartouche of Ambition\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura Cartouche\",\"text\":\"Enchant creature you control\\nWhen this Aura enters, you may put a -1/-1 counter on target creature.\\nEnchanted creature gets +1/+1 and has lifelink.\"},{\"id\":9,\"name\":\"Cruel Reality\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of enchanted player's upkeep, that player sacrifices a creature or planeswalker of their choice. If the player can't, they lose 5 life.\"},{\"id\":10,\"name\":\"Cursed Minotaur\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Minotaur\",\"text\":\"Menace (This creature can't be blocked except by two or more creatures.)\"},{\"id\":11,\"name\":\"Dispossess\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose an artifact card name. Search target opponent's graveyard, hand, and library for any number of cards with the chosen name and exile them. Then that player shuffles.\"},{\"id\":12,\"name\":\"Doomed Dissenter\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human\",\"text\":\"When this creature dies, create a 2/2 black Zombie creature token.\"},{\"id\":13,\"name\":\"Dread Wanderer\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Zombie Jackal\",\"text\":\"This creature enters tapped.\\n{2}{B}: Return this card from your graveyard to the battlefield. Activate only as a sorcery and only if you have one or fewer cards in hand.\"},{\"id\":14,\"name\":\"Dune Beetle\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"\"},{\"id\":15,\"name\":\"Faith of the Devoted\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cycle or discard a card, you may pay {1}. If you do, each opponent loses 2 life and you gain 2 life.\"},{\"id\":16,\"name\":\"Festering Mummy\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, you may put a -1/-1 counter on target creature.\"},{\"id\":17,\"name\":\"Final Reward\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature.\"},{\"id\":18,\"name\":\"Gravedigger\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, you may return target creature card from your graveyard to your hand.\"},{\"id\":19,\"name\":\"Grim Strider\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"This creature gets -1/-1 for each card in your hand.\"},{\"id\":20,\"name\":\"Horror of the Broken Lands\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Whenever you cycle or discard another card, this creature gets +2/+1 until end of turn.\\nCycling {B} ({B}, Discard this card: Draw a card.)\"},{\"id\":21,\"name\":\"Lay Bare the Heart\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a nonlegendary, nonland card from it. That player discards that card.\"},{\"id\":22,\"name\":\"Liliana, Death's Majesty\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Create a 2/2 black Zombie creature token. Mill two cards.\\n−3: Return target creature card from your graveyard to the battlefield. That creature is a black Zombie in addition to its other colors and types.\\n−7: Destroy all non-Zombie creatures.\"},{\"id\":23,\"name\":\"Liliana's Mastery\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Zombies you control get +1/+1.\\nWhen this enchantment enters, create two 2/2 black Zombie creature tokens.\"},{\"id\":24,\"name\":\"Lord of the Accursed\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Other Zombies you control get +1/+1.\\n{1}{B}, {T}: All Zombies gain menace until end of turn.\"},{\"id\":25,\"name\":\"Miasmic Mummy\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Jackal\",\"text\":\"When this creature enters, each player discards a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\",\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1832,
+      "cacheCreationInputTokens": 32421,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.794169,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.794169,
+      "pricedUsd": 0.794169,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.794169 and its own usage prices at $0.794169"
+    }
+  }
+}

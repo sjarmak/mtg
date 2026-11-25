@@ -1,0 +1,161 @@
+{
+  "key": "20a16a08967a60fb19193e38264350b2",
+  "recordedAt": "2026-11-22T22:18:52.423Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Titanic Growth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +4/+4 until end of turn.\"},{\"id\":2,\"name\":\"Undercity Troll\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Troll\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\n{2}{G}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":3,\"name\":\"Valeron Wardens\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Renown 2 (When this creature deals combat damage to a player, if it isn't renowned, put two +1/+1 counters on it and it becomes renowned.)\\nWhenever a creature you control becomes renowned, draw a card.\"},{\"id\":4,\"name\":\"Vastwood Gorger\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"},{\"id\":5,\"name\":\"Vine Snare\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn by creatures with power 4 or less.\"},{\"id\":6,\"name\":\"Wild Instincts\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control gets +2/+2 until end of turn. It fights target creature an opponent controls. (Each deals damage equal to its power to the other.)\"},{\"id\":7,\"name\":\"Woodland Bellower\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, you may search your library for a nonlegendary green creature card with mana value 3 or less, put it onto the battlefield, then shuffle.\"},{\"id\":8,\"name\":\"Yeva's Forcemage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, target creature gets +2/+2 until end of turn.\"},{\"id\":9,\"name\":\"Zendikar's Roil\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Landfall — Whenever a land you control enters, create a 2/2 green Elemental creature token.\"},{\"id\":10,\"name\":\"Blazing Hellhound\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"{1}, Sacrifice another creature: This creature deals 1 damage to any target.\"},{\"id\":11,\"name\":\"Blood-Cursed Knight\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Creature — Vampire Knight\",\"text\":\"As long as you control an enchantment, this creature gets +1/+1 and has lifelink. (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":12,\"name\":\"Bounding Krasis\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Fish Lizard\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, you may tap or untap target creature.\"},{\"id\":13,\"name\":\"Citadel Castellan\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\\nRenown 2 (When this creature deals combat damage to a player, if it isn't renowned, put two +1/+1 counters on it and it becomes renowned.)\"},{\"id\":14,\"name\":\"Iroas's Champion\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Double strike (This creature deals both first-strike and regular combat damage.)\"},{\"id\":15,\"name\":\"Possessed Skaab\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, return target instant, sorcery, or creature card from your graveyard to your hand.\\nIf this creature would die, exile it instead.\"},{\"id\":16,\"name\":\"Reclusive Artificer\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nWhen this creature enters, you may have it deal damage to target creature equal to the number of artifacts you control.\"},{\"id\":17,\"name\":\"Shaman of the Pack\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, target opponent loses life equal to the number of Elves you control.\"},{\"id\":18,\"name\":\"Thunderclap Wyvern\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\\nOther creatures you control with flying get +1/+1.\"},{\"id\":19,\"name\":\"Zendikar Incarnate\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Zendikar Incarnate's power is equal to the number of lands you control.\"},{\"id\":20,\"name\":\"Alchemist's Vial\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, draw a card.\\n{1}, {T}, Sacrifice this artifact: Target creature can't attack or block this turn.\"},{\"id\":21,\"name\":\"Alhammarret's Archive\",\"manaCost\":\"{5}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"If you would gain life, you gain twice that much life instead.\\nIf you would draw a card except the first one you draw in each of your draw steps, draw two cards instead.\"},{\"id\":22,\"name\":\"Angel's Tomb\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature you control enters, you may have this artifact become a 3/3 white Angel artifact creature with flying until end of turn.\"},{\"id\":23,\"name\":\"Bonded Construct\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature can't attack alone.\"},{\"id\":24,\"name\":\"Brawler's Plate\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":25,\"name\":\"Chief of the Foundry\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Other artifact creatures you control get +1/+1.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1491,
+      "cacheCreationInputTokens": 32525,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779199,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779199,
+      "pricedUsd": 0.779199,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779199 and its own usage prices at $0.779199"
+    }
+  }
+}

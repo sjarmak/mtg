@@ -11,6 +11,10 @@
  *
  * `window.mtgCase = 'mulligan'` swaps the draw for a real deal and the mulligan
  * that follows it, the new hand that must not be scrolled like a draw.
+ * `window.mtgCase = 'play'` draws the eighth card and then plays three, the hand
+ * that must give back the scroll the draw took, and `'swap'` loses three and
+ * draws one in the same render. The page reads the row before the
+ * last render either way, so `mtgBefore` is the row just ahead of the change.
  */
 import { createElement as h, useEffect, useState } from 'react';
 import { EXAMPLE_CARDS, exampleCard } from '@mtg/dsl';
@@ -56,6 +60,31 @@ function drawn(held: number): GameSession {
 }
 
 /**
+ * The eight-card hand with its last three gone and one card come in off the
+ * library, in one render: a discard and the next draw behind auto-pass. Built by
+ * moving the library's top object into the hand, because no scenario spec keeps
+ * five ids and mints a sixth.
+ */
+function discardedAndDrew(): GameSession {
+  const session = drawn(8);
+  const state = session.state;
+  const seat = state.players[0];
+  const top = seat.library[0];
+  if (top === undefined) throw new Error('the scenario dealt no library');
+  const object = state.objects[top];
+  if (object === undefined) throw new Error(`no object ${top}`);
+  const moved = {
+    ...state,
+    players: [
+      { ...seat, hand: [...seat.hand.slice(0, 5), top], library: seat.library.slice(1) },
+      state.players[1],
+    ] as const,
+    objects: { ...state.objects, [top]: { ...object, zone: 'hand' as const } },
+  };
+  return { ...session, state: moved, pending: pendingDecision(moved) };
+}
+
+/**
  * A real deal stopped at the opening hand, and the same game after the person
  * takes a mulligan: a whole new seven, which is a new hand and not a draw.
  */
@@ -68,12 +97,16 @@ function mulliganed(game: DealtGame): readonly [GameSession, GameSession] {
 }
 
 interface Table {
-  readonly sessions: readonly [GameSession, GameSession];
+  readonly sessions: readonly GameSession[];
   readonly viewer: PlayerId;
   readonly names: SeatNames;
 }
 
 function table(which: string | undefined): Table {
+  if (which === 'swap') {
+    return { sessions: [drawn(7), drawn(8), discardedAndDrew()], viewer: 0, names: ['You', 'Bot'] };
+  }
+  if (which === 'play') return { sessions: [drawn(7), drawn(8), drawn(5)], viewer: 0, names: ['You', 'Bot'] };
   if (which !== 'mulligan') return { sessions: [drawn(7), drawn(8)], viewer: 0, names: ['You', 'Bot'] };
   const game = dealMirrorGame(EXAMPLE_CARDS, { seed: 'ui/hand-draw-scroll' });
   return { sessions: mulliganed(game), viewer: game.config.viewer, names: game.config.names };
@@ -98,13 +131,19 @@ function afterPaint(then: () => void): void {
 
 const TABLE = table(page.mtgCase);
 
+function sessionAt(step: number): GameSession {
+  const session = TABLE.sessions[step];
+  if (session === undefined) throw new Error(`no session at step ${String(step)}`);
+  return session;
+}
+
 function Harness(): ReturnType<typeof h> {
-  const [step, setStep] = useState<0 | 1>(0);
+  const [step, setStep] = useState(0);
   useEffect(() => {
     afterPaint(() => {
-      if (step === 0) {
+      if (step < TABLE.sessions.length - 1) {
         page.mtgBefore = page.mtgReadRow?.();
-        setStep(1);
+        setStep(step + 1);
       } else {
         page.document.body.dataset['drawn'] = 'true';
       }
@@ -114,7 +153,7 @@ function Harness(): ReturnType<typeof h> {
     mode: 'play',
     onSelectMode: () => undefined,
     children: h(PlayView, {
-      session: TABLE.sessions[step],
+      session: sessionAt(step),
       viewer: TABLE.viewer,
       names: TABLE.names,
       onChoose: () => undefined,

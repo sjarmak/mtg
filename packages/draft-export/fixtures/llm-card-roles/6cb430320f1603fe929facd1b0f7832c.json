@@ -1,0 +1,137 @@
+{
+  "key": "6cb430320f1603fe929facd1b0f7832c",
+  "recordedAt": "2026-11-22T21:57:58.157Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":2,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":3,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":4,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"},{\"id\":5,\"name\":\"Aegis Angel\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhen this creature enters, another target permanent gains indestructible for as long as you control this creature. (Effects that say \\\"destroy\\\" don't destroy it. A creature with indestructible can't be destroyed by damage.)\"},{\"id\":6,\"name\":\"Divine Verdict\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"id\":7,\"name\":\"Inspired Charge\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +2/+1 until end of turn.\"},{\"id\":8,\"name\":\"Serra Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":9,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":10,\"name\":\"Mahamoti Djinn\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\"},{\"id\":11,\"name\":\"Nightmare\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Nightmare Horse\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nNightmare's power and toughness are each equal to the number of Swamps you control.\"},{\"id\":12,\"name\":\"Sengir Vampire\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhenever a creature dealt damage by this creature this turn dies, put a +1/+1 counter on this creature.\"},{\"id\":13,\"name\":\"Walking Corpse\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"\"},{\"id\":14,\"name\":\"Furnace Whelp\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":15,\"name\":\"Seismic Strike\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Seismic Strike deals damage to target creature equal to the number of Mountains you control.\"},{\"id\":16,\"name\":\"Shivan Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":17,\"name\":\"Centaur Courser\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"\"},{\"id\":18,\"name\":\"Garruk's Packleader\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Whenever another creature you control with power 3 or greater enters, you may draw a card.\"},{\"id\":19,\"name\":\"Terra Stomper\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"This spell can't be countered.\\nTrample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 561,
+      "cacheCreationInputTokens": 31591,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7140190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7140190000000001,
+      "pricedUsd": 0.714019,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.714019 and its own usage prices at $0.714019"
+    }
+  }
+}

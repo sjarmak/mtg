@@ -142,7 +142,7 @@ npx tsx packages/data/tools/inventory-printed-decisions.ts --catalog packages/da
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/rebind/scd/scenario.json --out out/rebind/scd/scenario-probes --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/rebind/scd/scenario-probes --inventory out/rebind/scd/decision-inventory/inventory.json --out out/rebind/scd/script-qualifications
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/rebind/scd/match.json --out out/rebind/scd/match-probes --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/scd/scd-constructed-format-v1.json --catalog packages/data/data/scd/scd-printed-catalog-v1.json --qualifications out/rebind/scd/script-qualifications --match-probes out/rebind/scd/match-probes --out packages/data/data/scd/play-admission-v12
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/scd/scd-constructed-format-v1.json --catalog packages/data/data/scd/scd-printed-catalog-v1.json --qualifications out/rebind/scd/script-qualifications --match-probes out/rebind/scd/match-probes --out packages/data/data/scd/play-admission
 ```
 
 `play-admission-v11/` re-binds v10 (deleted) to the Kaladesh bridge (`mtg-j4ucd.19`), which
@@ -255,7 +255,7 @@ Re-bound for every registered format at once with
 `packages/data/data/isd/README.md` (Play admission); to re-bind after a further adapter or bridge
 change, use output `play-admission-v17/`.
 
-`play-admission-v33/` replaces v32 (deleted) for the Commander bridge fixes (#211, #209, #208), with
+`play-admission/` replaces v32 (deleted) for the Commander bridge fixes (#211, #209, #208), with
 bridge `0aaf7b8e...` and adapter `aab3ecba...`. Unlike a plain re-bind it adds the
 two command-zone scenario probes above to `probes/`, so it was built by the recipe with those two
 appended to the generated scenario config rather than by `printed-admission-rebind-all.mjs` (whose
@@ -267,7 +267,7 @@ scripts and 0 residual. The next re-bind reads all four probes from this directo
 `packages/data/data/printed-formats-v1.json` carries the `scd` entry with
 `formatFile: scd-constructed-format-v1.json`, browse available, draft and
 sealed unavailable (there is no pack), play supported through
-`admissionDirectory: play-admission-v16`. The launcher
+`admissionDirectory: play-admission`. The launcher
 (`packages/ui/tools/play.ts`) stages it beside the Limited formats through
 `stage-printed-formats.ts`, which branches on the format's `kind` and checks a
 constructed bundle through `packages/ui/src/lab/printed-constructed-format.ts`

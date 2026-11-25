@@ -1,0 +1,161 @@
+{
+  "key": "3433f7495716ea8e3c0c44f3f80f3b3c",
+  "recordedAt": "2026-11-22T22:15:09.532Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Smoke Teller\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{1}{U}: Look at target face-down creature.\"},{\"id\":2,\"name\":\"Sultai Flayer\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Snake Shaman\",\"text\":\"Whenever a creature you control with toughness 4 or greater dies, you gain 4 life.\"},{\"id\":3,\"name\":\"Temur Charger\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Horse\",\"text\":\"Morph—Reveal a green card in your hand. (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, target creature gains trample until end of turn.\"},{\"id\":4,\"name\":\"Trail of Mystery\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a face-down creature you control enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.\\nWhenever a permanent you control is turned face up, if it's a creature, it gets +2/+2 until end of turn.\"},{\"id\":5,\"name\":\"Tusked Colossodon\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":6,\"name\":\"Tuskguard Captain\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Outlast {G} ({G}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has trample.\"},{\"id\":7,\"name\":\"Windstorm\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Windstorm deals X damage to each creature with flying.\"},{\"id\":8,\"name\":\"Woolly Loxodon\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Elephant Warrior\",\"text\":\"Morph {5}{G} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":9,\"name\":\"Abomination of Gudul\",\"manaCost\":\"{3}{B}{G}{U}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, you may draw a card. If you do, discard a card.\\nMorph {2}{B}{G}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":10,\"name\":\"Abzan Ascendancy\",\"manaCost\":\"{W}{B}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, put a +1/+1 counter on each creature you control.\\nWhenever a nontoken creature you control dies, create a 1/1 white Spirit creature token with flying.\"},{\"id\":11,\"name\":\"Abzan Charm\",\"manaCost\":\"{W}{B}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Exile target creature with power 3 or greater.\\n• You draw two cards and you lose 2 life.\\n• Distribute two +1/+1 counters among one or two target creatures.\"},{\"id\":12,\"name\":\"Abzan Guide\",\"manaCost\":\"{3}{W}{B}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\\nMorph {2}{W}{B}{G} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":13,\"name\":\"Anafenza, the Foremost\",\"manaCost\":\"{W}{B}{G}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"Whenever Anafenza attacks, put a +1/+1 counter on another target tapped creature you control.\\nIf a nontoken creature an opponent owns would die or a creature card not on the battlefield would be put into an opponent's graveyard, exile that card instead.\"},{\"id\":14,\"name\":\"Ankle Shanker\",\"manaCost\":\"{2}{R}{W}{B}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Haste\\nWhenever this creature attacks, creatures you control gain first strike and deathtouch until end of turn.\"},{\"id\":15,\"name\":\"Armament Corps\",\"manaCost\":\"{2}{W}{B}{G}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, distribute two +1/+1 counters among one or two target creatures you control.\"},{\"id\":16,\"name\":\"Avalanche Tusker\",\"manaCost\":\"{2}{G}{U}{R}\",\"typeLine\":\"Creature — Elephant Warrior\",\"text\":\"Whenever this creature attacks, target creature defending player controls blocks it this combat if able.\"},{\"id\":17,\"name\":\"Bear's Companion\",\"manaCost\":\"{2}{G}{U}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, create a 4/4 green Bear creature token.\"},{\"id\":18,\"name\":\"Butcher of the Horde\",\"manaCost\":\"{1}{R}{W}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nSacrifice another creature: This creature gains your choice of vigilance, lifelink, or haste until end of turn.\"},{\"id\":19,\"name\":\"Chief of the Edge\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Other Warrior creatures you control get +1/+0.\"},{\"id\":20,\"name\":\"Chief of the Scale\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Other Warrior creatures you control get +0/+1.\"},{\"id\":21,\"name\":\"Crackling Doom\",\"manaCost\":\"{R}{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Crackling Doom deals 2 damage to each opponent. Each opponent sacrifices a creature with the greatest power among creatures that player controls.\"},{\"id\":22,\"name\":\"Death Frenzy\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get -2/-2 until end of turn. Whenever a creature dies this turn, you gain 1 life.\"},{\"id\":23,\"name\":\"Deflecting Palm\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"The next time a source of your choice would deal damage to you this turn, prevent that damage. If damage is prevented this way, Deflecting Palm deals that much damage to that source's controller.\"},{\"id\":24,\"name\":\"Duneblast\",\"manaCost\":\"{4}{W}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose up to one creature. Destroy the rest.\"},{\"id\":25,\"name\":\"Efreet Weaponmaster\",\"manaCost\":\"{3}{U}{R}{W}\",\"typeLine\":\"Creature — Efreet Monk\",\"text\":\"First strike\\nWhen this creature enters or is turned face up, another target creature you control gets +3/+0 until end of turn.\\nMorph {2}{U}{R}{W} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"fixing\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1355,
+      "cacheCreationInputTokens": 32694,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.775779,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.775779,
+      "pricedUsd": 0.775779,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.775779 and its own usage prices at $0.775779"
+    }
+  }
+}

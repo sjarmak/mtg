@@ -1,0 +1,161 @@
+{
+  "key": "f034a878fa0364d7247dd290346d3c8d",
+  "recordedAt": "2026-11-22T22:10:59.673Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Mischief and Mayhem\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Up to two target creatures each get +4/+4 until end of turn.\"},{\"id\":2,\"name\":\"Mortal's Resolve\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it.)\"},{\"id\":3,\"name\":\"Nessian Demolok\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Tribute 3 (As this creature enters, an opponent of your choice may put three +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, destroy target noncreature permanent.\"},{\"id\":4,\"name\":\"Nessian Wilds Ravager\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"Tribute 6 (As this creature enters, an opponent of your choice may put six +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, you may have this creature fight another target creature. (Each deals damage equal to its power to the other.)\"},{\"id\":5,\"name\":\"Noble Quarry\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment Creature — Unicorn\",\"text\":\"Bestow {5}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nAll creatures able to block this creature or enchanted creature do so.\\nEnchanted creature gets +1/+1.\"},{\"id\":6,\"name\":\"Nyxborn Wolf\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment Creature — Wolf\",\"text\":\"Bestow {4}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +3/+1.\"},{\"id\":7,\"name\":\"Peregrination\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to two basic land cards, reveal those cards, and put one onto the battlefield tapped and the other into your hand. Shuffle, then scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":8,\"name\":\"Pheres-Band Raiders\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may pay {2}{G}. If you do, create a 3/3 green Centaur enchantment creature token.\"},{\"id\":9,\"name\":\"Pheres-Band Tromper\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Inspired — Whenever this creature becomes untapped, put a +1/+1 counter on it.\"},{\"id\":10,\"name\":\"Raised by Wolves\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, create two 2/2 green Wolf creature tokens.\\nEnchanted creature gets +1/+1 for each Wolf you control.\"},{\"id\":11,\"name\":\"Satyr Wayfinder\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"When this creature enters, reveal the top four cards of your library. You may put a land card from among them into your hand. Put the rest into your graveyard.\"},{\"id\":12,\"name\":\"Scourge of Skola Vale\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"Trample\\nThis creature enters with two +1/+1 counters on it.\\n{T}, Sacrifice another creature: Put a number of +1/+1 counters on this creature equal to the sacrificed creature's toughness.\"},{\"id\":13,\"name\":\"Setessan Oathsworn\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Satyr Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put two +1/+1 counters on this creature.\"},{\"id\":14,\"name\":\"Setessan Starbreaker\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, you may destroy target Aura.\"},{\"id\":15,\"name\":\"Skyreaping\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Skyreaping deals damage to each creature with flying equal to your devotion to green. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\"},{\"id\":16,\"name\":\"Snake of the Golden Grove\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Tribute 3 (As this creature enters, an opponent of your choice may put three +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, you gain 4 life.\"},{\"id\":17,\"name\":\"Swordwise Centaur\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"\"},{\"id\":18,\"name\":\"Unravel the Aether\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose target artifact or enchantment. Its owner shuffles it into their library.\"},{\"id\":19,\"name\":\"Chromanticore\",\"manaCost\":\"{W}{U}{B}{R}{G}\",\"typeLine\":\"Enchantment Creature — Manticore\",\"text\":\"Bestow {2}{W}{U}{B}{R}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nFlying, first strike, vigilance, trample, lifelink\\nEnchanted creature gets +4/+4 and has flying, first strike, vigilance, trample, and lifelink.\"},{\"id\":20,\"name\":\"Ephara, God of the Polis\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to white and blue is less than seven, Ephara isn't a creature.\\nAt the beginning of each upkeep, if you had another creature enter the battlefield under your control last turn, draw a card.\"},{\"id\":21,\"name\":\"Ephara's Enlightenment\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, put a +1/+1 counter on enchanted creature.\\nEnchanted creature has flying.\\nWhenever a creature you control enters, you may return this Aura to its owner's hand.\"},{\"id\":22,\"name\":\"Fanatic of Xenagos\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Trample\\nTribute 1 (As this creature enters, an opponent of your choice may put a +1/+1 counter on it.)\\nWhen this creature enters, if tribute wasn't paid, it gets +1/+1 and gains haste until end of turn.\"},{\"id\":23,\"name\":\"Karametra, God of Harvests\",\"manaCost\":\"{3}{G}{W}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to green and white is less than seven, Karametra isn't a creature.\\nWhenever you cast a creature spell, you may search your library for a Forest or Plains card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":24,\"name\":\"Kiora, the Crashing Wave\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Legendary Planeswalker — Kiora\",\"text\":\"+1: Until your next turn, prevent all damage that would be dealt to and dealt by target permanent an opponent controls.\\n−1: Draw a card. You may play an additional land this turn.\\n−5: You get an emblem with \\\"At the beginning of your end step, create a 9/9 blue Kraken creature token.\\\"\"},{\"id\":25,\"name\":\"Kiora's Follower\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Merfolk\",\"text\":\"{T}: Untap another target permanent.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"interaction\",\"draw\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 420,
+      "cacheCreationInputTokens": 33047,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.736089,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.736089,
+      "pricedUsd": 0.736089,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.736089 and its own usage prices at $0.736089"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "8b8f757e5f2af090d638e93ee06b752c",
+  "recordedAt": "2026-11-22T21:36:23.200Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Karn Liberated\",\"manaCost\":\"{7}\",\"typeLine\":\"Legendary Planeswalker — Karn\",\"text\":\"+4: Target player exiles a card from their hand.\\n−3: Exile target permanent.\\n−14: Restart the game, leaving in exile all non-Aura permanent cards exiled with Karn. Then put those cards onto the battlefield under your control.\"},{\"id\":2,\"name\":\"Apostle's Blessing\",\"manaCost\":\"{1}{W/P}\",\"typeLine\":\"Instant\",\"text\":\"({W/P} can be paid with either {W} or 2 life.)\\nTarget artifact or creature you control gains protection from artifacts or from the color of your choice until end of turn.\"},{\"id\":3,\"name\":\"Auriok Survivors\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, you may return target Equipment card from your graveyard to the battlefield. If you do, you may attach it to this creature.\"},{\"id\":4,\"name\":\"Blade Splicer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Phyrexian Human Artificer\",\"text\":\"When this creature enters, create a 3/3 colorless Phyrexian Golem artifact creature token.\\nGolems you control have first strike.\"},{\"id\":5,\"name\":\"Cathedral Membrane\",\"manaCost\":\"{1}{W/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Wall\",\"text\":\"({W/P} can be paid with either {W} or 2 life.)\\nDefender\\nWhen this creature dies during combat, it deals 6 damage to each creature it blocked this combat.\"},{\"id\":6,\"name\":\"Chancellor of the Annex\",\"manaCost\":\"{4}{W}{W}{W}\",\"typeLine\":\"Creature — Phyrexian Angel\",\"text\":\"You may reveal this card from your opening hand. If you do, when each opponent casts their first spell of the game, counter that spell unless that player pays {1}.\\nFlying\\nWhenever an opponent casts a spell, counter it unless that player pays {1}.\"},{\"id\":7,\"name\":\"Dispatch\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature.\\nMetalcraft — If you control three or more artifacts, exile that creature.\"},{\"id\":8,\"name\":\"Due Respect\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Permanents enter tapped this turn.\\nDraw a card.\"},{\"id\":9,\"name\":\"Elesh Norn, Grand Cenobite\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Legendary Creature — Phyrexian Praetor\",\"text\":\"Vigilance\\nOther creatures you control get +2/+2.\\nCreatures your opponents control get -2/-2.\"},{\"id\":10,\"name\":\"Exclusion Ritual\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Imprint — When this enchantment enters, exile target nonland permanent.\\nPlayers can't cast spells with the same name as the exiled card.\"},{\"id\":11,\"name\":\"Forced Worship\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack.\\n{2}{W}: Return this Aura to its owner's hand.\"},{\"id\":12,\"name\":\"Inquisitor Exarch\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Phyrexian Cleric\",\"text\":\"When this creature enters, choose one —\\n• You gain 2 life.\\n• Target opponent loses 2 life.\"},{\"id\":13,\"name\":\"Lost Leonin\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Phyrexian Cat Soldier\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":14,\"name\":\"Loxodon Convert\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Phyrexian Elephant Soldier\",\"text\":\"\"},{\"id\":15,\"name\":\"Marrow Shards\",\"manaCost\":\"{W/P}\",\"typeLine\":\"Instant\",\"text\":\"({W/P} can be paid with either {W} or 2 life.)\\nMarrow Shards deals 1 damage to each attacking creature.\"},{\"id\":16,\"name\":\"Master Splicer\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Phyrexian Human Artificer\",\"text\":\"When this creature enters, create a 3/3 colorless Phyrexian Golem artifact creature token.\\nGolems you control get +1/+1.\"},{\"id\":17,\"name\":\"Norn's Annex\",\"manaCost\":\"{3}{W/P}{W/P}\",\"typeLine\":\"Artifact\",\"text\":\"({W/P} can be paid with either {W} or 2 life.)\\nCreatures can't attack you or planeswalkers you control unless their controller pays {W/P} for each of those creatures.\"},{\"id\":18,\"name\":\"Phyrexian Unlife\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"You don't lose the game for having 0 or less life.\\nAs long as you have 0 or less life, all damage is dealt to you as though its source had infect. (Damage is dealt to you in the form of poison counters.)\"},{\"id\":19,\"name\":\"Porcelain Legionnaire\",\"manaCost\":\"{2}{W/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Soldier\",\"text\":\"({W/P} can be paid with either {W} or 2 life.)\\nFirst strike\"},{\"id\":20,\"name\":\"Puresteel Paladin\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Whenever an Equipment you control enters, you may draw a card.\\nMetalcraft — Equipment you control have equip {0} as long as you control three or more artifacts.\"},{\"id\":21,\"name\":\"Remember the Fallen\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Return target creature card from your graveyard to your hand.\\n• Return target artifact card from your graveyard to your hand.\"},{\"id\":22,\"name\":\"Sensor Splicer\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Phyrexian Artificer\",\"text\":\"When this creature enters, create a 3/3 colorless Phyrexian Golem artifact creature token.\\nGolem creatures you control have vigilance.\"},{\"id\":23,\"name\":\"Shattered Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Phyrexian Angel\",\"text\":\"Flying\\nWhenever a land an opponent controls enters, you may gain 3 life.\"},{\"id\":24,\"name\":\"Shriek Raptor\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Phyrexian Bird\",\"text\":\"Flying\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":25,\"name\":\"Suture Priest\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Phyrexian Cleric\",\"text\":\"Whenever another creature you control enters, you may gain 1 life.\\nWhenever a creature an opponent controls enters, you may have that player lose 1 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 423,
+      "cacheCreationInputTokens": 32680,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.728899,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.728899,
+      "pricedUsd": 0.728899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728899 and its own usage prices at $0.728899"
+    }
+  }
+}

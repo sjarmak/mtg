@@ -1,0 +1,157 @@
+{
+  "key": "fbe236562b59c84235f7a4ab9ec0a6a3",
+  "recordedAt": "2026-11-22T21:25:33.832Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Endless Sands\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{2}, {T}: Exile target creature you control.\\n{4}, {T}, Sacrifice this land: Return each creature card exiled with this land to the battlefield under its owner's control.\"},{\"id\":2,\"name\":\"Hashep Oasis\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add {G}.\\n{1}{G}{G}, {T}, Sacrifice a Desert: Target creature gets +3/+3 until end of turn. Activate only as a sorcery.\"},{\"id\":3,\"name\":\"Hostile Desert\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{2}, Exile a land card from your graveyard: This land becomes a 3/4 Elemental creature until end of turn. It's still a land.\"},{\"id\":4,\"name\":\"Ifnir Deadlands\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add {B}.\\n{2}{B}{B}, {T}, Sacrifice a Desert: Put two -1/-1 counters on target creature an opponent controls. Activate only as a sorcery.\"},{\"id\":5,\"name\":\"Ipnu Rivulet\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add {U}.\\n{1}{U}, {T}, Sacrifice a Desert: Target player mills four cards. (They put the top four cards of their library into their graveyard.)\"},{\"id\":6,\"name\":\"Ramunap Ruins\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add {R}.\\n{2}{R}{R}, {T}, Sacrifice a Desert: This land deals 2 damage to each opponent.\"},{\"id\":7,\"name\":\"Scavenger Grounds\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{2}, {T}, Sacrifice a Desert: Exile all graveyards.\"},{\"id\":8,\"name\":\"Shefet Dunes\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add {W}.\\n{2}{W}{W}, {T}, Sacrifice a Desert: Creatures you control get +1/+1 until end of turn. Activate only as a sorcery.\"},{\"id\":9,\"name\":\"Survivors' Encampment\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{T}, Tap an untapped creature you control: Add one mana of any color.\"},{\"id\":10,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"},{\"id\":11,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":12,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":13,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":14,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"},{\"id\":15,\"name\":\"Nissa, Genesis Mage\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+2: Untap up to two target creatures and up to two target lands.\\n−3: Target creature gets +5/+5 until end of turn.\\n−10: Look at the top ten cards of your library. You may put any number of creature and/or land cards from among them onto the battlefield. Put the rest on the bottom of your library in a random order.\"},{\"id\":16,\"name\":\"Avid Reclaimer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"{T}: Add {G} or {U}. If you control a Nissa planeswalker, you gain 2 life.\"},{\"id\":17,\"name\":\"Brambleweft Behemoth\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":18,\"name\":\"Nissa's Encouragement\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library and graveyard for a card named Forest, a card named Brambleweft Behemoth, and a card named Nissa, Genesis Mage. Reveal those cards, put them into your hand, then shuffle.\"},{\"id\":19,\"name\":\"Woodland Stream\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {U}.\"},{\"id\":20,\"name\":\"Nicol Bolas, the Deceiver\",\"manaCost\":\"{5}{U}{B}{R}\",\"typeLine\":\"Legendary Planeswalker — Bolas\",\"text\":\"+3: Each opponent loses 3 life unless that player sacrifices a nonland permanent of their choice or discards a card.\\n−3: Destroy target creature. Draw a card.\\n−11: Nicol Bolas deals 7 damage to each opponent. You draw seven cards.\"},{\"id\":21,\"name\":\"Wasp of the Bitter End\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Insect Horror\",\"text\":\"Flying\\nWhenever you cast a Bolas planeswalker spell, you may sacrifice this creature. If you do, destroy target creature.\"},{\"id\":22,\"name\":\"Zealot of the God-Pharaoh\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Archer\",\"text\":\"{4}{R}: This creature deals 2 damage to target opponent or planeswalker.\"},{\"id\":23,\"name\":\"Visage of Bolas\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, you may search your library and/or graveyard for a card named Nicol Bolas, the Deceiver, reveal it, and put it into your hand. If you search your library this way, shuffle.\\n{T}: Add {U}, {B}, or {R}.\"},{\"id\":24,\"name\":\"Cinder Barrens\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {R}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\",\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\",\"draw\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1597,
+      "cacheCreationInputTokens": 32511,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.784219,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.784219,
+      "pricedUsd": 0.784219,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.784219 and its own usage prices at $0.784219"
+    }
+  }
+}

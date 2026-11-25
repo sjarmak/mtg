@@ -1,0 +1,161 @@
+{
+  "key": "39a7c8912ffddbf7ac89e3fb6c0fb6c6",
+  "recordedAt": "2026-11-22T21:58:22.486Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Leap of Faith\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains flying until end of turn. Prevent all damage that would be dealt to that creature this turn.\"},{\"id\":2,\"name\":\"Midnight Duelist\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Protection from Vampires\"},{\"id\":3,\"name\":\"Midvast Protector\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, target creature you control gains protection from the color of your choice until end of turn.\"},{\"id\":4,\"name\":\"Moonlight Geist\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\n{3}{W}: Prevent all combat damage that would be dealt to and dealt by this creature this turn.\"},{\"id\":5,\"name\":\"Moorland Inquisitor\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"{2}{W}: This creature gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":6,\"name\":\"Nearheath Pilgrim\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have lifelink.\"},{\"id\":7,\"name\":\"Restoration Angel\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flash\\nFlying\\nWhen this creature enters, you may exile target non-Angel creature you control, then return that card to the battlefield under your control.\"},{\"id\":8,\"name\":\"Riders of Gavony\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Vigilance\\nAs this creature enters, choose a creature type.\\nHuman creatures you control have protection from creatures of the chosen type.\"},{\"id\":9,\"name\":\"Righteous Blow\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Righteous Blow deals 2 damage to target attacking or blocking creature.\"},{\"id\":10,\"name\":\"Seraph of Dawn\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, lifelink\"},{\"id\":11,\"name\":\"Silverblade Paladin\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have double strike.\"},{\"id\":12,\"name\":\"Spectral Gateguards\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Spirit Soldier\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have vigilance.\"},{\"id\":13,\"name\":\"Terminus\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Put all creatures on the bottom of their owners' libraries.\\nMiracle {W} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":14,\"name\":\"Thraben Valiant\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance\"},{\"id\":15,\"name\":\"Voice of the Provinces\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, create a 1/1 white Human creature token.\"},{\"id\":16,\"name\":\"Zealous Strike\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 and gains first strike until end of turn.\"},{\"id\":17,\"name\":\"Alchemist's Apprentice\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Sacrifice this creature: Draw a card.\"},{\"id\":18,\"name\":\"Amass the Components\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw three cards, then put a card from your hand on the bottom of your library.\"},{\"id\":19,\"name\":\"Arcane Melee\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Instant and sorcery spells cost {2} less to cast.\"},{\"id\":20,\"name\":\"Captain of the Mists\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever another Human you control enters, untap this creature.\\n{1}{U}, {T}: You may tap or untap target permanent.\"},{\"id\":21,\"name\":\"Crippling Chill\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature. It doesn't untap during its controller's next untap step.\\nDraw a card.\"},{\"id\":22,\"name\":\"Deadeye Navigator\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as Deadeye Navigator is paired with another creature, each of those creatures has \\\"{1}{U}: Exile this creature, then return it to the battlefield under your control.\\\"\"},{\"id\":23,\"name\":\"Devastation Tide\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all nonland permanents to their owners' hands.\\nMiracle {1}{U} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":24,\"name\":\"Dreadwaters\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills X cards, where X is the number of lands you control.\"},{\"id\":25,\"name\":\"Elgaud Shieldmate\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have hexproof. (They can't be the targets of spells or abilities your opponents control.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 401,
+      "cacheCreationInputTokens": 32433,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7228589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7228589999999999,
+      "pricedUsd": 0.722859,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.722859 and its own usage prices at $0.722859"
+    }
+  }
+}

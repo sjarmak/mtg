@@ -1,0 +1,161 @@
+{
+  "key": "71816c9242b2090a6fe3b4ee5f8d2ddb",
+  "recordedAt": "2026-11-22T21:40:27.977Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Hellion Eruption\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Sacrifice all creatures you control, then create that many 4/4 red Hellion creature tokens.\"},{\"id\":2,\"name\":\"Kargan Dragonlord\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Level up {R} ({R}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 4-7\\n4/4\\nFlying\\nLEVEL 8+\\n8/8\\nFlying, trample\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":3,\"name\":\"Kiln Fiend\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Elemental Beast\",\"text\":\"Whenever you cast an instant or sorcery spell, this creature gets +3/+0 until end of turn.\"},{\"id\":4,\"name\":\"Lagac Lizard\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"\"},{\"id\":5,\"name\":\"Lavafume Invoker\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"{8}: Creatures you control get +3/+0 until end of turn.\"},{\"id\":6,\"name\":\"Lord of Shatterskull Pass\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Shaman\",\"text\":\"Level up {1}{R} ({1}{R}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-5\\n6/6\\nLEVEL 6+\\n6/6\\nWhenever this creature attacks, it deals 6 damage to each creature defending player controls.\"},{\"id\":7,\"name\":\"Lust for War\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature becomes tapped, this Aura deals 3 damage to that creature's controller.\\nEnchanted creature attacks each combat if able.\"},{\"id\":8,\"name\":\"Magmaw\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{1}, Sacrifice a nonland permanent: This creature deals 1 damage to any target.\"},{\"id\":9,\"name\":\"Ogre Sentry\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Defender\"},{\"id\":10,\"name\":\"Rage Nimbus\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Defender, flying\\n{1}{R}: Target creature attacks this turn if able.\"},{\"id\":11,\"name\":\"Raid Bombardment\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control with power 2 or less attacks, this enchantment deals 1 damage to the player or planeswalker that creature is attacking.\"},{\"id\":12,\"name\":\"Rapacious One\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Eldrazi Drone\",\"text\":\"Trample\\nWhenever this creature deals combat damage to a player, create that many 0/1 colorless Eldrazi Spawn creature tokens. They have \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":13,\"name\":\"Soulsurge Elemental\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"First strike\\nSoulsurge Elemental's power is equal to the number of creatures you control.\"},{\"id\":14,\"name\":\"Spawning Breath\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Spawning Breath deals 1 damage to any target. Create a 0/1 colorless Eldrazi Spawn creature token. It has \\\"Sacrifice this token: Add {C}.\\\"\"},{\"id\":15,\"name\":\"Splinter Twin\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: Create a token that's a copy of this creature, except it has haste. Exile that token at the beginning of the next end step.\\\"\"},{\"id\":16,\"name\":\"Staggershock\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Staggershock deals 2 damage to any target.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":17,\"name\":\"Surreal Memoir\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Return an instant card at random from your graveyard to your hand.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":18,\"name\":\"Traitorous Instinct\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. Until end of turn, it gets +2/+0 and gains haste.\"},{\"id\":19,\"name\":\"Tuktuk the Explorer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Legendary Creature — Goblin\",\"text\":\"Haste\\nWhen Tuktuk the Explorer dies, create Tuktuk the Returned, a legendary 5/5 colorless Goblin Golem artifact creature token.\"},{\"id\":20,\"name\":\"Valakut Fireboar\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Elemental Boar\",\"text\":\"Whenever this creature attacks, switch its power and toughness until end of turn.\"},{\"id\":21,\"name\":\"Vent Sentinel\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Defender\\n{1}{R}, {T}: This creature deals damage to target player or planeswalker equal to the number of creatures you control with defender.\"},{\"id\":22,\"name\":\"World at War\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"After the second main phase this turn, there's an additional combat phase followed by an additional main phase. At the beginning of that combat, untap all creatures that attacked this turn.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":23,\"name\":\"Wrap in Flames\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Wrap in Flames deals 1 damage to each of up to three target creatures. Those creatures can't block this turn.\"},{\"id\":24,\"name\":\"Ancient Stirrings\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top five cards of your library. You may reveal a colorless card from among them and put it into your hand. Then put the rest on the bottom of your library in any order.\"},{\"id\":25,\"name\":\"Aura Gnarlid\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Creatures with power less than this creature's power can't block it.\\nThis creature gets +1/+1 for each Aura on the battlefield.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 421,
+      "cacheCreationInputTokens": 32694,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.729079,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.729079,
+      "pricedUsd": 0.729079,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.729079 and its own usage prices at $0.729079"
+    }
+  }
+}

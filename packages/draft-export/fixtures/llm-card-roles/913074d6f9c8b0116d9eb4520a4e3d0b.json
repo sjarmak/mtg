@@ -1,0 +1,161 @@
+{
+  "key": "913074d6f9c8b0116d9eb4520a4e3d0b",
+  "recordedAt": "2026-11-22T21:51:06.070Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ajani, Caller of the Pride\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Ajani\",\"text\":\"+1: Put a +1/+1 counter on up to one target creature.\\n−3: Target creature gains flying and double strike until end of turn.\\n−8: Create X 2/2 white Cat creature tokens, where X is your life total.\"},{\"id\":2,\"name\":\"Ajani's Sunstriker\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Cat Cleric\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":3,\"name\":\"Angel's Mercy\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"You gain 7 life.\"},{\"id\":4,\"name\":\"Angelic Benediction\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Exalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\\nWhenever a creature you control attacks alone, you may tap target creature.\"},{\"id\":5,\"name\":\"Attended Knight\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"First strike\\nWhen this creature enters, create a 1/1 white Soldier creature token.\"},{\"id\":6,\"name\":\"Aven Squire\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Bird Soldier\",\"text\":\"Flying\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":7,\"name\":\"Battleflight Eagle\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, target creature gets +2/+2 and gains flying until end of turn.\"},{\"id\":8,\"name\":\"Captain of the Watch\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\\nOther Soldier creatures you control get +1/+1 and have vigilance.\\nWhen this creature enters, create three 1/1 white Soldier creature tokens.\"},{\"id\":9,\"name\":\"Captain's Call\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create three 1/1 white Soldier creature tokens.\"},{\"id\":10,\"name\":\"Crusader of Odric\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Crusader of Odric's power and toughness are each equal to the number of creatures you control.\"},{\"id\":11,\"name\":\"Divine Favor\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, you gain 3 life.\\nEnchanted creature gets +1/+3.\"},{\"id\":12,\"name\":\"Divine Verdict\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"id\":13,\"name\":\"Erase\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target enchantment.\"},{\"id\":14,\"name\":\"Faith's Reward\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Return to the battlefield all permanent cards in your graveyard that were put there from the battlefield this turn.\"},{\"id\":15,\"name\":\"Glorious Charge\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+1 until end of turn.\"},{\"id\":16,\"name\":\"Griffin Protector\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\nWhenever another creature you control enters, this creature gets +1/+1 until end of turn.\"},{\"id\":17,\"name\":\"Guardian Lions\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":18,\"name\":\"Guardians of Akrasa\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Defender (This creature can't attack.)\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":19,\"name\":\"Healer of the Pride\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Cat Cleric\",\"text\":\"Whenever another creature you control enters, you gain 2 life.\"},{\"id\":20,\"name\":\"Intrepid Hero\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"{T}: Destroy target creature with power 4 or greater.\"},{\"id\":21,\"name\":\"Knight of Glory\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Protection from black (This creature can't be blocked, targeted, dealt damage, or enchanted by anything black.)\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":22,\"name\":\"Oblivion Ring\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile another target nonland permanent.\\nWhen this enchantment leaves the battlefield, return the exiled card to the battlefield under its owner's control.\"},{\"id\":23,\"name\":\"Odric, Master Tactician\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"First strike (This creature deals combat damage before creatures without first strike.)\\nWhenever Odric and at least three other creatures attack, you choose which creatures block this combat and how those creatures block.\"},{\"id\":24,\"name\":\"Pacifism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block.\"},{\"id\":25,\"name\":\"Pillarfield Ox\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Ox\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 971,
+      "cacheCreationInputTokens": 32323,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7491589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7491589999999999,
+      "pricedUsd": 0.749159,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.749159 and its own usage prices at $0.749159"
+    }
+  }
+}

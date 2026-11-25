@@ -213,10 +213,10 @@ export const TAPPED_FACE_INSET = `calc((100cqh - min(${cssNumber(TAPPED_FACE_WID
  * `--art` would collide with the first sheet that wanted the word.
  *
  * Exported for one reason, and it is not styling: `./arrival.ts` and `./band.ts`
- * have to ask the same `@supports` question this file asks, because whether the
- * badges are glued to the picture decides whether an entrance animation may move
- * them. A second copy of the ident in those files would be a guard that agrees
- * with this one only until somebody renames it here.
+ * ask an `@supports` question about it, because whether the badges are glued
+ * to the picture decides whether an entrance animation may move them. A second
+ * copy of the ident in those files would be a guard that agrees with this one
+ * only until somebody renames it here.
  */
 export const ART_ANCHOR = '--mtg-art-anchor';
 
@@ -229,35 +229,6 @@ export const ART_ANCHOR = '--mtg-art-anchor';
  * picture on a land.
  */
 const COST_ANCHOR = '--mtg-cost-anchor';
-
-/**
- * How far above the slot's middle the rotated card's top edge sits, as a share
- * of the slot's *width*.
- *
- * **Only where anchor positioning is unavailable.** With it the badges are
- * anchored to the picture itself and follow the rotated card for free
- * (`MARKS_CSS` below); this is the arithmetic a browser that cannot do that
- * still needs, and it is what this build drew everywhere until `mtg-9edk`.
- *
- * The rotated card is as wide as the slot and 63/88 of that across the block
- * axis, so it sits centered with half of the remainder empty above it and half
- * below. The corner marks are positioned against the *slot*, so without this
- * they float in that gap instead of sitting on the card — which is the second
- * half of what `mtg-yi5` reported, the `ATK` and P/T badges "floating in the
- * empty space above and to the left of the shrunken card rather than attached
- * to it".
- *
- * It is spent as a negative `margin-block-start` under an `inset-block-start` of
- * 50%, which is the one arrangement that can measure a block-axis offset in
- * inline-axis units: a percentage `inset` resolves against the containing
- * block's height, and a percentage *margin* resolves against its width (CSS 2.1
- * §8.3), on both axes. The offset the marks need is `slot height / 2 - card
- * height / 2`, and the card's height is a share of the slot's width, so the two
- * halves have to come from different axes or the badge drifts off the card
- * exactly as far as the row shrank the slot — 4.4px at 1440x900 and 21px at
- * 1024x768, which is the defect this constant exists to prevent.
- */
-const TAPPED_MARK_PULL = (CARD_TRIM_MM.width / CARD_TRIM_MM.height / 2) * 100;
 
 export const SLOT_CSS = `
 /* container-type, so the face inside can be *measured* rather than guessed at.
@@ -278,6 +249,10 @@ export const SLOT_CSS = `
   display: flex; align-items: center; justify-content: center;
   width: ${cssNumber(SLOT_WIDTH_REM)}rem; height: ${cssNumber(SLOT_HEIGHT_REM)}rem;
   container-type: inline-size;
+  /* Scoped to the slot, so a slot's corner badges can only see its own card's
+     art window. Without this the name is document-wide and the browser takes
+     the last acceptable anchor in tree order, which is some other permanent. */
+  anchor-scope: ${ART_ANCHOR}, ${COST_ANCHOR};
 }
 .mtg-slot[data-slot='hand'][data-empty='true'] {
   flex: none; align-self: center;
@@ -412,7 +387,8 @@ export const SLOT_CSS = `
  * more letters, and at eight a side the damage badge wraps to a second line and
  * the worst face loses twenty-seven. A tapped slot had it at the other corner -
  * the quarter turn sends the card's top-left to the slot's top *right*, which is
- * where TAPPED_MARK_PULL was putting them - and lost up to eight a face there.
+ * where the old pull arithmetic was putting them - and lost up to eight a face
+ * there.
  *
  * **The row is anchored to the art window, which is the region with no text
  * under it.** ../card.ts already made that argument for the mana cost and put it
@@ -443,78 +419,56 @@ export const SLOT_CSS = `
  *   the row still starts on the name, and a smaller badge over a smaller name
  *   covers the same share of it.
  *
- * What it costs: two geometries, because anchor positioning is Chromium 131 and
- * Safari 26 and Firefox has not shipped it. The declarations below the guard are
- * exactly what this build drew before, so an unsupporting browser is left where
- * it already was rather than somewhere new - including TAPPED_MARK_PULL, which
- * survives for that branch alone. mtg-9edk.1 tracks retiring the fallback.
- * The guard tests anchor-scope rather than anchor-name, and which of the two is
- * tested matters: a browser with the name and not the scope would resolve every
- * slot's badges against the *last* card in the document, which is a worse
- * drawing than the one being fixed. */
+ * One geometry, unguarded. Anchor positioning with anchor-scope ships in
+ * Chromium 131, Safari and iPadOS/iOS 26 and Firefox 147, which covers every
+ * browser this lab is opened in, so the slot-corner fallback and its tapped
+ * pull arithmetic were retired (mtg-9edk.1). The scope is what must not be
+ * missing: a browser with anchor-name and not anchor-scope would resolve every
+ * slot's badges against the *last* card in the document. That scope is
+ * declared on the .mtg-slot rule above, which owns the class. */
+/* The two faces a slot draws (../../board/CardSlot.ts, SlotFace). Not the
+   zoom's, which is a full-size face in the same slot and would otherwise be
+   the later of two anchors carrying one name. */
+.mtg-card[data-size='board'] > .mtg-art,
+.mtg-card[data-size='art'] > .mtg-art { anchor-name: ${ART_ANCHOR}; }
+/* The window's own start corner, and the badges stay level: an anchor
+   rectangle is the anchor's box in the containing block's axes, so a rotated
+   card hands back its upright bounding box and a tapped permanent's badges
+   land on the near corner of its picture reading the way every other badge on
+   the table reads, with no pull arithmetic for the quarter turn.
+
+   The row is also held to the picture's width and wraps inside it, which is
+   the same measurement read the other way. A quarter turn puts the card's
+   short side along the row, so a tapped window at 1440x900 four a side is
+   44.5px across where the upright one is 83.2 - and an unbounded row of 61.2px
+   ran 12.7px past it and back onto the name it had just been taken off. Wrapped
+   it costs a second line of badges over the picture, which is the one region
+   with nothing under it; that is why this is the axis that gives. */
+/* The window's *near* corner, and the block axis is the one that must not be
+   negotiable: a row that wraps has to grow into the picture and never back
+   toward the bar it was just taken off. Anchoring the far edge instead was
+   measured and reversed - at 1024x768 eight a side the window is 17.4px tall,
+   a two-badge row wraps to 30.8, and a bottom-pinned row grew straight back
+   through the title bar and covered 91 letters that this arrangement leaves
+   alone.
+
+   The inline end stops at the cost rather than at the picture, because the
+   window already has a tenant: ../card.ts puts the mana cost in its top-right
+   corner, and at 1440x900 four a side a row of 61.2px in a 66.6px window
+   painted over the generic pip of a two-pip cost. So the row is pinned to the
+   cost badge's own near edge through a second anchor and wraps in what is
+   left. A face with no cost badge - every land, and the art tile, since
+   ../card.ts draws that corner for castable board faces only - has no such
+   anchor, which makes the declaration invalid at computed-value time and
+   leaves the property at auto: the row takes the whole picture, which is
+   the right answer for a card with nothing in that corner. */
+.mtg-card__corner { anchor-name: ${COST_ANCHOR}; }
 .mtg-slot__marks {
-  position: absolute; inset-inline-start: var(--mtg-space-1); inset-block-start: var(--mtg-space-1);
-  display: flex; gap: 2px; z-index: 1;
-}
-@supports not (anchor-scope: ${ART_ANCHOR}) {
-  /* A quarter turn clockwise sends the card's top-left corner to the top *right*
-     of the slot and the foot that prints the power and toughness to the top
-     left, so a slot-anchored row is put at the end rather than the start: the
-     numbers combat turns on are the ones it must never cover. */
-  .mtg-slot[data-tapped='true'] > .mtg-slot__marks {
-    inset-block-start: 50%;
-    margin-block-start: calc(var(--mtg-space-1) - ${cssNumber(TAPPED_MARK_PULL)}%);
-    inset-inline-start: auto; inset-inline-end: var(--mtg-space-1);
-  }
-}
-@supports (anchor-scope: ${ART_ANCHOR}) {
-  /* Scoped to the slot, so a slot's badges can only see its own card's window.
-     Without this the name is document-wide and the browser takes the last
-     acceptable anchor in tree order, which is some other permanent. */
-  .mtg-slot { anchor-scope: ${ART_ANCHOR}, ${COST_ANCHOR}; }
-  /* The two faces a slot draws (../../board/CardSlot.ts, SlotFace). Not the
-     zoom's, which is a full-size face in the same slot and would otherwise be
-     the later of two anchors carrying one name. */
-  .mtg-card[data-size='board'] > .mtg-art,
-  .mtg-card[data-size='art'] > .mtg-art { anchor-name: ${ART_ANCHOR}; }
-  /* The window's own start corner, and the badges stay level: an anchor
-     rectangle is the anchor's box in the containing block's axes, so a rotated
-     card hands back its upright bounding box and a tapped permanent's badges
-     land on the near corner of its picture reading the way every other badge on
-     the table reads. That is the whole of what TAPPED_MARK_PULL was computing.
-
-     The row is also held to the picture's width and wraps inside it, which is
-     the same measurement read the other way. A quarter turn puts the card's
-     short side along the row, so a tapped window at 1440x900 four a side is
-     44.5px across where the upright one is 83.2 - and an unbounded row of 61.2px
-     ran 12.7px past it and back onto the name it had just been taken off. Wrapped
-     it costs a second line of badges over the picture, which is the one region
-     with nothing under it; that is why this is the axis that gives. */
-  /* The window's *near* corner, and the block axis is the one that must not be
-     negotiable: a row that wraps has to grow into the picture and never back
-     toward the bar it was just taken off. Anchoring the far edge instead was
-     measured and reversed - at 1024x768 eight a side the window is 17.4px tall,
-     a two-badge row wraps to 30.8, and a bottom-pinned row grew straight back
-     through the title bar and covered 91 letters that this arrangement leaves
-     alone.
-
-     The inline end stops at the cost rather than at the picture, because the
-     window already has a tenant: ../card.ts puts the mana cost in its top-right
-     corner, and at 1440x900 four a side a row of 61.2px in a 66.6px window
-     painted over the generic pip of a two-pip cost. So the row is pinned to the
-     cost badge's own near edge through a second anchor and wraps in what is
-     left. A face with no cost badge - every land, and the art tile, since
-     ../card.ts draws that corner for castable board faces only - has no such
-     anchor, which makes the declaration invalid at computed-value time and
-     leaves the property at auto: the row takes the whole picture, which is
-     the right answer for a card with nothing in that corner. */
-  .mtg-card__corner { anchor-name: ${COST_ANCHOR}; }
-  .mtg-slot__marks {
-    position-anchor: ${ART_ANCHOR};
-    inset-block-start: anchor(start); inset-inline-start: anchor(start);
-    inset-inline-end: anchor(${COST_ANCHOR} start);
-    max-width: anchor-size(width); flex-wrap: wrap;
-  }
+  position: absolute; display: flex; gap: 2px; z-index: 1;
+  position-anchor: ${ART_ANCHOR};
+  inset-block-start: anchor(start); inset-inline-start: anchor(start);
+  inset-inline-end: anchor(${COST_ANCHOR} start);
+  max-width: anchor-size(width); flex-wrap: wrap;
 }
 /* A badge. Not scoped to .mtg-slot, and that is now load-bearing rather than
    incidental: ../../board/StackZone.ts draws the same badge on a stack entry, so

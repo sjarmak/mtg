@@ -1,0 +1,161 @@
+{
+  "key": "15a28ba4aa6f47456383b72c11869e23",
+  "recordedAt": "2026-11-22T21:22:41.084Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Khenra Charioteer\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"Trample\\nOther creatures you control have trample.\"},{\"id\":2,\"name\":\"Merciless Javelineer\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"{2}, Discard a card: Put a -1/-1 counter on target creature. That creature can't block this turn.\"},{\"id\":3,\"name\":\"Neheb, the Worthy\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Legendary Creature — Minotaur Warrior\",\"text\":\"First strike\\nOther Minotaurs you control have first strike.\\nAs long as you have one or fewer cards in hand, Minotaurs you control get +2/+0.\\nWhenever Neheb deals combat damage to a player, each player discards a card.\"},{\"id\":4,\"name\":\"Nissa, Steward of Elements\",\"manaCost\":\"{X}{G}{U}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+2: Scry 2.\\n0: Look at the top card of your library. If it's a land card or a creature card with mana value less than or equal to the number of loyalty counters on Nissa, you may put that card onto the battlefield.\\n−6: Untap up to two target lands you control. They become 5/5 Elemental creatures with flying and haste until end of turn. They're still lands.\"},{\"id\":5,\"name\":\"Samut, Voice of Dissent\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Legendary Creature — Human Warrior\",\"text\":\"Flash\\nDouble strike, vigilance, haste\\nOther creatures you control have haste.\\n{W}, {T}: Untap another target creature.\"},{\"id\":6,\"name\":\"Shadowstorm Vizier\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Flying\\nWhenever you cycle or discard a card, this creature gets +1/+1 until end of turn.\"},{\"id\":7,\"name\":\"Temmet, Vizier of Naktamun\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Legendary Creature — Human Cleric\",\"text\":\"At the beginning of combat on your turn, target creature token you control gets +1/+1 until end of turn and can't be blocked this turn.\\nEmbalm {3}{W}{U} ({3}{W}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Human Cleric with no mana cost. Embalm only as a sorcery.)\"},{\"id\":8,\"name\":\"Wayward Servant\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Whenever another Zombie you control enters, each opponent loses 1 life and you gain 1 life.\"},{\"id\":9,\"name\":\"Weaver of Currents\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Snake Druid\",\"text\":\"{T}: Add {C}{C}.\"},{\"id\":10,\"name\":\"Dusk // Dawn\",\"manaCost\":\"{2}{W}{W} // {3}{W}{W}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Dusk\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures with power 3 or greater.\"},{\"name\":\"Dawn\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nReturn all creature cards with power 2 or less from your graveyard to your hand.\"}]},{\"id\":11,\"name\":\"Commit // Memory\",\"manaCost\":\"{3}{U} // {4}{U}{U}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Commit\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Put target spell or nonland permanent into its owner's library second from the top.\"},{\"name\":\"Memory\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nEach player shuffles their hand and graveyard into their library, then draws seven cards.\"}]},{\"id\":12,\"name\":\"Never // Return\",\"manaCost\":\"{1}{B}{B} // {3}{B}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Never\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature or planeswalker.\"},{\"name\":\"Return\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nExile target card from a graveyard. Create a 2/2 black Zombie creature token.\"}]},{\"id\":13,\"name\":\"Insult // Injury\",\"manaCost\":\"{2}{R} // {2}{R}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Insult\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Damage can't be prevented this turn. If a source you control would deal damage this turn, it deals double that damage instead.\"},{\"name\":\"Injury\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nInjury deals 2 damage to target creature and 2 damage to target player or planeswalker.\"}]},{\"id\":14,\"name\":\"Mouth // Feed\",\"manaCost\":\"{2}{G} // {3}{G}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Mouth\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 3/3 green Hippo creature token.\"},{\"name\":\"Feed\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nDraw a card for each creature you control with power 3 or greater.\"}]},{\"id\":15,\"name\":\"Start // Finish\",\"manaCost\":\"{2}{W} // {2}{B}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Start\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create two 1/1 white Warrior creature tokens with vigilance.\"},{\"name\":\"Finish\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nAs an additional cost to cast this spell, sacrifice a creature.\\nDestroy target creature.\"}]},{\"id\":16,\"name\":\"Reduce // Rubble\",\"manaCost\":\"{2}{U} // {2}{R}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Reduce\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {3}.\"},{\"name\":\"Rubble\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nUp to three target lands don't untap during their controller's next untap step.\"}]},{\"id\":17,\"name\":\"Destined // Lead\",\"manaCost\":\"{1}{B} // {3}{G}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Destined\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains indestructible until end of turn.\"},{\"name\":\"Lead\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nAll creatures able to block target creature this turn do so.\"}]},{\"id\":18,\"name\":\"Onward // Victory\",\"manaCost\":\"{2}{R} // {2}{W}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Onward\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +X/+0 until end of turn, where X is its power.\"},{\"name\":\"Victory\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nTarget creature gains double strike until end of turn.\"}]},{\"id\":19,\"name\":\"Spring // Mind\",\"manaCost\":\"{2}{G} // {4}{U}{U}\",\"typeLine\":\"Sorcery // Instant\",\"text\":null,\"faces\":[{\"name\":\"Spring\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"name\":\"Mind\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nDraw two cards.\"}]},{\"id\":20,\"name\":\"Prepare // Fight\",\"manaCost\":\"{1}{W} // {3}{G}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Prepare\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature. It gets +2/+2 and gains lifelink until end of turn.\"},{\"name\":\"Fight\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nTarget creature you control fights target creature an opponent controls.\"}]},{\"id\":21,\"name\":\"Failure // Comply\",\"manaCost\":\"{1}{U} // {W}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Failure\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target spell to its owner's hand.\"},{\"name\":\"Comply\",\"manaCost\":\"{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nChoose a card name. Until your next turn, your opponents can't cast spells with the chosen name.\"}]},{\"id\":22,\"name\":\"Rags // Riches\",\"manaCost\":\"{2}{B}{B} // {5}{U}{U}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Rags\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get -2/-2 until end of turn.\"},{\"name\":\"Riches\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nEach opponent chooses a creature they control. You gain control of those creatures.\"}]},{\"id\":23,\"name\":\"Cut // Ribbons\",\"manaCost\":\"{1}{R} // {X}{B}{B}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Cut\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Cut deals 4 damage to target creature.\"},{\"name\":\"Ribbons\",\"manaCost\":\"{X}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nEach opponent loses X life.\"}]},{\"id\":24,\"name\":\"Heaven // Earth\",\"manaCost\":\"{X}{G} // {X}{R}{R}\",\"typeLine\":\"Instant // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Heaven\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Heaven deals X damage to each creature with flying.\"},{\"name\":\"Earth\",\"manaCost\":\"{X}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Aftermath (Cast this spell only from your graveyard. Then exile it.)\\nEarth deals X damage to each creature without flying.\"}]},{\"id\":25,\"name\":\"Bontu's Monument\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"Black creature spells you cast cost {1} less to cast.\\nWhenever you cast a creature spell, each opponent loses 1 life and you gain 1 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\",\"draw\"]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\",\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1503,
+      "cacheCreationInputTokens": 34549,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.820279,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.820279,
+      "pricedUsd": 0.820279,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.820279 and its own usage prices at $0.820279"
+    }
+  }
+}

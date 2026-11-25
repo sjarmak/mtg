@@ -1,0 +1,137 @@
+{
+  "key": "5d33aaea5ad321bfe5bf27ddd1bce67b",
+  "recordedAt": "2026-11-22T22:24:08.811Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Servo Schematic\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters or is put into a graveyard from the battlefield, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":2,\"name\":\"Treasure Keeper\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature dies, reveal cards from the top of your library until you reveal a nonland card with mana value 3 or less. You may cast that card without paying its mana cost. Put all revealed cards not cast this way on the bottom of your library in a random order.\"},{\"id\":3,\"name\":\"Universal Solvent\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{7}, {T}, Sacrifice this artifact: Destroy target permanent.\"},{\"id\":4,\"name\":\"Untethered Express\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Trample\\nWhenever this Vehicle attacks, put a +1/+1 counter on it.\\nCrew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":5,\"name\":\"Verdant Automaton\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{3}{G}: Put a +1/+1 counter on this creature.\"},{\"id\":6,\"name\":\"Walking Ballista\",\"manaCost\":\"{X}{X}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature enters with X +1/+1 counters on it.\\n{4}: Put a +1/+1 counter on this creature.\\nRemove a +1/+1 counter from this creature: It deals 1 damage to any target.\"},{\"id\":7,\"name\":\"Watchful Automaton\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{2}{U}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":8,\"name\":\"Welder Automaton\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{3}{R}: This creature deals 1 damage to each opponent.\"},{\"id\":9,\"name\":\"Spire of Industry\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}, Pay 1 life: Add one mana of any color. Activate only if you control an artifact.\"},{\"id\":10,\"name\":\"Ajani, Valiant Protector\",\"manaCost\":\"{4}{G}{W}\",\"typeLine\":\"Legendary Planeswalker — Ajani\",\"text\":\"+2: Put two +1/+1 counters on up to one target creature.\\n+1: Reveal cards from the top of your library until you reveal a creature card. Put that card into your hand and the rest on the bottom of your library in a random order.\\n−11: Put X +1/+1 counters on target creature, where X is your life total. That creature gains trample until end of turn.\"},{\"id\":11,\"name\":\"Inspiring Roar\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on each creature you control.\"},{\"id\":12,\"name\":\"Ajani's Comrade\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Soldier\",\"text\":\"Trample\\nAt the beginning of combat on your turn, if you control an Ajani planeswalker, put a +1/+1 counter on this creature.\"},{\"id\":13,\"name\":\"Ajani's Aid\",\"manaCost\":\"{2}{G}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, you may search your library and/or graveyard for a card named Ajani, Valiant Protector, reveal it, and put it into your hand. If you search your library this way, shuffle.\\nSacrifice this enchantment: Prevent all combat damage a creature of your choice would deal this turn.\"},{\"id\":14,\"name\":\"Tranquil Expanse\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {W}.\"},{\"id\":15,\"name\":\"Tezzeret, Master of Metal\",\"manaCost\":\"{4}{U}{B}\",\"typeLine\":\"Legendary Planeswalker — Tezzeret\",\"text\":\"+1: Reveal cards from the top of your library until you reveal an artifact card. Put that card into your hand and the rest on the bottom of your library in a random order.\\n−3: Target opponent loses life equal to the number of artifacts you control.\\n−8: Gain control of all artifacts and creatures target opponent controls.\"},{\"id\":16,\"name\":\"Tezzeret's Betrayal\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature. You may search your library and/or graveyard for a card named Tezzeret, Master of Metal, reveal it, and put it into your hand. If you search your library this way, shuffle.\"},{\"id\":17,\"name\":\"Pendulum of Patterns\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, you gain 3 life.\\n{5}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":18,\"name\":\"Tezzeret's Simulacrum\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"{T}: Target opponent loses 1 life. If you control a Tezzeret planeswalker, that player loses 3 life instead.\"},{\"id\":19,\"name\":\"Submerged Boneyard\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {B}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\",\"draw\"]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"interaction\",\"draw\"]},{\"id\":16,\"roles\":[\"interaction\",\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1422,
+      "cacheCreationInputTokens": 32106,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767369,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767369,
+      "pricedUsd": 0.767369,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767369 and its own usage prices at $0.767369"
+    }
+  }
+}

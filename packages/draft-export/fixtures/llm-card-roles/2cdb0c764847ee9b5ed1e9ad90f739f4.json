@@ -1,0 +1,161 @@
+{
+  "key": "2cdb0c764847ee9b5ed1e9ad90f739f4",
+  "recordedAt": "2026-11-22T21:57:12.021Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Genesis Hydra\",\"manaCost\":\"{X}{G}{G}\",\"typeLine\":\"Creature — Plant Hydra\",\"text\":\"When you cast this spell, reveal the top X cards of your library. You may put a nonland permanent card with mana value X or less from among them onto the battlefield. Then shuffle the rest into your library.\\nThis creature enters with X +1/+1 counters on it.\"},{\"id\":2,\"name\":\"Hornet Nest\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Defender (This creature can't attack.)\\nWhenever this creature is dealt damage, create that many 1/1 green Insect creature tokens with flying and deathtouch. (Any amount of damage a creature with deathtouch deals to a creature is enough to destroy it.)\"},{\"id\":3,\"name\":\"Hornet Queen\",\"manaCost\":\"{4}{G}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Flying, deathtouch\\nWhen this creature enters, create four 1/1 green Insect creature tokens with flying and deathtouch.\"},{\"id\":4,\"name\":\"Hunt the Weak\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on target creature you control. Then that creature fights target creature you don't control. (Each deals damage equal to its power to the other.)\"},{\"id\":5,\"name\":\"Hunter's Ambush\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt by nongreen creatures this turn.\"},{\"id\":6,\"name\":\"Invasive Species\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"When this creature enters, return another permanent you control to its owner's hand.\"},{\"id\":7,\"name\":\"Kalonian Twingrove\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Kalonian Twingrove's power and toughness are each equal to the number of Forests you control.\\nWhen this creature enters, create a green Treefolk Warrior creature token with \\\"This token's power and toughness are each equal to the number of Forests you control.\\\"\"},{\"id\":8,\"name\":\"Life's Legacy\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nDraw cards equal to the sacrificed creature's power.\"},{\"id\":9,\"name\":\"Living Totem\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Plant Elemental\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nWhen this creature enters, you may put a +1/+1 counter on another target creature.\"},{\"id\":10,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":11,\"name\":\"Netcaster Spider\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\\nWhenever this creature blocks a creature with flying, this creature gets +2/+0 until end of turn.\"},{\"id\":12,\"name\":\"Nissa, Worldwaker\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+1: Target land you control becomes a 4/4 Elemental creature with trample. It's still a land.\\n+1: Untap up to four target Forests.\\n−7: Search your library for any number of basic land cards, put them onto the battlefield, then shuffle. Those lands become 4/4 Elemental creatures with trample. They're still lands.\"},{\"id\":13,\"name\":\"Nissa's Expedition\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nSearch your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":14,\"name\":\"Overwhelm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nCreatures you control get +3/+3 until end of turn.\"},{\"id\":15,\"name\":\"Paragon of Eternal Wilds\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Other green creatures you control get +1/+1.\\n{G}, {T}: Another target green creature you control gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":16,\"name\":\"Phytotitan\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Plant Elemental\",\"text\":\"When this creature dies, return it to the battlefield tapped under its owner's control at the beginning of their next upkeep.\"},{\"id\":17,\"name\":\"Plummet\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying.\"},{\"id\":18,\"name\":\"Ranger's Guile\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +1/+1 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":19,\"name\":\"Reclamation Sage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, you may destroy target artifact or enchantment.\"},{\"id\":20,\"name\":\"Restock\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return two target cards from your graveyard to your hand. Exile Restock.\"},{\"id\":21,\"name\":\"Roaring Primadox\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"At the beginning of your upkeep, return a creature you control to its owner's hand.\"},{\"id\":22,\"name\":\"Runeclaw Bear\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"\"},{\"id\":23,\"name\":\"Satyr Wayfinder\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"When this creature enters, reveal the top four cards of your library. You may put a land card from among them into your hand. Put the rest into your graveyard.\"},{\"id\":24,\"name\":\"Shaman of Spring\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, draw a card.\"},{\"id\":25,\"name\":\"Siege Wurm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTrample\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1583,
+      "cacheCreationInputTokens": 32632,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7859389999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7859389999999999,
+      "pricedUsd": 0.785939,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.785939 and its own usage prices at $0.785939"
+    }
+  }
+}

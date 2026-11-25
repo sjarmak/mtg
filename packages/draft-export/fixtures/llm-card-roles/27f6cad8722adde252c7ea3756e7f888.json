@@ -1,0 +1,161 @@
+{
+  "key": "27f6cad8722adde252c7ea3756e7f888",
+  "recordedAt": "2026-11-22T21:57:37.162Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Soul of Zendikar\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Reach\\n{3}{G}{G}: Create a 3/3 green Beast creature token.\\n{3}{G}{G}, Exile this card from your graveyard: Create a 3/3 green Beast creature token.\"},{\"id\":2,\"name\":\"Sunblade Elf\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"This creature gets +1/+1 as long as you control a Plains.\\n{4}{W}: Creatures you control get +1/+1 until end of turn.\"},{\"id\":3,\"name\":\"Titanic Growth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +4/+4 until end of turn.\"},{\"id\":4,\"name\":\"Undergrowth Scavenger\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Fungus Horror\",\"text\":\"This creature enters with a number of +1/+1 counters on it equal to the number of creature cards in all graveyards.\"},{\"id\":5,\"name\":\"Venom Sliver\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have deathtouch. (Any amount of damage a creature with deathtouch deals to a creature is enough to destroy it.)\"},{\"id\":6,\"name\":\"Verdant Haven\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, you gain 2 life.\\nWhenever enchanted land is tapped for mana, its controller adds an additional one mana of any color.\"},{\"id\":7,\"name\":\"Vineweft\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1.\\n{4}{G}: Return this card from your graveyard to your hand.\"},{\"id\":8,\"name\":\"Wall of Mulch\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\\n{G}, Sacrifice a Wall: Draw a card.\"},{\"id\":9,\"name\":\"Yisan, the Wanderer Bard\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Creature — Human Rogue Bard\",\"text\":\"{2}{G}, {T}, Put a verse counter on Yisan: Search your library for a creature card with mana value equal to the number of verse counters on Yisan, put it onto the battlefield, then shuffle.\"},{\"id\":10,\"name\":\"Garruk, Apex Predator\",\"manaCost\":\"{5}{B}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Destroy another target planeswalker.\\n+1: Create a 3/3 black Beast creature token with deathtouch.\\n−3: Destroy target creature. You gain life equal to its toughness.\\n−8: Target opponent gets an emblem with \\\"Whenever a creature attacks you, it gets +5/+5 and gains trample until end of turn.\\\"\"},{\"id\":11,\"name\":\"Sliver Hivelord\",\"manaCost\":\"{W}{U}{B}{R}{G}\",\"typeLine\":\"Legendary Creature — Sliver\",\"text\":\"Sliver creatures you control have indestructible. (Damage and effects that say \\\"destroy\\\" don't destroy them.)\"},{\"id\":12,\"name\":\"Avarice Amulet\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+0 and has vigilance and \\\"At the beginning of your upkeep, draw a card.\\\"\\nWhenever equipped creature dies, target opponent gains control of this Equipment.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":13,\"name\":\"Brawler's Plate\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":14,\"name\":\"Bronze Sable\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Sable\",\"text\":\"\"},{\"id\":15,\"name\":\"The Chain Veil\",\"manaCost\":\"{4}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"At the beginning of your end step, if you didn't activate a loyalty ability of a planeswalker this turn, you lose 2 life.\\n{4}, {T}: For each planeswalker you control, you may activate one of its loyalty abilities once this turn as though none of its loyalty abilities have been activated this turn.\"},{\"id\":16,\"name\":\"Gargoyle Sentinel\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Gargoyle\",\"text\":\"Defender (This creature can't attack.)\\n{3}: Until end of turn, this creature loses defender and gains flying.\"},{\"id\":17,\"name\":\"Grindclock\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Put a charge counter on this artifact.\\n{T}: Target player mills X cards, where X is the number of charge counters on this artifact.\"},{\"id\":18,\"name\":\"Haunted Plate Mail\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +4/+4.\\n{0}: Until end of turn, this permanent becomes a 4/4 Spirit artifact creature that's no longer an Equipment. Activate only if you control no creatures.\\nEquip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":19,\"name\":\"Hot Soup\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can't be blocked.\\nWhenever equipped creature is dealt damage, destroy it.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":20,\"name\":\"Juggernaut\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Juggernaut\",\"text\":\"This creature attacks each combat if able.\\nThis creature can't be blocked by Walls.\"},{\"id\":21,\"name\":\"Meteorite\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, it deals 2 damage to any target.\\n{T}: Add one mana of any color.\"},{\"id\":22,\"name\":\"Obelisk of Urd\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nAs this artifact enters, choose a creature type.\\nCreatures you control of the chosen type get +2/+2.\"},{\"id\":23,\"name\":\"Ornithopter\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact Creature — Thopter\",\"text\":\"Flying\"},{\"id\":24,\"name\":\"Perilous Vault\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{5}, {T}, Exile this artifact: Exile all nonland permanents.\"},{\"id\":25,\"name\":\"Phyrexian Revoker\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"As this creature enters, choose a nonland card name.\\nActivated abilities of sources with the chosen name can't be activated.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"fixing\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1556,
+      "cacheCreationInputTokens": 32807,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.788089,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.788089,
+      "pricedUsd": 0.788089,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.788089 and its own usage prices at $0.788089"
+    }
+  }
+}

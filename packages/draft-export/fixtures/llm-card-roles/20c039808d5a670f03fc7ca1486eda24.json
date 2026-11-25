@@ -1,0 +1,161 @@
+{
+  "key": "20c039808d5a670f03fc7ca1486eda24",
+  "recordedAt": "2026-11-22T22:31:21.322Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Hissing Miasma\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature attacks you, its controller loses 1 life.\"},{\"id\":2,\"name\":\"Leyline of the Void\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"If this card is in your opening hand, you may begin the game with it on the battlefield.\\nIf a card would be put into an opponent's graveyard from anywhere, exile it instead.\"},{\"id\":3,\"name\":\"Necromancer's Magemark\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nCreatures you control that are enchanted get +1/+1.\\nIf a creature you control that's enchanted would die, return it to its owner's hand instead.\"},{\"id\":4,\"name\":\"Orzhov Euthanist\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"Haunt (When this creature dies, exile it haunting target creature.)\\nWhen this creature enters or the creature it haunts dies, destroy target creature that was dealt damage this turn.\"},{\"id\":5,\"name\":\"Ostiary Thrull\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"{W}, {T}: Tap target creature.\"},{\"id\":6,\"name\":\"Plagued Rusalka\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{B}, Sacrifice a creature: Target creature gets -1/-1 until end of turn.\"},{\"id\":7,\"name\":\"Poisonbelly Ogre\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Whenever another creature enters, its controller loses 1 life.\"},{\"id\":8,\"name\":\"Restless Bones\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Skeleton\",\"text\":\"{3}{B}, {T}: Target creature gains swampwalk until end of turn. (It can't be blocked as long as defending player controls a Swamp.)\\n{1}{B}: Regenerate this creature.\"},{\"id\":9,\"name\":\"Revenant Patriarch\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"When this creature enters, if {W} was spent to cast it, target player skips their next combat phase.\\nThis creature can't block.\"},{\"id\":10,\"name\":\"Sanguine Praetor\",\"manaCost\":\"{6}{B}{B}\",\"typeLine\":\"Creature — Avatar Praetor\",\"text\":\"{B}, Sacrifice a creature: Destroy each creature with the same mana value as the sacrificed creature.\"},{\"id\":11,\"name\":\"Seize the Soul\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonwhite, nonblack creature. Create a 1/1 white Spirit creature token with flying.\\nHaunt (When this spell card is put into a graveyard after resolving, exile it haunting target creature.)\\nWhen the creature this card haunts dies, destroy target nonwhite, nonblack creature. Create a 1/1 white Spirit creature token with flying.\"},{\"id\":12,\"name\":\"Skeletal Vampire\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Vampire Skeleton\",\"text\":\"Flying\\nWhen this creature enters, create two 1/1 black Bat creature tokens with flying.\\n{3}{B}{B}, Sacrifice a Bat: Create two 1/1 black Bat creature tokens with flying.\\nSacrifice a Bat: Regenerate this creature.\"},{\"id\":13,\"name\":\"Smogsteed Rider\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever this creature attacks, each other attacking creature gains fear until end of turn. (They can't be blocked except by artifact creatures and/or black creatures.)\"},{\"id\":14,\"name\":\"Bloodscale Prowler\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Lizard Warrior\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\"},{\"id\":15,\"name\":\"Fencer's Magemark\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nCreatures you control that are enchanted get +1/+1 and have first strike.\"},{\"id\":16,\"name\":\"Ghor-Clan Bloodscale\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Lizard Warrior\",\"text\":\"First strike\\n{3}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\"},{\"id\":17,\"name\":\"Hypervolt Grasp\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: This creature deals 1 damage to any target.\\\"\\n{1}{U}: Return this Aura to its owner's hand.\"},{\"id\":18,\"name\":\"Leyline of Lightning\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"If this card is in your opening hand, you may begin the game with it on the battlefield.\\nWhenever you cast a spell, you may pay {1}. If you do, this enchantment deals 1 damage to target player or planeswalker.\"},{\"id\":19,\"name\":\"Living Inferno\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{T}: This creature deals damage equal to its power divided as you choose among any number of target creatures. Each of those creatures deals damage equal to its power to this creature.\"},{\"id\":20,\"name\":\"Ogre Savant\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Ogre Wizard\",\"text\":\"When this creature enters, if {U} was spent to cast it, return target creature to its owner's hand.\"},{\"id\":21,\"name\":\"Parallectric Feedback\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Parallectric Feedback deals damage to target spell's controller equal to that spell's mana value.\"},{\"id\":22,\"name\":\"Pyromatics\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Replicate {1}{R} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nPyromatics deals 1 damage to any target.\"},{\"id\":23,\"name\":\"Rabble-Rouser\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\n{R}, {T}: Attacking creatures get +X/+0 until end of turn, where X is this creature's power.\"},{\"id\":24,\"name\":\"Scorched Rusalka\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{R}, Sacrifice a creature: This creature deals 1 damage to target player or planeswalker.\"},{\"id\":25,\"name\":\"Shattering Spree\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Replicate {R} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nDestroy target artifact.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 426,
+      "cacheCreationInputTokens": 32756,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.730569,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.730569,
+      "pricedUsd": 0.730569,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.730569 and its own usage prices at $0.730569"
+    }
+  }
+}

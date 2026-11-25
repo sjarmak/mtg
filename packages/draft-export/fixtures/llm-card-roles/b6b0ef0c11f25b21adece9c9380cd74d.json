@@ -1,0 +1,161 @@
+{
+  "key": "b6b0ef0c11f25b21adece9c9380cd74d",
+  "recordedAt": "2026-11-22T21:34:15.695Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Putrefax\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Trample, haste\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nAt the beginning of the end step, sacrifice this creature.\"},{\"id\":2,\"name\":\"Slice in Twain\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\\nDraw a card.\"},{\"id\":3,\"name\":\"Tangle Angler\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{G}: Target creature blocks this creature this turn if able.\"},{\"id\":4,\"name\":\"Tel-Jilad Defiance\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains protection from artifacts until end of turn.\\nDraw a card.\"},{\"id\":5,\"name\":\"Tel-Jilad Fallen\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Elf Warrior\",\"text\":\"Protection from artifacts\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":6,\"name\":\"Untamed Might\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +X/+X until end of turn.\"},{\"id\":7,\"name\":\"Viridian Revel\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an artifact is put into an opponent's graveyard from the battlefield, you may draw a card.\"},{\"id\":8,\"name\":\"Wing Puncture\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control deals damage equal to its power to target creature with flying.\"},{\"id\":9,\"name\":\"Withstand Death\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it. If its toughness is 0 or less, it still dies.)\"},{\"id\":10,\"name\":\"Venser, the Sojourner\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Legendary Planeswalker — Venser\",\"text\":\"+2: Exile target permanent you own. Return it to the battlefield under your control at the beginning of the next end step.\\n−1: Creatures can't be blocked this turn.\\n−8: You get an emblem with \\\"Whenever you cast a spell, exile target permanent.\\\"\"},{\"id\":11,\"name\":\"Accorder's Shield\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +0/+3 and has vigilance. (Attacking doesn't cause it to tap.)\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":12,\"name\":\"Argentum Armor\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +6/+6.\\nWhenever equipped creature attacks, destroy target permanent.\\nEquip {6}\"},{\"id\":13,\"name\":\"Auriok Replica\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Cleric\",\"text\":\"{W}, Sacrifice this creature: Prevent all damage a source of your choice would deal to you this turn.\"},{\"id\":14,\"name\":\"Barbed Battlegear\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +4/-1.\\nEquip {2}\"},{\"id\":15,\"name\":\"Bladed Pinions\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has flying and first strike.\\nEquip {2}\"},{\"id\":16,\"name\":\"Chimeric Mass\",\"manaCost\":\"{X}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with X charge counters on it.\\n{1}: Until end of turn, this artifact becomes a Construct artifact creature with \\\"This creature's power and toughness are each equal to the number of charge counters on it.\\\"\"},{\"id\":17,\"name\":\"Chrome Steed\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Horse\",\"text\":\"Metalcraft — This creature gets +2/+2 as long as you control three or more artifacts.\"},{\"id\":18,\"name\":\"Clone Shell\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Shapeshifter\",\"text\":\"Imprint — When this creature enters, look at the top four cards of your library, exile one face down, then put the rest on the bottom of your library in any order.\\nWhen this creature dies, turn the exiled card face up. If it's a creature card, put it onto the battlefield under your control.\"},{\"id\":19,\"name\":\"Contagion Clasp\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, put a -1/-1 counter on target creature.\\n{4}, {T}: Proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":20,\"name\":\"Contagion Engine\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, put a -1/-1 counter on each creature target player controls.\\n{4}, {T}: Proliferate twice. (Choose any number of permanents and/or players, then give each another counter of each kind already there. Then do it again.)\"},{\"id\":21,\"name\":\"Copper Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add {G}.\"},{\"id\":22,\"name\":\"Corpse Cur\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Dog\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhen this creature enters, you may return target creature card with infect from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Culling Dais\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice a creature: Put a charge counter on this artifact.\\n{1}, Sacrifice this artifact: Draw a card for each charge counter on this artifact.\"},{\"id\":24,\"name\":\"Darksteel Axe\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Indestructible (Effects that say \\\"destroy\\\" don't destroy this Equipment.)\\nEquipped creature gets +2/+0.\\nEquip {2}\"},{\"id\":25,\"name\":\"Darksteel Juggernaut\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Juggernaut\",\"text\":\"Indestructible\\nDarksteel Juggernaut's power and toughness are each equal to the number of artifacts you control.\\nThis creature attacks each combat if able.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1456,
+      "cacheCreationInputTokens": 32652,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779989,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779989,
+      "pricedUsd": 0.779989,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779989 and its own usage prices at $0.779989"
+    }
+  }
+}

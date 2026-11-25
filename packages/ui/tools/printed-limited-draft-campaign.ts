@@ -1,10 +1,12 @@
 /** Full-pod printed Limited draft comparison with fixed construction and Forge play. */
 import { isDeepStrictEqual } from 'node:util';
-import { botEvidenceSha256, type JsonValue } from '@mtg/bot-evidence';
+import { botEvidenceSha256 } from '@mtg/bot-evidence';
 import {
   runPrintedLimitedDraft,
+  validatePrintedCardRoles,
   type PreparedPrintedLimitedFormat,
   type PrintedBoosterPayload,
+  type PrintedCardRoles,
 } from '@mtg/draft-export';
 import type { DeckRef, ObservedBackend } from '@mtg/engine';
 import { prepareLimitedDeck, toDeckRef } from '@mtg/limited';
@@ -31,8 +33,12 @@ import {
   forgeGameplayFeatureIdentity,
   forgeGameplayPolicyIdentity,
   printedConstructionForgeRuntime,
+  printedLimitedArmPolicies,
+  printedLimitedArms,
   printedLimitedSubjectIdentity,
   type PrintedConstructionGameRunner,
+  type PrintedLimitedArm,
+  type PrintedLimitedComparison,
   type PrintedConstructionSubject,
   type PrintedLimitedConstructionCampaignOptions,
 } from './printed-limited-construction-campaign';
@@ -48,33 +54,42 @@ export const PRINTED_LIMITED_DRAFT_FEATURES = {
   schemaSha256: botEvidenceSha256(DRAFT_FEATURE_SHAPE),
 } as const;
 
-const baselineConfig = { version: 'printed-limited-full-pod-draft/v1', evaluation: 'structural' } as const;
-function candidateConfig(ratings: PrintedConstructionSubject['ratings']) {
-  return {
-    version: 'printed-limited-full-pod-draft/v1',
-    evaluation: 'forge-ranked',
-    ratingsFingerprint: ratings.source.fingerprint,
-  } as const;
+const VERSION = 'printed-limited-full-pod-draft/v1';
+function draftArms(
+  ratings: PrintedConstructionSubject['ratings'],
+  comparison: PrintedLimitedComparison,
+  roles: PrintedCardRoles | undefined,
+): Record<StageStrengthArm, PrintedLimitedArm> {
+  return printedLimitedArms(
+    {
+      policyId: PRINTED_GENERAL_BOT.botPolicy,
+      config: { version: VERSION, evaluation: 'structural' },
+      dataSha256: null,
+      ranked: false,
+      roles: false,
+    },
+    {
+      policyId: printedDraftRatingsPolicy(ratings),
+      config: {
+        version: VERSION,
+        evaluation: 'forge-ranked',
+        ratingsFingerprint: ratings.source.fingerprint,
+      },
+      dataSha256: ratings.source.fingerprint,
+      ranked: true,
+      roles: false,
+    },
+    comparison,
+    roles,
+  );
 }
 
 export function printedLimitedDraftPolicies(
   ratings: PrintedConstructionSubject['ratings'],
+  comparison: PrintedLimitedComparison = 'structural-vs-ranked',
+  roles?: PrintedCardRoles,
 ): StageStrengthCampaignPlan['policies'] {
-  const candidate = candidateConfig(ratings);
-  return {
-    baseline: {
-      policyId: PRINTED_GENERAL_BOT.botPolicy,
-      configSha256: botEvidenceSha256(baselineConfig),
-      modelSha256: null,
-      dataSha256: null,
-    },
-    candidate: {
-      policyId: printedDraftRatingsPolicy(ratings),
-      configSha256: botEvidenceSha256(candidate),
-      modelSha256: null,
-      dataSha256: ratings.source.fingerprint,
-    },
-  };
+  return printedLimitedArmPolicies(draftArms(ratings, comparison, roles));
 }
 
 export interface PrintedLimitedDraftCampaignOptions {
@@ -85,6 +100,8 @@ export interface PrintedLimitedDraftCampaignOptions {
   readonly opponents: ReadonlyMap<string, DeckRef>;
   readonly maximumTurns: number;
   readonly maximumDecisions: number;
+  /** Defaults to `structural-vs-ranked`. */
+  readonly comparison?: PrintedLimitedComparison;
   readonly now?: () => number;
   readonly onTrial?: StageStrengthTrialCheckpoint;
 }
@@ -132,6 +149,7 @@ function snapshotOptions(options: PrintedLimitedDraftCampaignOptions): PrintedLi
           prepared: snapshotPreparedFormat(subject.prepared),
           catalogs: structuredClone(subject.catalogs),
           ratings: structuredClone(subject.ratings),
+          ...(subject.roles === undefined ? {} : { roles: structuredClone(subject.roles) }),
           backend: bindPrintedConstructionBackend(
             {
               admitted: true,
@@ -146,13 +164,10 @@ function snapshotOptions(options: PrintedLimitedDraftCampaignOptions): PrintedLi
     opponents: new Map([...options.opponents].map(([id, deck]) => [id, structuredClone(deck)])),
     maximumTurns: options.maximumTurns,
     maximumDecisions: options.maximumDecisions,
+    comparison: options.comparison ?? 'structural-vs-ranked',
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.onTrial === undefined ? {} : { onTrial: options.onTrial }),
   };
-}
-
-function policyConfig(arm: StageStrengthArm, subject: PrintedConstructionSubject): JsonValue {
-  return structuredClone(arm === 'baseline' ? baselineConfig : candidateConfig(subject.ratings));
 }
 
 function positiveSafeInteger(value: number, label: string): void {
@@ -186,10 +201,12 @@ async function validateOptions(options: PrintedLimitedDraftCampaignOptions) {
     const subject = options.subjects.get(identity.id);
     if (subject === undefined) throw new Error(`campaign has no subject ${identity.id}`);
     const ratings = await validatePrintedDraftRatings(subject.ratings, subject.prepared, subject.catalogs);
+    const roles =
+      subject.roles === undefined ? undefined : validatePrintedCardRoles(subject.roles, subject.catalogs);
     if (!isDeepStrictEqual(printedLimitedSubjectIdentity(subject.prepared), identity)) {
       throw new Error(`printed subject ${identity.id} differs from plan`);
     }
-    if (!isDeepStrictEqual(printedLimitedDraftPolicies(ratings), plan.policies)) {
+    if (!isDeepStrictEqual(printedLimitedDraftPolicies(ratings, options.comparison, roles), plan.policies)) {
       throw new Error(`printed draft policies for ${identity.id} differ from plan`);
     }
     const admission = subject.backend.admission.subject;
@@ -224,11 +241,14 @@ function focalSeatId(context: StageStrengthExecutionContext): string {
   return seat;
 }
 
-function runDraft(context: StageStrengthExecutionContext, subject: PrintedConstructionSubject) {
-  const bot = createPrintedReplayBot(
-    context.policy.policyId,
-    context.arm === 'candidate' ? subject.ratings : undefined,
-  );
+function runDraft(
+  context: StageStrengthExecutionContext,
+  subject: PrintedConstructionSubject,
+  comparison: PrintedLimitedComparison,
+) {
+  // The policy id alone picks the reading; ratings and roles only make it resolvable.
+  const bot = createPrintedReplayBot(context.policy.policyId, subject.ratings, subject.roles);
+  const config = draftArms(subject.ratings, comparison, subject.roles)[context.arm].config;
   const progress = runPrintedLimitedDraft(subject.prepared, {
     seed: context.row.seed,
     ...bot,
@@ -241,7 +261,7 @@ function runDraft(context: StageStrengthExecutionContext, subject: PrintedConstr
         cardsSha256: context.subject.cardsSha256,
       },
       features: context.features,
-      behavior: { ...context.policy, config: policyConfig(context.arm, subject) },
+      behavior: { ...context.policy, config: structuredClone(config) },
       lineage: { setId: context.subject.id, draftId: context.row.seed },
       splitGroup: { kind: 'draft', id: context.row.seed },
     },
@@ -256,7 +276,7 @@ function stageExecutor(
 ): StageStrengthCampaignOptions['executeStage'] {
   return async (context) => {
     const startedAt = (options.now ?? Date.now)();
-    const progress = runDraft(context, options.subjects.get(context.subject.id)!);
+    const progress = runDraft(context, options.subjects.get(context.subject.id)!, options.comparison!);
     return {
       episode: {
         ...progress.evidence!,
@@ -303,10 +323,11 @@ function builtFocalDeck(
     return card as typeof card & { payload: PrintedBoosterPayload };
   });
   const initial = prepareLimitedDeck(pool, (card) => printedLimitedFacts(card.payload.printing));
+  // Construction is held fixed across arms (and comparisons): this measures picks only.
   return toDeckRef(suggestPrintedDeck(initial, subject.ratings), `Drafted ${seatId}`);
 }
 
-/** Compare structural and ranked full-pod drafting while holding construction and gameplay fixed. */
+/** Compare two full-pod drafting readings while holding construction and gameplay fixed. */
 export async function runPrintedLimitedDraftCampaign(
   options: PrintedLimitedDraftCampaignOptions,
   runGame?: PrintedConstructionGameRunner,

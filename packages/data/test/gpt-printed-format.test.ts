@@ -89,7 +89,7 @@ describe('Guildpact printed format sources', () => {
 
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('gpt-constructed-format-v1.json')));
     const printings = new Map([...gpt.cards, ...rav.cards].map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v10/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(
@@ -103,7 +103,7 @@ describe('Guildpact printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v10/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

@@ -1,0 +1,161 @@
+{
+  "key": "d46937fca8ea7e3a02d056a7b26e7332",
+  "recordedAt": "2026-11-22T22:11:50.488Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Skyspear Cavalry\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Flying\\nDouble strike (This creature deals both first-strike and regular combat damage.)\"},{\"id\":2,\"name\":\"Stonewise Fortifier\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{4}{W}: Prevent all damage that would be dealt to this creature by target creature this turn.\"},{\"id\":3,\"name\":\"Supply-Line Cranes\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, put a +1/+1 counter on target creature.\"},{\"id\":4,\"name\":\"Tethmos High Priest\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Cat Cleric\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, return target creature card with mana value 2 or less from your graveyard to the battlefield.\"},{\"id\":5,\"name\":\"Aerial Formation\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{U} more to cast for each target beyond the first.\\nAny number of target creatures each get +1/+1 and gain flying until end of turn.\"},{\"id\":6,\"name\":\"Battlefield Thaumaturge\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Each instant and sorcery spell you cast costs {1} less to cast for each creature it targets.\\nHeroic — Whenever you cast a spell that targets this creature, this creature gains hexproof until end of turn.\"},{\"id\":7,\"name\":\"Cloaked Siren\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Siren\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\"},{\"id\":8,\"name\":\"Countermand\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Its controller mills four cards.\"},{\"id\":9,\"name\":\"Crystalline Nautilus\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment Creature — Nautilus\",\"text\":\"Bestow {3}{U}{U} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nWhen this permanent becomes the target of a spell or ability, sacrifice it.\\nEnchanted creature gets +4/+4 and has \\\"When this creature becomes the target of a spell or ability, sacrifice it.\\\"\"},{\"id\":10,\"name\":\"Dakra Mystic\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{U}, {T}: Each player reveals the top card of their library. You may put the revealed cards into their owners' graveyards. If you don't, each player draws a card.\"},{\"id\":11,\"name\":\"Daring Thief\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Inspired — Whenever this creature becomes untapped, you may exchange control of target nonland permanent you control and target permanent an opponent controls that shares a card type with it.\"},{\"id\":12,\"name\":\"Dictate of Kruphix\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nAt the beginning of each player's draw step, that player draws an additional card.\"},{\"id\":13,\"name\":\"Font of Fortunes\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}{U}, Sacrifice this enchantment: Draw two cards.\"},{\"id\":14,\"name\":\"Godhunter Octopus\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Octopus\",\"text\":\"This creature can't attack unless defending player controls an enchantment or an enchanted permanent.\"},{\"id\":15,\"name\":\"Hour of Need\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {1}{U} more to cast for each target beyond the first.\\nExile any number of target creatures. For each creature exiled this way, its controller creates a 4/4 blue Sphinx creature token with flying.\"},{\"id\":16,\"name\":\"Hubris\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature and all Auras attached to it to their owners' hands.\"},{\"id\":17,\"name\":\"Hypnotic Siren\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment Creature — Siren\",\"text\":\"Bestow {5}{U}{U} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nFlying\\nYou control enchanted creature.\\nEnchanted creature gets +1/+1 and has flying.\"},{\"id\":18,\"name\":\"Interpret the Signs\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Scry 3, then reveal the top card of your library. Draw cards equal to that card's mana value. (To scry 3, look at the top three cards of your library, then put any number of them on the bottom and the rest on top in any order.)\"},{\"id\":19,\"name\":\"Kiora's Dismissal\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {U} more to cast for each target beyond the first.\\nReturn any number of target enchantments to their owners' hands.\"},{\"id\":20,\"name\":\"Pin to the Earth\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -6/-0.\"},{\"id\":21,\"name\":\"Polymorphous Rush\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {1}{U} more to cast for each target beyond the first.\\nChoose a creature on the battlefield. Any number of target creatures you control each become a copy of that creature until end of turn.\"},{\"id\":22,\"name\":\"Pull from the Deep\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to one target instant card and up to one target sorcery card from your graveyard to your hand. Exile Pull from the Deep.\"},{\"id\":23,\"name\":\"Riptide Chimera\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment Creature — Chimera\",\"text\":\"Flying\\nAt the beginning of your upkeep, return an enchantment you control to its owner's hand.\"},{\"id\":24,\"name\":\"Rise of Eagles\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 2/2 blue Bird enchantment creature tokens with flying. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":25,\"name\":\"Sage of Hours\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on it.\\nRemove all +1/+1 counters from this creature: For each five counters removed this way, take an extra turn after this one.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1432,
+      "cacheCreationInputTokens": 32692,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779589,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779589,
+      "pricedUsd": 0.779589,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779589 and its own usage prices at $0.779589"
+    }
+  }
+}

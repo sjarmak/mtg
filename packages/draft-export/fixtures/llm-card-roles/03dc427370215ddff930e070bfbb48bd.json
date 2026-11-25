@@ -1,0 +1,161 @@
+{
+  "key": "03dc427370215ddff930e070bfbb48bd",
+  "recordedAt": "2026-11-22T22:07:43.403Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Phalanx Leader\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on each creature you control.\"},{\"id\":2,\"name\":\"Ray of Dissolution\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment. You gain 3 life.\"},{\"id\":3,\"name\":\"Scholar of Athreos\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{2}{B}: Each opponent loses 1 life. You gain life equal to the life lost this way.\"},{\"id\":4,\"name\":\"Setessan Battle Priest\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, you gain 2 life.\"},{\"id\":5,\"name\":\"Setessan Griffin\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\n{2}{G}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\"},{\"id\":6,\"name\":\"Silent Artisan\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"\"},{\"id\":7,\"name\":\"Soldier of the Pantheon\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Protection from multicolored\\nWhenever an opponent casts a multicolored spell, you gain 1 life.\"},{\"id\":8,\"name\":\"Spear of Heliod\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Legendary Enchantment Artifact\",\"text\":\"Creatures you control get +1/+1.\\n{1}{W}{W}, {T}: Destroy target creature that dealt damage to you this turn.\"},{\"id\":9,\"name\":\"Traveling Philosopher\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"\"},{\"id\":10,\"name\":\"Vanquish the Foul\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature with power 4 or greater. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":11,\"name\":\"Wingsteed Rider\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Flying\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature.\"},{\"id\":12,\"name\":\"Yoked Ox\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Ox\",\"text\":\"\"},{\"id\":13,\"name\":\"Annul\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target artifact or enchantment spell.\"},{\"id\":14,\"name\":\"Aqueous Form\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't be blocked.\\nWhenever enchanted creature attacks, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":15,\"name\":\"Artisan of Forms\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, you may have this creature become a copy of target creature, except it has this ability.\"},{\"id\":16,\"name\":\"Benthic Giant\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":17,\"name\":\"Bident of Thassa\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Legendary Enchantment Artifact\",\"text\":\"Whenever a creature you control deals combat damage to a player, you may draw a card.\\n{1}{U}, {T}: Creatures your opponents control attack this turn if able.\"},{\"id\":18,\"name\":\"Breaching Hippocamp\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Horse Fish\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, untap another target creature you control.\"},{\"id\":19,\"name\":\"Coastline Chimera\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Chimera\",\"text\":\"Flying\\n{1}{W}: This creature can block an additional creature this turn.\"},{\"id\":20,\"name\":\"Crackling Triton\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{2}{R}, Sacrifice this creature: It deals 2 damage to any target.\"},{\"id\":21,\"name\":\"Curse of the Swine\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile X target creatures. For each creature exiled this way, its controller creates a 2/2 green Boar creature token.\"},{\"id\":22,\"name\":\"Dissolve\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":23,\"name\":\"Fate Foretold\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw a card.\\nWhen enchanted creature dies, its controller draws a card.\"},{\"id\":24,\"name\":\"Gainsay\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target blue spell.\"},{\"id\":25,\"name\":\"Griptide\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Put target creature on top of its owner's library.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 787,
+      "cacheCreationInputTokens": 32185,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7371989999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7371989999999999,
+      "pricedUsd": 0.737199,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.737199 and its own usage prices at $0.737199"
+    }
+  }
+}

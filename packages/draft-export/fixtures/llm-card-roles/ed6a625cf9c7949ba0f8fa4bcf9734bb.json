@@ -1,0 +1,161 @@
+{
+  "key": "ed6a625cf9c7949ba0f8fa4bcf9734bb",
+  "recordedAt": "2026-11-22T22:06:09.615Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Advent of the Wurm\",\"manaCost\":\"{1}{G}{G}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create a 5/5 green Wurm creature token with trample.\"},{\"id\":2,\"name\":\"Armored Wolf-Rider\",\"manaCost\":\"{3}{G}{W}\",\"typeLine\":\"Creature — Elf Knight\",\"text\":\"\"},{\"id\":3,\"name\":\"Ascended Lawmage\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"Flying\\nHexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":4,\"name\":\"Beetleform Mage\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Human Insect Wizard\",\"text\":\"{G}{U}: This creature gets +2/+2 and gains flying until end of turn. Activate only once each turn.\"},{\"id\":5,\"name\":\"Blast of Genius\",\"manaCost\":\"{4}{U}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose any target. Draw three cards, then discard a card. Blast of Genius deals damage equal to the discarded card's mana value to that permanent or player.\"},{\"id\":6,\"name\":\"Blaze Commando\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Creature — Minotaur Soldier\",\"text\":\"Whenever an instant or sorcery spell you control deals damage, create two 1/1 red and white Soldier creature tokens with haste.\"},{\"id\":7,\"name\":\"Blood Baron of Vizkopa\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Lifelink, protection from white and from black\\nAs long as you have 30 or more life and an opponent has 10 or less life, this creature gets +6/+6 and has flying.\"},{\"id\":8,\"name\":\"Boros Battleshaper\",\"manaCost\":\"{5}{R}{W}\",\"typeLine\":\"Creature — Minotaur Soldier\",\"text\":\"At the beginning of each combat, up to one target creature attacks or blocks this combat if able and up to one target creature can't attack or block this combat.\"},{\"id\":9,\"name\":\"Bred for the Hunt\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control with a +1/+1 counter on it deals combat damage to a player, you may draw a card.\"},{\"id\":10,\"name\":\"Bronzebeak Moa\",\"manaCost\":\"{2}{G}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Whenever another creature you control enters, this creature gets +3/+3 until end of turn.\"},{\"id\":11,\"name\":\"Carnage Gladiator\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Creature — Skeleton Warrior\",\"text\":\"Whenever a creature blocks, that creature's controller loses 1 life.\\n{1}{B}{R}: Regenerate this creature.\"},{\"id\":12,\"name\":\"Council of the Absolute\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"As this creature enters, choose a noncreature, nonland card name.\\nYour opponents can't cast spells with the chosen name.\\nSpells with the chosen name you cast cost {2} less to cast.\"},{\"id\":13,\"name\":\"Deadbridge Chant\",\"manaCost\":\"{4}{B}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, mill ten cards.\\nAt the beginning of your upkeep, choose a card at random in your graveyard. If it's a creature card, put it onto the battlefield. Otherwise, put it into your hand.\"},{\"id\":14,\"name\":\"Debt to the Deathless\",\"manaCost\":\"{X}{W}{W}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each opponent loses two times X life. You gain life equal to the life lost this way.\"},{\"id\":15,\"name\":\"Deputy of Acquittals\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, you may return another target creature you control to its owner's hand.\"},{\"id\":16,\"name\":\"Dragonshift\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature you control becomes a blue and red Dragon with base power and toughness 4/4, loses all abilities, and gains flying.\\nOverload {3}{U}{U}{R}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":17,\"name\":\"Drown in Filth\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose target creature. Mill four cards, then that creature gets -1/-1 until end of turn for each land card in your graveyard.\"},{\"id\":18,\"name\":\"Emmara Tandris\",\"manaCost\":\"{5}{G}{W}\",\"typeLine\":\"Legendary Creature — Elf Shaman\",\"text\":\"Prevent all damage that would be dealt to creature tokens you control.\"},{\"id\":19,\"name\":\"Exava, Rakdos Blood Witch\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Legendary Creature — Human Cleric\",\"text\":\"First strike, haste\\nUnleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\\nEach other creature you control with a +1/+1 counter on it has haste.\"},{\"id\":20,\"name\":\"Feral Animist\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"{3}: This creature gets +X/+0 until end of turn, where X is its power.\"},{\"id\":21,\"name\":\"Fluxcharger\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Creature — Weird\",\"text\":\"Flying\\nWhenever you cast an instant or sorcery spell, you may switch this creature's power and toughness until end of turn.\"},{\"id\":22,\"name\":\"Gaze of Granite\",\"manaCost\":\"{X}{B}{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy each nonland permanent with mana value X or less.\"},{\"id\":23,\"name\":\"Gleam of Battle\",\"manaCost\":\"{4}{R}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control attacks, put a +1/+1 counter on it.\"},{\"id\":24,\"name\":\"Goblin Test Pilot\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Goblin Pilot Wizard\",\"text\":\"Flying\\n{T}: This creature deals 2 damage to any target chosen at random.\"},{\"id\":25,\"name\":\"Gruul War Chant\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Attacking creatures you control get +1/+0 and have menace.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\",\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 411,
+      "cacheCreationInputTokens": 32565,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.725999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.725999,
+      "pricedUsd": 0.725999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.725999 and its own usage prices at $0.725999"
+    }
+  }
+}

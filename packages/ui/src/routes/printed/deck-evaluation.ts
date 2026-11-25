@@ -4,8 +4,10 @@ import {
   hasPrintedEvaluation,
   planLimitedPool,
   allocateLimitedMana,
+  evaluateStructuralPrintedCard,
+  withPrintedCardRoles,
 } from '@mtg/draft-export';
-import type { PrintedBoosterPayload } from '@mtg/draft-export';
+import type { PrintedBoosterPayload, PrintedCardRoles } from '@mtg/draft-export';
 import { suggestLimitedBasics, suggestLimitedDeckWithReport, validateLimitedDeck } from '@mtg/limited';
 import type { LimitedDeck } from '@mtg/limited';
 import { evaluateRankedPrintedCard, type PrintedDraftRatings } from '../../lab/printed-draft-ratings';
@@ -16,11 +18,27 @@ const supported = (deck: PrintedDeck): boolean =>
 const evaluate = (deck: PrintedDeck) =>
   deck.pool.map((c) => evaluatePrintedCard(c.payload.printing, c.physicalId));
 
-export function suggestPrintedDeck(deck: PrintedDeck, ratings?: PrintedDraftRatings): PrintedDeck {
+/**
+ * `roles` is passed only for a role-aware draft policy (issue 305); without it nothing changes.
+ * No UI caller passes it yet: the UI creates no role-aware draft until #21's comparison,
+ * and the #21 construction campaign is the first caller.
+ */
+export function suggestPrintedDeck(
+  deck: PrintedDeck,
+  ratings?: PrintedDraftRatings,
+  roles?: PrintedCardRoles,
+): PrintedDeck {
   if (!supported(deck)) {
-    if (ratings !== undefined) {
+    if (ratings !== undefined || roles !== undefined) {
       const plan = planLimitedPool(
-        deck.pool.map((copy) => evaluateRankedPrintedCard(ratings, copy.payload.printing, copy.physicalId)),
+        deck.pool.map((copy) => {
+          const printing = copy.payload.printing;
+          const base =
+            ratings === undefined
+              ? evaluateStructuralPrintedCard(printing, copy.physicalId)
+              : evaluateRankedPrintedCard(ratings, printing, copy.physicalId);
+          return roles === undefined ? base : withPrintedCardRoles(roles, printing, base);
+        }),
       );
       const next = { ...deck, selectedPhysicalIds: plan.selectedIds, basics: plan.basics };
       if (!validateLimitedDeck(next).legal)

@@ -1,0 +1,161 @@
+{
+  "key": "ee04af1f52ee8090a62f77b056ddb6e2",
+  "recordedAt": "2026-11-22T21:31:34.630Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Tragic Slip\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -1/-1 until end of turn.\\nMorbid — That creature gets -13/-13 until end of turn instead if a creature died this turn.\"},{\"id\":2,\"name\":\"Undying Evil\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains undying until end of turn. (When it dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":3,\"name\":\"Vengeful Vampire\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":4,\"name\":\"Wakedancer\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Morbid — When this creature enters, if a creature died this turn, create a 2/2 black Zombie creature token.\"},{\"id\":5,\"name\":\"Zombie Apocalypse\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all Zombie creature cards from your graveyard to the battlefield tapped, then destroy all Humans.\"},{\"id\":6,\"name\":\"Afflicted Deserter\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Afflicted Deserter\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Werewolf Ransacker\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Whenever this creature transforms into Werewolf Ransacker, you may destroy target artifact. If that artifact is put into a graveyard this way, this creature deals 3 damage to that artifact's controller.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":7,\"name\":\"Alpha Brawl\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature an opponent controls deals damage equal to its power to each other creature that player controls, then each of those creatures deals damage equal to its power to that creature.\"},{\"id\":8,\"name\":\"Blood Feud\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature fights another target creature. (Each deals damage equal to its power to the other.)\"},{\"id\":9,\"name\":\"Burning Oil\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Burning Oil deals 3 damage to target attacking or blocking creature.\\nFlashback {3}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":10,\"name\":\"Curse of Bloodletting\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nIf a source would deal damage to enchanted player, it deals double that damage to that player instead.\"},{\"id\":11,\"name\":\"Erdwal Ripper\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Haste\\nWhenever this creature deals combat damage to a player, put a +1/+1 counter on it.\"},{\"id\":12,\"name\":\"Faithless Looting\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards, then discard two cards.\\nFlashback {2}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":13,\"name\":\"Fires of Undeath\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Fires of Undeath deals 2 damage to any target.\\nFlashback {5}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":14,\"name\":\"Flayer of the Hatebound\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"Undying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\\nWhenever this creature or another creature enters from your graveyard, that creature deals damage equal to its power to any target.\"},{\"id\":15,\"name\":\"Fling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nFling deals damage equal to the sacrificed creature's power to any target.\"},{\"id\":16,\"name\":\"Forge Devil\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"When this creature enters, it deals 1 damage to target creature and 1 damage to you.\"},{\"id\":17,\"name\":\"Heckling Fiends\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"{2}{R}: Target creature attacks this turn if able.\"},{\"id\":18,\"name\":\"Hellrider\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"Haste\\nWhenever a creature you control attacks, this creature deals 1 damage to the player or planeswalker it's attacking.\"},{\"id\":19,\"name\":\"Hinterland Hermit\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Hinterland Hermit\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Hinterland Scourge\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"This creature must be blocked if able.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":20,\"name\":\"Increasing Vengeance\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Copy target instant or sorcery spell you control. If this spell was cast from a graveyard, copy that spell twice instead. You may choose new targets for the copies.\\nFlashback {3}{R}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":21,\"name\":\"Markov Blademaster\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Vampire Warrior\",\"text\":\"Double strike (This creature deals both first-strike and regular combat damage.)\\nWhenever this creature deals combat damage to a player, put a +1/+1 counter on it.\"},{\"id\":22,\"name\":\"Markov Warlord\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Vampire Warrior\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nWhen this creature enters, up to two target creatures can't block this turn.\"},{\"id\":23,\"name\":\"Mondronen Shaman\",\"manaCost\":null,\"typeLine\":\"Creature — Human Shaman Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Mondronen Shaman\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Shaman Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Tovolar's Magehunter\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Whenever an opponent casts a spell, this creature deals 2 damage to that player.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":24,\"name\":\"Moonveil Dragon\",\"manaCost\":\"{3}{R}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{R}: Each creature you control gets +1/+0 until end of turn.\"},{\"id\":25,\"name\":\"Nearheath Stalker\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Vampire Rogue\",\"text\":\"Undying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\",\"draw\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1319,
+      "cacheCreationInputTokens": 33140,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.782899,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.782899,
+      "pricedUsd": 0.782899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.782899 and its own usage prices at $0.782899"
+    }
+  }
+}

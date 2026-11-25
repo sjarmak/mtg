@@ -1,0 +1,161 @@
+{
+  "key": "f4c0623b9d6b754cac37ae5e0a7544c7",
+  "recordedAt": "2026-11-22T21:52:11.359Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Murder\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature.\"},{\"id\":2,\"name\":\"Mutilate\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get -1/-1 until end of turn for each Swamp you control.\"},{\"id\":3,\"name\":\"Nefarox, Overlord of Grixis\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\\nWhenever Nefarox attacks alone, defending player sacrifices a creature of their choice.\"},{\"id\":4,\"name\":\"Phylactery Lich\",\"manaCost\":\"{B}{B}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Indestructible\\nAs this creature enters, put a phylactery counter on an artifact you control.\\nWhen you control no permanents with phylactery counters on them, sacrifice this creature.\"},{\"id\":5,\"name\":\"Public Execution\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature an opponent controls. Each other creature that player controls gets -2/-0 until end of turn.\"},{\"id\":6,\"name\":\"Ravenous Rats\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"When this creature enters, target opponent discards a card.\"},{\"id\":7,\"name\":\"Rise from the Grave\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature card from a graveyard onto the battlefield under your control. That creature is a black Zombie in addition to its other colors and types.\"},{\"id\":8,\"name\":\"Servant of Nefarox\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Exalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":9,\"name\":\"Shimian Specter\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Specter\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, that player reveals their hand. You choose a nonland card from it. Search that player's graveyard, hand, and library for all cards with the same name as that card and exile them. Then that player shuffles.\"},{\"id\":10,\"name\":\"Sign in Blood\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws two cards and loses 2 life.\"},{\"id\":11,\"name\":\"Tormented Soul\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't block and can't be blocked.\"},{\"id\":12,\"name\":\"Vampire Nighthawk\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Flying\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":13,\"name\":\"Vampire Nocturnus\",\"manaCost\":\"{1}{B}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Play with the top card of your library revealed.\\nAs long as the top card of your library is black, this creature and other Vampire creatures you control get +2/+1 and have flying.\"},{\"id\":14,\"name\":\"Veilborn Ghoul\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature can't block.\\nWhenever a Swamp you control enters, you may return this card from your graveyard to your hand.\"},{\"id\":15,\"name\":\"Vile Rebirth\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature card from a graveyard. Create a 2/2 black Zombie creature token.\"},{\"id\":16,\"name\":\"Walking Corpse\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"\"},{\"id\":17,\"name\":\"Wit's End\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards their hand.\"},{\"id\":18,\"name\":\"Xathrid Gorgon\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Gorgon\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\n{2}{B}, {T}: Put a petrification counter on target creature. It gains defender and becomes a colorless artifact in addition to its other types. Its activated abilities can't be activated. (A creature with defender can't attack.)\"},{\"id\":19,\"name\":\"Zombie Goliath\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"\"},{\"id\":20,\"name\":\"Arms Dealer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{1}{R}, Sacrifice a Goblin: This creature deals 4 damage to target creature.\"},{\"id\":21,\"name\":\"Bladetusk Boar\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":22,\"name\":\"Canyon Minotaur\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"\"},{\"id\":23,\"name\":\"Chandra, the Firebrand\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Chandra deals 1 damage to any target.\\n−2: When you next cast an instant or sorcery spell this turn, copy that spell. You may choose new targets for the copy.\\n−6: Chandra deals 6 damage to each of up to six targets.\"},{\"id\":24,\"name\":\"Chandra's Fury\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Chandra's Fury deals 4 damage to target player or planeswalker and 1 damage to each creature that player or that planeswalker's controller controls.\"},{\"id\":25,\"name\":\"Cleaver Riot\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control gain double strike until end of turn. (They deal both first-strike and regular combat damage.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 419,
+      "cacheCreationInputTokens": 32407,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.723239,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.723239,
+      "pricedUsd": 0.723239,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723239 and its own usage prices at $0.723239"
+    }
+  }
+}

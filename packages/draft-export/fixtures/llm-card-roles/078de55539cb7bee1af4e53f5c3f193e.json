@@ -1,0 +1,161 @@
+{
+  "key": "078de55539cb7bee1af4e53f5c3f193e",
+  "recordedAt": "2026-11-22T22:18:30.682Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Evolutionary Leap\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"{G}, Sacrifice a creature: Reveal cards from the top of your library until you reveal a creature card. Put that card into your hand and the rest on the bottom of your library in a random order.\"},{\"id\":2,\"name\":\"Gaea's Revenge\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"This spell can't be countered.\\nHaste\\nThis creature can't be the target of nongreen spells or abilities from nongreen sources.\"},{\"id\":3,\"name\":\"Gather the Pack\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top five cards of your library. You may put a creature card from among them into your hand. Put the rest into your graveyard.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, put up to two creature cards from among the revealed cards into your hand instead of one.\"},{\"id\":4,\"name\":\"The Great Aurora\",\"manaCost\":\"{6}{G}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player shuffles all cards from their hand and all permanents they own into their library, then draws that many cards. Each player may put any number of land cards from their hand onto the battlefield. Exile The Great Aurora.\"},{\"id\":5,\"name\":\"Herald of the Pantheon\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Centaur Shaman\",\"text\":\"Enchantment spells you cast cost {1} less to cast.\\nWhenever you cast an enchantment spell, you gain 1 life.\"},{\"id\":6,\"name\":\"Hitchclaw Recluse\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\"},{\"id\":7,\"name\":\"Honored Hierarch\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\nAs long as this creature is renowned, it has vigilance and \\\"{T}: Add one mana of any color.\\\"\"},{\"id\":8,\"name\":\"Joraga Invocation\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Each creature you control gets +3/+3 until end of turn and must be blocked this turn if able.\"},{\"id\":9,\"name\":\"Leaf Gilder\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":10,\"name\":\"Llanowar Empath\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, scry 2, then reveal the top card of your library. If it's a creature card, put it into your hand. (To scry 2, look at the top two cards of your library, then put any number of them on the bottom and the rest on top in any order.)\"},{\"id\":11,\"name\":\"Managorger Hydra\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"Trample\\nWhenever a player casts a spell, put a +1/+1 counter on this creature.\"},{\"id\":12,\"name\":\"Mantle of Webs\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+3 and has reach. (It can block creatures with flying.)\"},{\"id\":13,\"name\":\"Might of the Masses\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 until end of turn for each creature you control.\"},{\"id\":14,\"name\":\"Nissa, Vastwood Seer\",\"manaCost\":null,\"typeLine\":\"Legendary Creature — Elf Scout // Legendary Planeswalker — Nissa\",\"text\":null,\"faces\":[{\"name\":\"Nissa, Vastwood Seer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Creature — Elf Scout\",\"text\":\"When Nissa enters, you may search your library for a basic Forest card, reveal it, put it into your hand, then shuffle.\\nWhenever a land you control enters, if you control seven or more lands, exile Nissa, then return her to the battlefield transformed under her owner's control.\"},{\"name\":\"Nissa, Sage Animist\",\"manaCost\":\"\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+1: Reveal the top card of your library. If it's a land card, put it onto the battlefield. Otherwise, put it into your hand.\\n−2: Create Ashaya, the Awoken World, a legendary 4/4 green Elemental creature token.\\n−7: Untap up to six target lands. They become 6/6 Elemental creatures. They're still lands.\"}]},{\"id\":15,\"name\":\"Nissa's Pilgrimage\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to two basic Forest cards, reveal those cards, and put one onto the battlefield tapped and the rest into your hand. Then shuffle.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, search your library for up to three basic Forest cards instead of two.\"},{\"id\":16,\"name\":\"Nissa's Revelation\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Scry 5, then reveal the top card of your library. If it's a creature card, you draw cards equal to its power and you gain life equal to its toughness.\"},{\"id\":17,\"name\":\"Orchard Spirit\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked except by creatures with flying or reach.\"},{\"id\":18,\"name\":\"Outland Colossus\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Renown 6 (When this creature deals combat damage to a player, if it isn't renowned, put six +1/+1 counters on it and it becomes renowned.)\\nThis creature can't be blocked by more than one creature.\"},{\"id\":19,\"name\":\"Pharika's Disciple\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nRenown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\"},{\"id\":20,\"name\":\"Reclaim\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Put target card from your graveyard on top of your library.\"},{\"id\":21,\"name\":\"Rhox Maulers\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Rhino Soldier\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nRenown 2 (When this creature deals combat damage to a player, if it isn't renowned, put two +1/+1 counters on it and it becomes renowned.)\"},{\"id\":22,\"name\":\"Skysnare Spider\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\\nReach (This creature can block creatures with flying.)\"},{\"id\":23,\"name\":\"Somberwald Alpha\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Whenever a creature you control becomes blocked, it gets +1/+1 until end of turn.\\n{1}{G}: Target creature you control gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":24,\"name\":\"Sylvan Messenger\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nWhen this creature enters, reveal the top four cards of your library. Put all Elf cards revealed this way into your hand and the rest on the bottom of your library in any order.\"},{\"id\":25,\"name\":\"Timberpack Wolf\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"This creature gets +1/+1 for each other creature you control named Timberpack Wolf.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1840,
+      "cacheCreationInputTokens": 33074,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.8076289999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.8076289999999999,
+      "pricedUsd": 0.807629,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.807629 and its own usage prices at $0.807629"
+    }
+  }
+}

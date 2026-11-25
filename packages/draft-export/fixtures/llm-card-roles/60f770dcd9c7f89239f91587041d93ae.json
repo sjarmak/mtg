@@ -1,0 +1,161 @@
+{
+  "key": "60f770dcd9c7f89239f91587041d93ae",
+  "recordedAt": "2026-11-22T22:22:40.007Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aether Poisoner\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":2,\"name\":\"Alley Strangler\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Aetherborn Rogue\",\"text\":\"Menace\"},{\"id\":3,\"name\":\"Battle at the Bridge\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nTarget creature gets -X/-X until end of turn. You gain X life.\"},{\"id\":4,\"name\":\"Cruel Finality\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -2/-2 until end of turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":5,\"name\":\"Daring Demolition\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature or Vehicle.\"},{\"id\":6,\"name\":\"Defiant Salvager\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Aetherborn Artificer\",\"text\":\"Sacrifice an artifact or creature: Put a +1/+1 counter on this creature. Activate only as a sorcery.\"},{\"id\":7,\"name\":\"Fatal Push\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature if it has mana value 2 or less.\\nRevolt — Destroy that creature if it has mana value 4 or less instead if a permanent left the battlefield under your control this turn.\"},{\"id\":8,\"name\":\"Fen Hauler\",\"manaCost\":\"{6}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nThis creature can't be blocked by artifact creatures.\"},{\"id\":9,\"name\":\"Foundry Hornet\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Flying\\nWhen this creature enters, if you control a creature with a +1/+1 counter on it, creatures your opponents control get -1/-1 until end of turn.\"},{\"id\":10,\"name\":\"Fourth Bridge Prowler\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"When this creature enters, you may have target creature get -1/-1 until end of turn.\"},{\"id\":11,\"name\":\"Gifted Aetherborn\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Aetherborn Vampire\",\"text\":\"Deathtouch, lifelink\"},{\"id\":12,\"name\":\"Glint-Sleeve Siphoner\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Menace\\nWhenever this creature enters or attacks, you get {E} (an energy counter).\\nAt the beginning of your upkeep, you may pay {E}{E}. If you do, you draw a card and you lose 1 life.\"},{\"id\":13,\"name\":\"Gonti's Machinations\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you lose life for the first time each turn, you get {E}. (You get an energy counter. Damage causes loss of life.)\\nPay {E}{E}, Sacrifice this enchantment: Each opponent loses 3 life. You gain life equal to the life lost this way.\"},{\"id\":14,\"name\":\"Herald of Anguish\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nFlying\\nAt the beginning of your end step, each opponent discards a card.\\n{1}{B}, Sacrifice an artifact: Target creature gets -2/-2 until end of turn.\"},{\"id\":15,\"name\":\"Ironclad Revolutionary\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Aetherborn Artificer\",\"text\":\"When this creature enters, you may sacrifice an artifact. If you do, put two +1/+1 counters on this creature and each opponent loses 2 life.\"},{\"id\":16,\"name\":\"Midnight Entourage\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Aetherborn Rogue\",\"text\":\"Other Aetherborn you control get +1/+1.\\nWhenever this creature or another Aetherborn you control dies, you draw a card and you lose 1 life.\"},{\"id\":17,\"name\":\"Night Market Aeronaut\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Aetherborn Warrior\",\"text\":\"Flying\\nRevolt — This creature enters with a +1/+1 counter on it if a permanent left the battlefield under your control this turn.\"},{\"id\":18,\"name\":\"Perilous Predicament\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Each opponent sacrifices an artifact creature and a nonartifact creature of their choice.\"},{\"id\":19,\"name\":\"Renegade's Getaway\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target permanent gains indestructible until end of turn. Create a 1/1 colorless Servo artifact creature token. (Effects that say \\\"destroy\\\" don't destroy a permanent with indestructible, and if it's a creature, it can't be destroyed by damage.)\"},{\"id\":20,\"name\":\"Resourceful Return\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to your hand. If you control an artifact, draw a card.\"},{\"id\":21,\"name\":\"Secret Salvage\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target nonland card from your graveyard. Search your library for any number of cards with the same name as that card, reveal them, put them into your hand, then shuffle.\"},{\"id\":22,\"name\":\"Sly Requisitioner\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nWhenever a nontoken artifact you control is put into a graveyard from the battlefield, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":23,\"name\":\"Vengeful Rebel\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Aetherborn Warrior\",\"text\":\"Revolt — When this creature enters, if a permanent left the battlefield under your control this turn, target creature an opponent controls gets -3/-3 until end of turn.\"},{\"id\":24,\"name\":\"Yahenni, Undying Partisan\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Legendary Creature — Aetherborn Vampire\",\"text\":\"Haste\\nWhenever a creature an opponent controls dies, put a +1/+1 counter on Yahenni.\\nSacrifice another creature: Yahenni gains indestructible until end of turn.\"},{\"id\":25,\"name\":\"Yahenni's Expertise\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures get -3/-3 until end of turn.\\nYou may cast a spell with mana value 3 or less from your hand without paying its mana cost.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 430,
+      "cacheCreationInputTokens": 32864,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7329289999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7329289999999999,
+      "pricedUsd": 0.732929,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.732929 and its own usage prices at $0.732929"
+    }
+  }
+}

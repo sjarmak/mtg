@@ -144,9 +144,19 @@ single booster set's own sheet):
 npx tsx packages/data/tools/fetch-token-printings.ts --catalog packages/data/data/commander-precons/scd-printed-catalog-v1.json --catalog packages/data/data/commander-precons/c17-printed-catalog-v1.json --catalog packages/data/data/commander-precons/ala-printed-catalog-v1.json --catalog packages/data/data/commander-precons/c13-printed-catalog-v1.json --catalog packages/data/data/commander-precons/cma-printed-catalog-v1.json --catalog packages/data/data/commander-precons/c16-printed-catalog-v1.json --catalog packages/data/data/commander-precons/cmm-printed-catalog-v1.json --forge-scripts tools/forge/dist/res/cardsfolder/cardsfolder.zip --forge-tokenscripts tools/forge/dist/res/tokenscripts --forge-version 2.0.14 --out <new-file>
 ```
 
+The committed sheet is exactly that command's output, each token at its
+oldest printing. Until #311 it was not: it also carried SCD's whole token
+sheet (all 25 TSCD rows), and the Zombie Army that seven SCD and CMM cards amass
+was bound only through TSCD 14. Amass, Afterlife and Investigate create tokens
+whose card scripts name none, so the scanner now reads them as well, and the
+rebuild binds the Zombie Army at TWAR 8, the Sliver Army at TCMM 68, the Clue
+at TSOI 11 and Afterlife's white-black Spirit at TEVE 4.
+
 The registry entry names it as `tokenPrintingsFile`, the launcher stages it
 beside the catalogs, and `packages/data/test/token-printings.test.ts`
 re-derives every binding from the installed Forge token scripts.
+`commander-precons-printed-format.test.ts` fails if any token the seven
+catalogs create has no row matching its name and colors.
 
 ## Closure and coverage
 

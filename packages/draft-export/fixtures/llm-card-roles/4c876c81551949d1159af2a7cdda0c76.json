@@ -1,0 +1,161 @@
+{
+  "key": "4c876c81551949d1159af2a7cdda0c76",
+  "recordedAt": "2026-11-22T21:22:56.862Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Edifice of Authority\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Target creature can't attack this turn. Put a brick counter on this artifact.\\n{1}, {T}: Until your next turn, target creature can't attack or block and its activated abilities can't be activated. Activate only if there are three or more brick counters on this artifact.\"},{\"id\":2,\"name\":\"Embalmer's Tools\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Activated abilities of creature cards in your graveyard cost {1} less to activate.\\nTap an untapped Zombie you control: Target player mills a card.\"},{\"id\":3,\"name\":\"Gate to the Afterlife\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a nontoken creature you control dies, you gain 1 life. Then you may draw a card. If you do, discard a card.\\n{2}, {T}, Sacrifice this artifact: Search your graveyard, hand, and/or library for a card named God-Pharaoh's Gift and put it onto the battlefield. If you search your library this way, shuffle. Activate only if there are six or more creature cards in your graveyard.\"},{\"id\":4,\"name\":\"Hazoret's Monument\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"Red creature spells you cast cost {1} less to cast.\\nWhenever you cast a creature spell, you may discard a card. If you do, draw a card.\"},{\"id\":5,\"name\":\"Honed Khopesh\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":6,\"name\":\"Kefnet's Monument\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"Blue creature spells you cast cost {1} less to cast.\\nWhenever you cast a creature spell, target creature an opponent controls doesn't untap during its controller's next untap step.\"},{\"id\":7,\"name\":\"Luxa River Shrine\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: You gain 1 life. Put a brick counter on this artifact.\\n{T}: You gain 2 life. Activate only if there are three or more brick counters on this artifact.\"},{\"id\":8,\"name\":\"Oketra's Monument\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"White creature spells you cast cost {1} less to cast.\\nWhenever you cast a creature spell, create a 1/1 white Warrior creature token with vigilance.\"},{\"id\":9,\"name\":\"Oracle's Vault\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Exile the top card of your library. Until end of turn, you may play that card. Put a brick counter on this artifact.\\n{T}: Exile the top card of your library. Until end of turn, you may play that card without paying its mana cost. Activate only if there are three or more brick counters on this artifact.\"},{\"id\":10,\"name\":\"Pyramid of the Pantheon\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Add one mana of any color. Put a brick counter on this artifact.\\n{T}: Add three mana of any one color. Activate only if there are three or more brick counters on this artifact.\"},{\"id\":11,\"name\":\"Rhonas's Monument\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"Green creature spells you cast cost {1} less to cast.\\nWhenever you cast a creature spell, target creature you control gets +2/+2 and gains trample until end of turn.\"},{\"id\":12,\"name\":\"Throne of the God-Pharaoh\",\"manaCost\":\"{2}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"At the beginning of your end step, each opponent loses life equal to the number of tapped creatures you control.\"},{\"id\":13,\"name\":\"Watchers of the Dead\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Cat\",\"text\":\"Exile this creature: Each opponent chooses two cards in their graveyard and exiles the rest.\"},{\"id\":14,\"name\":\"Canyon Slough\",\"manaCost\":\"\",\"typeLine\":\"Land — Swamp Mountain\",\"text\":\"({T}: Add {B} or {R}.)\\nThis land enters tapped.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":15,\"name\":\"Cascading Cataracts\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Indestructible\\n{T}: Add {C}.\\n{5}, {T}: Add five mana in any combination of colors.\"},{\"id\":16,\"name\":\"Cradle of the Accursed\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{3}, {T}, Sacrifice this land: Create a 2/2 black Zombie creature token. Activate only as a sorcery.\"},{\"id\":17,\"name\":\"Evolving Wilds\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":18,\"name\":\"Fetid Pools\",\"manaCost\":\"\",\"typeLine\":\"Land — Island Swamp\",\"text\":\"({T}: Add {U} or {B}.)\\nThis land enters tapped.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":19,\"name\":\"Grasping Dunes\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{1}, {T}, Sacrifice this land: Put a -1/-1 counter on target creature. Activate only as a sorcery.\"},{\"id\":20,\"name\":\"Irrigated Farmland\",\"manaCost\":\"\",\"typeLine\":\"Land — Plains Island\",\"text\":\"({T}: Add {W} or {U}.)\\nThis land enters tapped.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":21,\"name\":\"Painted Bluffs\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"{T}: Add {C}.\\n{1}, {T}: Add one mana of any color.\"},{\"id\":22,\"name\":\"Scattered Groves\",\"manaCost\":\"\",\"typeLine\":\"Land — Forest Plains\",\"text\":\"({T}: Add {G} or {W}.)\\nThis land enters tapped.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":23,\"name\":\"Sheltered Thicket\",\"manaCost\":\"\",\"typeLine\":\"Land — Mountain Forest\",\"text\":\"({T}: Add {R} or {G}.)\\nThis land enters tapped.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":24,\"name\":\"Sunscorched Desert\",\"manaCost\":\"\",\"typeLine\":\"Land — Desert\",\"text\":\"When this land enters, it deals 1 damage to target player or planeswalker.\\n{T}: Add {C}.\"},{\"id\":25,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"fixing\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1204,
+      "cacheCreationInputTokens": 32677,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767889,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767889,
+      "pricedUsd": 0.767889,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767889 and its own usage prices at $0.767889"
+    }
+  }
+}

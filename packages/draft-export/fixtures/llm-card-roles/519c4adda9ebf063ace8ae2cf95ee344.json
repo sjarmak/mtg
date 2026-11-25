@@ -1,0 +1,161 @@
+{
+  "key": "519c4adda9ebf063ace8ae2cf95ee344",
+  "recordedAt": "2026-11-22T22:04:35.018Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Clan Defiance\",\"manaCost\":\"{X}{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or more —\\n• Clan Defiance deals X damage to target creature with flying.\\n• Clan Defiance deals X damage to target creature without flying.\\n• Clan Defiance deals X damage to target player or planeswalker.\"},{\"id\":2,\"name\":\"Consuming Aberration\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Consuming Aberration's power and toughness are each equal to the number of cards in your opponents' graveyards.\\nWhenever you cast a spell, each opponent reveals cards from the top of their library until they reveal a land card, then puts those cards into their graveyard.\"},{\"id\":3,\"name\":\"Deathpact Angel\",\"manaCost\":\"{3}{W}{B}{B}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature dies, create a 1/1 white and black Cleric creature token. It has \\\"{3}{W}{B}{B}, {T}, Sacrifice this token: Return a card named Deathpact Angel from your graveyard to the battlefield.\\\"\"},{\"id\":4,\"name\":\"Dimir Charm\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Counter target sorcery spell.\\n• Destroy target creature with power 2 or less.\\n• Look at the top three cards of target player's library. Put one back and the rest into that player's graveyard.\"},{\"id\":5,\"name\":\"Dinrova Horror\",\"manaCost\":\"{4}{U}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"When this creature enters, return target permanent to its owner's hand, then that player discards a card.\"},{\"id\":6,\"name\":\"Domri Rade\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Legendary Planeswalker — Domri\",\"text\":\"+1: Look at the top card of your library. If it's a creature card, you may reveal it and put it into your hand.\\n−2: Target creature you control fights another target creature.\\n−7: You get an emblem with \\\"Creatures you control have double strike, trample, hexproof, and haste.\\\"\"},{\"id\":7,\"name\":\"Drakewing Krasis\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Lizard Drake\",\"text\":\"Flying, trample\"},{\"id\":8,\"name\":\"Duskmantle Guildmage\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}{U}{B}: Whenever a card is put into an opponent's graveyard from anywhere this turn, that player loses 1 life.\\n{2}{U}{B}: Target player mills two cards.\"},{\"id\":9,\"name\":\"Duskmantle Seer\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Creature — Vampire Wizard\",\"text\":\"Flying\\nAt the beginning of your upkeep, each player reveals the top card of their library, loses life equal to that card's mana value, then puts it into their hand.\"},{\"id\":10,\"name\":\"Elusive Krasis\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Fish Mutant\",\"text\":\"This creature can't be blocked.\\nEvolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\"},{\"id\":11,\"name\":\"Executioner's Swing\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature that dealt damage this turn gets -5/-5 until end of turn.\"},{\"id\":12,\"name\":\"Fathom Mage\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Evolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\\nWhenever a +1/+1 counter is put on this creature, you may draw a card.\"},{\"id\":13,\"name\":\"Firemane Avenger\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nBattalion — Whenever this creature and at least two other creatures attack, this creature deals 3 damage to any target and you gain 3 life.\"},{\"id\":14,\"name\":\"Fortress Cyclops\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Creature — Cyclops Soldier\",\"text\":\"Whenever this creature attacks, it gets +3/+0 until end of turn.\\nWhenever this creature blocks, it gets +0/+3 until end of turn.\"},{\"id\":15,\"name\":\"Foundry Champion\",\"manaCost\":\"{4}{R}{W}\",\"typeLine\":\"Creature — Elemental Soldier\",\"text\":\"When this creature enters, it deals damage to any target equal to the number of creatures you control.\\n{R}: This creature gets +1/+0 until end of turn.\\n{W}: This creature gets +0/+1 until end of turn.\"},{\"id\":16,\"name\":\"Frenzied Tilling\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\"},{\"id\":17,\"name\":\"Ghor-Clan Rampager\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nBloodrush — {R}{G}, Discard this card: Target attacking creature gets +4/+4 and gains trample until end of turn.\"},{\"id\":18,\"name\":\"Ground Assault\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Ground Assault deals damage to target creature equal to the number of lands you control.\"},{\"id\":19,\"name\":\"Gruul Charm\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Creatures without flying can't block this turn.\\n• Gain control of all permanents you own.\\n• Gruul Charm deals 3 damage to each creature with flying.\"},{\"id\":20,\"name\":\"Gruul Ragebeast\",\"manaCost\":\"{5}{R}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Whenever this creature or another creature you control enters, that creature fights target creature an opponent controls.\"},{\"id\":21,\"name\":\"High Priest of Penance\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Whenever this creature is dealt damage, you may destroy target nonland permanent.\"},{\"id\":22,\"name\":\"Hydroform\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target land becomes a 3/3 Elemental creature with flying until end of turn. It's still a land.\"},{\"id\":23,\"name\":\"Kingpin's Pet\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"Flying\\nExtort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":24,\"name\":\"Lazav, Dimir Mastermind\",\"manaCost\":\"{U}{U}{B}{B}\",\"typeLine\":\"Legendary Creature — Shapeshifter\",\"text\":\"Hexproof\\nWhenever a creature card is put into an opponent's graveyard from anywhere, you may have Lazav become a copy of that card, except its name is Lazav, Dimir Mastermind, it's legendary in addition to its other types, and it has hexproof and this ability.\"},{\"id\":25,\"name\":\"Martial Glory\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+0 until end of turn.\\nTarget creature gets +0/+3 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\",\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1308,
+      "cacheCreationInputTokens": 32853,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776609,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776609,
+      "pricedUsd": 0.776609,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776609 and its own usage prices at $0.776609"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "dc742698d27927e885df625f079b8c32",
+  "recordedAt": "2026-11-22T21:48:36.095Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Manic Vandal\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, destroy target artifact.\"},{\"id\":2,\"name\":\"Prodigal Pyromancer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}: This creature deals 1 damage to any target.\"},{\"id\":3,\"name\":\"Pyretic Ritual\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Add {R}{R}{R}.\"},{\"id\":4,\"name\":\"Pyroclasm\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Pyroclasm deals 2 damage to each creature.\"},{\"id\":5,\"name\":\"Reverberate\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Copy target instant or sorcery spell. You may choose new targets for the copy.\"},{\"id\":6,\"name\":\"Shiv's Embrace\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has flying.\\n{R}: Enchanted creature gets +1/+0 until end of turn.\"},{\"id\":7,\"name\":\"Thunder Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":8,\"name\":\"Volcanic Strength\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has mountainwalk. (It can't be blocked as long as defending player controls a Mountain.)\"},{\"id\":9,\"name\":\"Vulshok Berserker\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":10,\"name\":\"Wild Evocation\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each player's upkeep, that player reveals a card at random from their hand. If it's a land card, the player puts it onto the battlefield. Otherwise, the player casts it without paying its mana cost if able.\"},{\"id\":11,\"name\":\"Acidic Slime\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nWhen this creature enters, destroy target artifact, enchantment, or land.\"},{\"id\":12,\"name\":\"Autumn's Veil\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Spells you control can't be countered by blue or black spells this turn, and creatures you control can't be the targets of blue or black spells this turn.\"},{\"id\":13,\"name\":\"Awakener Druid\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"When this creature enters, target Forest becomes a 4/5 green Treefolk creature for as long as this creature remains on the battlefield. It's still a land.\"},{\"id\":14,\"name\":\"Back to Nature\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy all enchantments.\"},{\"id\":15,\"name\":\"Birds of Paradise\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\n{T}: Add one mana of any color.\"},{\"id\":16,\"name\":\"Brindle Boar\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Sacrifice this creature: You gain 4 life.\"},{\"id\":17,\"name\":\"Cudgel Troll\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Troll\",\"text\":\"{G}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":18,\"name\":\"Cultivate\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to two basic land cards, reveal those cards, put one onto the battlefield tapped and the other into your hand, then shuffle.\"},{\"id\":19,\"name\":\"Dryad's Favor\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has forestwalk. (It can't be blocked as long as defending player controls a Forest.)\"},{\"id\":20,\"name\":\"Duskdale Wurm\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":21,\"name\":\"Elvish Archdruid\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"Other Elf creatures you control get +1/+1.\\n{T}: Add {G} for each Elf you control.\"},{\"id\":22,\"name\":\"Fauna Shaman\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{G}, {T}, Discard a creature card: Search your library for a creature card, reveal it, put it into your hand, then shuffle.\"},{\"id\":23,\"name\":\"Fog\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\"},{\"id\":24,\"name\":\"Gaea's Revenge\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"This spell can't be countered.\\nHaste\\nThis creature can't be the target of nongreen spells or abilities from nongreen sources.\"},{\"id\":25,\"name\":\"Garruk Wildspeaker\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Untap two target lands.\\n−1: Create a 3/3 green Beast creature token.\\n−4: Creatures you control get +3/+3 and gain trample until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 410,
+      "cacheCreationInputTokens": 32318,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.721009,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.721009,
+      "pricedUsd": 0.721009,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.721009 and its own usage prices at $0.721009"
+    }
+  }
+}

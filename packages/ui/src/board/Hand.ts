@@ -180,7 +180,30 @@ export function revealInRow(row: HandRowNode, key: string): void {
 }
 
 /**
- * Keeps a card that just arrived in hand in view.
+ * Gives back any scroll past the row's last held card.
+ *
+ * Found on the live lab: a draw scrolled the row to its seventh card, that card
+ * was played, and the row kept its scroll, because the empty slots after the
+ * hand keep the row as wide as it was. At 1024x768 that left six cards that fit
+ * at no scroll drawn 83px to the left, the first one cut to its last 9px, with
+ * an empty slot in view at the other end.
+ */
+function settleRow(row: HandRowNode, keys: readonly string[]): void {
+  const held = Array.from(row.children).filter((child) =>
+    keys.includes(child.getAttribute('data-permanent-key') ?? ''),
+  );
+  const last = held[held.length - 1];
+  const end =
+    last === undefined
+      ? 0
+      : last.getBoundingClientRect().right - row.getBoundingClientRect().left + row.scrollLeft;
+  const furthest = Math.max(0, end - row.clientWidth);
+  if (row.scrollLeft > furthest) row.scrollLeft = furthest;
+}
+
+/**
+ * Keeps a card that just arrived in hand in view, and gives the scroll back as
+ * cards leave (`settleRow`).
  *
  * Found on the live lab on the draw: the drawn card is appended at the end of
  * the row, and where the row overflows (an eight-card hand at 1024x768, where
@@ -205,6 +228,10 @@ function useRevealArrivals(keys: readonly string[]): (node: unknown) => void {
       row.current.scrollLeft = 0;
       return;
     }
+    // Settle first, then reveal: one render can take cards out and bring one
+    // in (a discard and the next draw, behind auto-pass), and a reveal alone
+    // would keep the scroll the departed cards left past the end.
+    settleRow(row.current, keys);
     const newest = arrived[arrived.length - 1];
     if (newest !== undefined) revealInRow(row.current, newest);
   }, [keys.join(' ')]);

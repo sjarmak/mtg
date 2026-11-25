@@ -7,9 +7,12 @@ export const BASIC_NAMES = ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest'] a
 export type Basics = Readonly<Record<(typeof BASIC_NAMES)[number], number>>;
 const ColorSchema = z.enum(COLORS);
 const Strings = z.array(z.string().min(1)).refine((v) => new Set(v).size === v.length, 'duplicate tag');
+/** Shared by authored profiles and the model-labeled printed role files (`printed-roles.ts`). */
+export const CARD_ROLES = ['interaction', 'draw', 'fixing'] as const;
+export type CardRole = (typeof CARD_ROLES)[number];
 export const CardProfileSchema = z.strictObject({
   quality: z.number().min(0).max(5),
-  roles: z.array(z.enum(['interaction', 'draw', 'fixing'])),
+  roles: z.array(z.enum(CARD_ROLES)),
   tags: Strings,
   planningCost: z.string().min(1).optional(),
   landSources: z.array(ColorSchema).optional(),

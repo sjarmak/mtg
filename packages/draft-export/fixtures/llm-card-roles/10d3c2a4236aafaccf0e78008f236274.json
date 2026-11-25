@@ -1,0 +1,161 @@
+{
+  "key": "10d3c2a4236aafaccf0e78008f236274",
+  "recordedAt": "2026-11-22T21:43:41.251Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Admonition Angel\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nLandfall — Whenever a land you control enters, you may exile target nonland permanent other than this creature.\\nWhen this creature leaves the battlefield, return all cards exiled with it to the battlefield under their owners' control.\"},{\"id\":2,\"name\":\"Apex Hawks\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Multikicker {1}{W} (You may pay an additional {1}{W} any number of times as you cast this spell.)\\nFlying\\nThis creature enters with a +1/+1 counter on it for each time it was kicked.\"},{\"id\":3,\"name\":\"Archon of Redemption\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Archon\",\"text\":\"Flying\\nWhenever this creature or another creature you control with flying enters, you may gain life equal to that creature's power.\"},{\"id\":4,\"name\":\"Battle Hurda\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"First strike\"},{\"id\":5,\"name\":\"Fledgling Griffin\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Landfall — Whenever a land you control enters, this creature gains flying until end of turn.\"},{\"id\":6,\"name\":\"Guardian Zendikon\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land is a 2/6 white Wall creature with defender. It's still a land.\\nWhen enchanted land dies, return that card to its owner's hand.\"},{\"id\":7,\"name\":\"Hada Freeblade\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may put a +1/+1 counter on this creature.\"},{\"id\":8,\"name\":\"Iona's Judgment\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target creature or enchantment.\"},{\"id\":9,\"name\":\"Join the Ranks\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create two 1/1 white Soldier Ally creature tokens.\"},{\"id\":10,\"name\":\"Kitesail Apprentice\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"As long as this creature is equipped, it gets +1/+1 and has flying.\"},{\"id\":11,\"name\":\"Kor Firewalker\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Kor Soldier\",\"text\":\"Protection from red\\nWhenever a player casts a red spell, you may gain 1 life.\"},{\"id\":12,\"name\":\"Lightkeeper of Emeria\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Multikicker {W} (You may pay an additional {W} any number of times as you cast this spell.)\\nFlying\\nWhen this creature enters, you gain 2 life for each time it was kicked.\"},{\"id\":13,\"name\":\"Loam Lion\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"This creature gets +1/+2 as long as you control a Forest.\"},{\"id\":14,\"name\":\"Marsh Threader\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kor Scout\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\"},{\"id\":15,\"name\":\"Marshal's Anthem\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Multikicker {1}{W} (You may pay an additional {1}{W} any number of times as you cast this spell.)\\nCreatures you control get +1/+1.\\nWhen this enchantment enters, return up to X target creature cards from your graveyard to the battlefield, where X is the number of times this enchantment was kicked.\"},{\"id\":16,\"name\":\"Perimeter Captain\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Defender\\nWhenever a creature you control with defender blocks, you may gain 2 life.\"},{\"id\":17,\"name\":\"Refraction Trap\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent cast a red instant or sorcery spell this turn, you may pay {W} rather than pay this spell's mana cost.\\nPrevent the next 3 damage that a source of your choice would deal to you and/or permanents you control this turn. If damage is prevented this way, Refraction Trap deals that much damage to any target.\"},{\"id\":18,\"name\":\"Rest for the Weary\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target player gains 4 life.\\nLandfall — If you had a land enter the battlefield under your control this turn, that player gains 8 life instead.\"},{\"id\":19,\"name\":\"Ruin Ghost\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{W}, {T}: Exile target land you control, then return it to the battlefield under your control.\"},{\"id\":20,\"name\":\"Stoneforge Mystic\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kor Artificer\",\"text\":\"When this creature enters, you may search your library for an Equipment card, reveal it, put it into your hand, then shuffle.\\n{1}{W}, {T}: You may put an Equipment card from your hand onto the battlefield.\"},{\"id\":21,\"name\":\"Talus Paladin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Knight Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have Allies you control gain lifelink until end of turn, and you may put a +1/+1 counter on this creature.\"},{\"id\":22,\"name\":\"Terra Eternal\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"All lands have indestructible.\"},{\"id\":23,\"name\":\"Veteran's Reflexes\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 until end of turn. Untap that creature.\"},{\"id\":24,\"name\":\"Aether Tradewinds\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target permanent you control and target permanent you don't control to their owners' hands.\"},{\"id\":25,\"name\":\"Calcite Snapper\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Turtle\",\"text\":\"Shroud (This creature can't be the target of spells or abilities.)\\nLandfall — Whenever a land you control enters, you may switch this creature's power and toughness until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1207,
+      "cacheCreationInputTokens": 32500,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.764499,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.764499,
+      "pricedUsd": 0.764499,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.764499 and its own usage prices at $0.764499"
+    }
+  }
+}

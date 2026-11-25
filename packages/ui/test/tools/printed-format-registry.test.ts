@@ -29,7 +29,7 @@ const registry = {
         sealed: 'available',
         play: { status: 'supported', reason: 'Verified Forge admission is installed.' },
       },
-      admissionDirectory: 'play-admission-v1',
+      admissionDirectory: 'play-admission',
       catalogs: [{ code: 'AKH', name: 'Amonkhet', file: 'akh-printed-catalog-v1.json' }],
     },
   ],
@@ -41,7 +41,7 @@ describe('printed format launcher registry', () => {
       {
         ...registry.formats[0],
         directory: resolve('/repo/packages/data/data/akh-hou'),
-        admissionDirectory: resolve('/repo/packages/data/data/akh-hou/play-admission-v1'),
+        admissionDirectory: resolve('/repo/packages/data/data/akh-hou/play-admission'),
       },
     ]);
   });
@@ -113,7 +113,7 @@ describe('printed format launcher registry', () => {
       sealed: 'unavailable',
       play: { status: 'supported', reason: expect.stringMatching(/command-zone contracts are witnessed/) },
     });
-    expect(source.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/scd/play-admission-v33'));
+    expect(source.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/scd/play-admission'));
     const installed = loadPrintedAdmissionSource(source);
     if (installed === undefined) throw new Error('SCD admission is not installed');
     const admission = PrintedPlayAdmissionSchema.parse(JSON.parse(installed.evidence.body));
@@ -143,7 +143,7 @@ describe('printed format launcher registry', () => {
     });
     expect(source.presentationCatalog).toBe('momir-oldest-creatures');
     expect(source.admissionDirectory).toBe(
-      resolve(REPO_ROOT, 'packages/data/data/momir-basic/play-admission-v14'),
+      resolve(REPO_ROOT, 'packages/data/data/momir-basic/play-admission'),
     );
     const installed = loadPrintedAdmissionSource(source);
     if (installed === undefined) throw new Error('Momir Basic admission is not installed');
@@ -212,11 +212,9 @@ describe('printed format launcher registry', () => {
     if (guildpact === undefined) throw new Error('GPT is absent from the installed registry');
     if (ravnica === undefined) throw new Error('RAV is absent from the installed registry');
     expect(guildpact.catalogs.map((catalog) => catalog.code)).toEqual(['GPT', 'RAV']);
-    expect(guildpact.admissionDirectory).toBe(
-      resolve(REPO_ROOT, 'packages/data/data/gpt/play-admission-v10'),
-    );
+    expect(guildpact.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/gpt/play-admission'));
     expect(ravnica.catalogs.map((catalog) => catalog.code)).toEqual(['RAV']);
-    expect(ravnica.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/rav/play-admission-v15'));
+    expect(ravnica.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/rav/play-admission'));
   });
 
   it('registers Dissension as DIS-GPT-RAV with its own admission', () => {
@@ -227,9 +225,7 @@ describe('printed format launcher registry', () => {
     const dissension = sources.find((entry) => entry.formatFile === 'dis-limited-format-v1.json');
     if (dissension === undefined) throw new Error('DIS is absent from the installed registry');
     expect(dissension.catalogs.map((catalog) => catalog.code)).toEqual(['DIS', 'GPT', 'RAV']);
-    expect(dissension.admissionDirectory).toBe(
-      resolve(REPO_ROOT, 'packages/data/data/dis/play-admission-v8'),
-    );
+    expect(dissension.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/dis/play-admission'));
   });
 
   it('loads every installed admission for both launchers, the Commander precons included', () => {

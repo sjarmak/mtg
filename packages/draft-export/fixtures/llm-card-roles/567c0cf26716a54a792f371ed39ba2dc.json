@@ -1,0 +1,161 @@
+{
+  "key": "567c0cf26716a54a792f371ed39ba2dc",
+  "recordedAt": "2026-11-22T22:26:48.273Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Panharmonicon\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"If an artifact or creature entering causes a triggered ability of a permanent you control to trigger, that ability triggers an additional time.\"},{\"id\":2,\"name\":\"Perpetual Timepiece\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Mill two cards. (Put the top two cards of your library into your graveyard.)\\n{2}, Exile this artifact: Shuffle any number of target cards from your graveyard into your library.\"},{\"id\":3,\"name\":\"Prakhata Pillar-Bug\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Insect\",\"text\":\"{B}: This creature gains lifelink until end of turn. (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":4,\"name\":\"Prophetic Prism\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, draw a card.\\n{1}, {T}: Add one mana of any color.\"},{\"id\":5,\"name\":\"Renegade Freighter\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Whenever this Vehicle attacks, it gets +1/+1 and gains trample until end of turn.\\nCrew 2 (Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":6,\"name\":\"Scrapheap Scrounger\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature can't block.\\n{1}{B}, Exile another creature card from your graveyard: Return this card from your graveyard to the battlefield.\"},{\"id\":7,\"name\":\"Self-Assembler\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Assembly-Worker\",\"text\":\"When this creature enters, you may search your library for an Assembly-Worker creature card, reveal it, put it into your hand, then shuffle.\"},{\"id\":8,\"name\":\"Sky Skiff\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Flying\\nCrew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":9,\"name\":\"Skysovereign, Consul Flagship\",\"manaCost\":\"{5}\",\"typeLine\":\"Legendary Artifact — Vehicle\",\"text\":\"Flying\\nWhenever Skysovereign enters or attacks, it deals 3 damage to target creature or planeswalker an opponent controls.\\nCrew 3 (Tap any number of creatures you control with total power 3 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":10,\"name\":\"Smuggler's Copter\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Vehicle\",\"text\":\"Flying\\nWhenever this Vehicle attacks or blocks, you may draw a card. If you do, discard a card.\\nCrew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)\"},{\"id\":11,\"name\":\"Snare Thopter\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Thopter\",\"text\":\"Flying, haste\"},{\"id\":12,\"name\":\"Torch Gauntlet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+0.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":13,\"name\":\"Weldfast Monitor\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Lizard\",\"text\":\"{R}: This creature gains menace until end of turn.\"},{\"id\":14,\"name\":\"Whirlermaker\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{4}, {T}: Create a 1/1 colorless Thopter artifact creature token with flying.\"},{\"id\":15,\"name\":\"Woodweaver's Puzzleknot\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, you gain 3 life and get {E}{E}{E} (three energy counters).\\n{2}{G}, Sacrifice this artifact: You gain 3 life and get {E}{E}{E}.\"},{\"id\":16,\"name\":\"Workshop Assistant\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature dies, return another target artifact card from your graveyard to your hand.\"},{\"id\":17,\"name\":\"Aether Hub\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"When this land enters, you get {E} (an energy counter).\\n{T}: Add {C}.\\n{T}, Pay {E}: Add one mana of any color.\"},{\"id\":18,\"name\":\"Blooming Marsh\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {B} or {G}.\"},{\"id\":19,\"name\":\"Botanical Sanctum\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {G} or {U}.\"},{\"id\":20,\"name\":\"Concealed Courtyard\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {W} or {B}.\"},{\"id\":21,\"name\":\"Inspiring Vantage\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {R} or {W}.\"},{\"id\":22,\"name\":\"Inventors' Fair\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"At the beginning of your upkeep, if you control three or more artifacts, you gain 1 life.\\n{T}: Add {C}.\\n{4}, {T}, Sacrifice Inventors' Fair: Search your library for an artifact card, reveal it, put it into your hand, then shuffle. Activate only if you control three or more artifacts.\"},{\"id\":23,\"name\":\"Sequestered Stash\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{4}, {T}, Sacrifice this land: Mill five cards. Then you may put an artifact card from your graveyard on top of your library.\"},{\"id\":24,\"name\":\"Spirebluff Canal\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {U} or {R}.\"},{\"id\":25,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"fixing\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 413,
+      "cacheCreationInputTokens": 32532,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.725439,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.725439,
+      "pricedUsd": 0.725439,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.725439 and its own usage prices at $0.725439"
+    }
+  }
+}

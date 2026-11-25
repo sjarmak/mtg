@@ -1,0 +1,161 @@
+{
+  "key": "b2e2dad544f109c9921fd98fb7f73a00",
+  "recordedAt": "2026-11-22T21:29:35.441Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Daybreak Ranger\",\"manaCost\":null,\"typeLine\":\"Creature — Human Archer Ranger Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Daybreak Ranger\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Archer Ranger Werewolf\",\"text\":\"{T}: This creature deals 2 damage to target creature with flying.\\nAt the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Nightfall Predator\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"{R}, {T}: This creature fights target creature. (Each deals damage equal to its power to the other.)\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":2,\"name\":\"Elder of Laurels\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"{3}{G}: Target creature gets +X/+X until end of turn, where X is the number of creatures you control.\"},{\"id\":3,\"name\":\"Essence of the Wild\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Creatures you control enter as a copy of this creature.\"},{\"id\":4,\"name\":\"Festerhide Boar\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Trample\\nMorbid — This creature enters with two +1/+1 counters on it if a creature died this turn.\"},{\"id\":5,\"name\":\"Full Moon's Rise\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Werewolf creatures you control get +1/+0 and have trample.\\nSacrifice this enchantment: Regenerate all Werewolf creatures you control.\"},{\"id\":6,\"name\":\"Garruk Relentless\",\"manaCost\":null,\"typeLine\":\"Legendary Planeswalker — Garruk // Legendary Planeswalker — Garruk\",\"text\":null,\"faces\":[{\"name\":\"Garruk Relentless\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"When Garruk has two or fewer loyalty counters on him, transform him.\\n0: Garruk deals 3 damage to target creature. That creature deals damage equal to its power to him.\\n0: Create a 2/2 green Wolf creature token.\"},{\"name\":\"Garruk, the Veil-Cursed\",\"manaCost\":\"\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Create a 1/1 black Wolf creature token with deathtouch.\\n−1: Sacrifice a creature. If you do, search your library for a creature card, reveal it, put it into your hand, then shuffle.\\n−3: Creatures you control gain trample and get +X/+X until end of turn, where X is the number of creature cards in your graveyard.\"}]},{\"id\":7,\"name\":\"Gatstaf Shepherd\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Gatstaf Shepherd\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Gatstaf Howler\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":8,\"name\":\"Gnaw to the Bone\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"You gain 2 life for each creature card in your graveyard.\\nFlashback {2}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":9,\"name\":\"Grave Bramble\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Plant\",\"text\":\"Defender, protection from Zombies\"},{\"id\":10,\"name\":\"Grizzled Outcasts\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Grizzled Outcasts\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Krallenhorde Wantons\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"At the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":11,\"name\":\"Gutter Grime\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a nontoken creature you control dies, put a slime counter on this enchantment, then create a green Ooze creature token with \\\"This token's power and toughness are each equal to the number of slime counters on Gutter Grime.\\\"\"},{\"id\":12,\"name\":\"Hamlet Captain\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature attacks or blocks, other Humans you control get +1/+1 until end of turn.\"},{\"id\":13,\"name\":\"Hollowhenge Scavenger\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Morbid — When this creature enters, if a creature died this turn, you gain 5 life.\"},{\"id\":14,\"name\":\"Kessig Cagebreakers\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Whenever this creature attacks, create a 2/2 green Wolf creature token that's tapped and attacking for each creature card in your graveyard.\"},{\"id\":15,\"name\":\"Kindercatch\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"\"},{\"id\":16,\"name\":\"Lumberknot\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Treefolk\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nWhenever a creature dies, put a +1/+1 counter on this creature.\"},{\"id\":17,\"name\":\"Make a Wish\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return two cards at random from your graveyard to your hand.\"},{\"id\":18,\"name\":\"Mayor of Avabruck\",\"manaCost\":null,\"typeLine\":\"Creature — Human Advisor Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Mayor of Avabruck\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Advisor Werewolf\",\"text\":\"Other Human creatures you control get +1/+1.\\nAt the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Howlpack Alpha\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Each other creature you control that's a Werewolf or a Wolf gets +1/+1.\\nAt the beginning of your end step, create a 2/2 green Wolf creature token.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":19,\"name\":\"Moldgraf Monstrosity\",\"manaCost\":\"{4}{G}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Trample\\nWhen this creature dies, exile it, then return two creature cards at random from your graveyard to the battlefield.\"},{\"id\":20,\"name\":\"Moonmist\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Transform all Humans. Prevent all combat damage that would be dealt this turn by creatures other than Werewolves and Wolves. (Only double-faced cards can be transformed.)\"},{\"id\":21,\"name\":\"Mulch\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top four cards of your library. Put all land cards revealed this way into your hand and the rest into your graveyard.\"},{\"id\":22,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":23,\"name\":\"Orchard Spirit\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked except by creatures with flying or reach.\"},{\"id\":24,\"name\":\"Parallel Lives\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"If an effect would create one or more tokens under your control, it creates twice that many of those tokens instead.\"},{\"id\":25,\"name\":\"Prey Upon\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control fights target creature you don't control. (Each deals damage equal to its power to the other.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1600,
+      "cacheCreationInputTokens": 33337,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.800889,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.800889,
+      "pricedUsd": 0.800889,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.800889 and its own usage prices at $0.800889"
+    }
+  }
+}

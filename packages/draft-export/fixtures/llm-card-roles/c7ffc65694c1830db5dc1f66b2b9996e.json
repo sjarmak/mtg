@@ -1,0 +1,93 @@
+{
+  "key": "c7ffc65694c1830db5dc1f66b2b9996e",
+  "recordedAt": "2026-11-22T21:32:24.302Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Helvault\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"{1}, {T}: Exile target creature you control.\\n{7}, {T}: Exile target creature you don't control.\\nWhen Helvault is put into a graveyard from the battlefield, return all cards exiled with it to the battlefield under their owners' control.\"},{\"id\":2,\"name\":\"Jar of Eyeballs\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a creature you control dies, put two eyeball counters on this artifact.\\n{3}, {T}, Remove all eyeball counters from this artifact: Look at the top X cards of your library, where X is the number of eyeball counters removed this way. Put one of them into your hand and the rest on the bottom of your library in any order.\"},{\"id\":3,\"name\":\"Warden of the Wall\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters tapped.\\n{T}: Add {C}.\\nDuring turns other than yours, this artifact is a 2/3 Gargoyle artifact creature with flying.\"},{\"id\":4,\"name\":\"Wolfhunter's Quiver\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has \\\"{T}: This creature deals 1 damage to any target\\\" and \\\"{T}: This creature deals 3 damage to target Werewolf creature.\\\"\\nEquip {5}\"},{\"id\":5,\"name\":\"Evolving Wilds\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":6,\"name\":\"Grim Backwoods\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}{B}{G}, {T}, Sacrifice a creature: Draw a card.\"},{\"id\":7,\"name\":\"Haunted Fengraf\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{3}, {T}, Sacrifice this land: Return a creature card at random from your graveyard to your hand.\"},{\"id\":8,\"name\":\"Vault of the Archangel\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}{W}{B}, {T}: Creatures you control gain deathtouch and lifelink until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 797,
+      "cacheCreationInputTokens": 30991,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.713819,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.713819,
+      "pricedUsd": 0.713819,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.713819 and its own usage prices at $0.713819"
+    }
+  }
+}

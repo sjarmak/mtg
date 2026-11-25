@@ -1,0 +1,161 @@
+{
+  "key": "5c60f63c37b0c7b3334614d31e767e62",
+  "recordedAt": "2026-11-22T21:52:04.893Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Vedalken Entrancer\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"{U}, {T}: Target player mills two cards.\"},{\"id\":2,\"name\":\"Void Stalker\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{2}{U}, {T}: Put this creature and target creature on top of their owners' libraries, then those players shuffle their libraries.\"},{\"id\":3,\"name\":\"Watercourser\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{U}: This creature gets +1/-1 until end of turn.\"},{\"id\":4,\"name\":\"Welkin Tern\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature can block only creatures with flying.\"},{\"id\":5,\"name\":\"Wind Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\"},{\"id\":6,\"name\":\"Blood Reckoning\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature attacks you or a planeswalker you control, that creature's controller loses 1 life.\"},{\"id\":7,\"name\":\"Bloodhunter Bat\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\\nWhen this creature enters, target player loses 2 life and you gain 2 life.\"},{\"id\":8,\"name\":\"Bloodthrone Vampire\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Sacrifice a creature: This creature gets +2/+2 until end of turn.\"},{\"id\":9,\"name\":\"Cower in Fear\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -1/-1 until end of turn.\"},{\"id\":10,\"name\":\"Crippling Blight\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -1/-1 and can't block.\"},{\"id\":11,\"name\":\"Dark Favor\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, you lose 1 life.\\nEnchanted creature gets +3/+1.\"},{\"id\":12,\"name\":\"Diabolic Revelation\",\"manaCost\":\"{X}{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to X cards, put those cards into your hand, then shuffle.\"},{\"id\":13,\"name\":\"Disciple of Bolas\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, sacrifice another creature. You gain X life and draw X cards, where X is that creature's power.\"},{\"id\":14,\"name\":\"Disentomb\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to your hand.\"},{\"id\":15,\"name\":\"Duress\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card.\"},{\"id\":16,\"name\":\"Duskmantle Prowler\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Vampire Rogue\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":17,\"name\":\"Duty-Bound Dead\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Skeleton\",\"text\":\"Exalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\\n{3}{B}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":18,\"name\":\"Essence Drain\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Essence Drain deals 3 damage to any target and you gain 3 life.\"},{\"id\":19,\"name\":\"Giant Scorpion\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Scorpion\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":20,\"name\":\"Harbor Bandit\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"This creature gets +1/+1 as long as you control an Island.\\n{1}{U}: This creature can't be blocked this turn.\"},{\"id\":21,\"name\":\"Knight of Infamy\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Protection from white (This creature can't be blocked, targeted, dealt damage, or enchanted by anything white.)\\nExalted (Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.)\"},{\"id\":22,\"name\":\"Liliana of the Dark Realms\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Legendary Planeswalker — Liliana\",\"text\":\"+1: Search your library for a Swamp card, reveal it, put it into your hand, then shuffle.\\n−3: Target creature gets +X/+X or -X/-X until end of turn, where X is the number of Swamps you control.\\n−6: You get an emblem with \\\"Swamps you control have '{T}: Add {B}{B}{B}{B}.'\\\"\"},{\"id\":23,\"name\":\"Liliana's Shade\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"When this creature enters, you may search your library for a Swamp card, reveal it, put it into your hand, then shuffle.\\n{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":24,\"name\":\"Mark of the Vampire\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has lifelink.\"},{\"id\":25,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1425,
+      "cacheCreationInputTokens": 32396,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7733190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7733190000000001,
+      "pricedUsd": 0.773319,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773319 and its own usage prices at $0.773319"
+    }
+  }
+}

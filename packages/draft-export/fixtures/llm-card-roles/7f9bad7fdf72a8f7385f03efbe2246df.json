@@ -1,0 +1,161 @@
+{
+  "key": "7f9bad7fdf72a8f7385f03efbe2246df",
+  "recordedAt": "2026-11-22T21:56:35.687Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Act on Impulse\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile the top three cards of your library. Until end of turn, you may play those cards. (If you cast a spell this way, you still pay its costs. You can play a land this way only if you have an available land play remaining.)\"},{\"id\":2,\"name\":\"Aggressive Mining\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"You can't play lands.\\nSacrifice a land: Draw two cards. Activate only once each turn.\"},{\"id\":3,\"name\":\"Altac Bloodseeker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Whenever a creature an opponent controls dies, this creature gets +2/+0 and gains first strike and haste until end of turn. (It deals combat damage before creatures without first strike, and it can attack and {T} as soon as it comes under your control.)\"},{\"id\":4,\"name\":\"Belligerent Sliver\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have menace. (They can't be blocked except by two or more creatures.)\"},{\"id\":5,\"name\":\"Blastfire Bolt\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Instant\",\"text\":\"Blastfire Bolt deals 5 damage to target creature. Destroy all Equipment attached to that creature.\"},{\"id\":6,\"name\":\"Borderland Marauder\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature attacks, it gets +2/+0 until end of turn.\"},{\"id\":7,\"name\":\"Brood Keeper\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Whenever an Aura becomes attached to this creature, create a 2/2 red Dragon creature token with flying. It has \\\"{R}: This creature gets +1/+0 until end of turn.\\\"\"},{\"id\":8,\"name\":\"Burning Anger\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: This creature deals damage equal to its power to any target.\\\"\"},{\"id\":9,\"name\":\"Chandra, Pyromaster\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Chandra deals 1 damage to target player or planeswalker and 1 damage to up to one target creature that player or that planeswalker's controller controls. That creature can't block this turn.\\n0: Exile the top card of your library. You may play it this turn.\\n−7: Exile the top ten cards of your library. Choose an instant or sorcery card exiled this way and copy it three times. You may cast the copies without paying their mana costs.\"},{\"id\":10,\"name\":\"Circle of Flame\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature without flying attacks you or a planeswalker you control, this enchantment deals 1 damage to that creature.\"},{\"id\":11,\"name\":\"Clear a Path\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature with defender.\"},{\"id\":12,\"name\":\"Cone of Flame\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Cone of Flame deals 1 damage to any target, 2 damage to another target, and 3 damage to a third target.\"},{\"id\":13,\"name\":\"Crowd's Favor\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTarget creature gets +1/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":14,\"name\":\"Crucible of Fire\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Dragon creatures you control get +3/+3.\"},{\"id\":15,\"name\":\"Forge Devil\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"When this creature enters, it deals 1 damage to target creature and 1 damage to you.\"},{\"id\":16,\"name\":\"Foundry Street Denizen\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Whenever another red creature you control enters, this creature gets +1/+0 until end of turn.\"},{\"id\":17,\"name\":\"Frenzied Goblin\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Whenever this creature attacks, you may pay {R}. If you do, target creature can't block this turn.\"},{\"id\":18,\"name\":\"Generator Servant\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{T}, Sacrifice this creature: Add {C}{C}. If that mana is spent on a creature spell, it gains haste until end of turn. (That creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":19,\"name\":\"Goblin Kaboomist\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"At the beginning of your upkeep, create a colorless artifact token named Land Mine with \\\"{R}, Sacrifice this token: This token deals 2 damage to target attacking creature without flying.\\\" Then flip a coin. If you lose the flip, this creature deals 2 damage to itself.\"},{\"id\":20,\"name\":\"Goblin Rabblemaster\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Other Goblin creatures you control attack each combat if able.\\nAt the beginning of combat on your turn, create a 1/1 red Goblin creature token with haste.\\nWhenever this creature attacks, it gets +1/+0 until end of turn for each other attacking Goblin.\"},{\"id\":21,\"name\":\"Goblin Roughrider\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Knight\",\"text\":\"\"},{\"id\":22,\"name\":\"Hammerhand\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, target creature can't block this turn.\\nEnchanted creature gets +1/+1 and has haste.\"},{\"id\":23,\"name\":\"Heat Ray\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Instant\",\"text\":\"Heat Ray deals X damage to target creature.\"},{\"id\":24,\"name\":\"Hoarding Dragon\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhen this creature enters, you may search your library for an artifact card, exile it, then shuffle.\\nWhen this creature dies, you may put the exiled card into its owner's hand.\"},{\"id\":25,\"name\":\"Inferno Fist\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nEnchanted creature gets +2/+0.\\n{R}, Sacrifice this Aura: This Aura deals 2 damage to any target.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\",\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 427,
+      "cacheCreationInputTokens": 32675,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7289990000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7289990000000001,
+      "pricedUsd": 0.728999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728999 and its own usage prices at $0.728999"
+    }
+  }
+}

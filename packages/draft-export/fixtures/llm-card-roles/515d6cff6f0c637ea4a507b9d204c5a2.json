@@ -1,0 +1,161 @@
+{
+  "key": "515d6cff6f0c637ea4a507b9d204c5a2",
+  "recordedAt": "2026-11-22T22:30:03.124Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Dimir Cutpurse\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Whenever this creature deals combat damage to a player, that player discards a card and you draw a card.\"},{\"id\":2,\"name\":\"Dimir Doppelganger\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"{1}{U}{B}: Exile target creature card from a graveyard. This creature becomes a copy of that card, except it has this ability.\"},{\"id\":3,\"name\":\"Dimir Infiltrator\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked.\\nTransmute {1}{U}{B} ({1}{U}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":4,\"name\":\"Drooling Groodion\",\"manaCost\":\"{3}{B}{B}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"{2}{B}{G}, Sacrifice a creature: Target creature gets +2/+2 until end of turn. Another target creature gets -2/-2 until end of turn.\"},{\"id\":5,\"name\":\"Firemane Angel\",\"manaCost\":\"{3}{R}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, first strike\\nAt the beginning of your upkeep, if Firemane Angel is in your graveyard or on the battlefield, you may gain 1 life.\\n{6}{R}{R}{W}{W}: Return this card from your graveyard to the battlefield. Activate only during your upkeep.\"},{\"id\":6,\"name\":\"Flame-Kin Zealot\",\"manaCost\":\"{1}{R}{R}{W}\",\"typeLine\":\"Creature — Elemental Berserker\",\"text\":\"When this creature enters, creatures you control get +1/+1 and gain haste until end of turn.\"},{\"id\":7,\"name\":\"Glare of Subdual\",\"manaCost\":\"{2}{G}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Tap an untapped creature you control: Tap target artifact or creature.\"},{\"id\":8,\"name\":\"Glimpse the Unthinkable\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills ten cards.\"},{\"id\":9,\"name\":\"Golgari Germination\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a nontoken creature you control dies, create a 1/1 green Saproling creature token.\"},{\"id\":10,\"name\":\"Golgari Rotwurm\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Creature — Zombie Wurm\",\"text\":\"{B}, Sacrifice a creature: Target player loses 1 life.\"},{\"id\":11,\"name\":\"Grave-Shell Scarab\",\"manaCost\":\"{2}{B}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"{1}, Sacrifice this creature: Draw a card.\\nDredge 1 (If you would draw a card, you may mill a card instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":12,\"name\":\"Guardian of Vitu-Ghazi\",\"manaCost\":\"{6}{G}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nVigilance\"},{\"id\":13,\"name\":\"Lightning Helix\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Lightning Helix deals 3 damage to any target and you gain 3 life.\"},{\"id\":14,\"name\":\"Loxodon Hierarch\",\"manaCost\":\"{2}{G}{W}\",\"typeLine\":\"Creature — Elephant Cleric\",\"text\":\"When this creature enters, you gain 4 life.\\n{G}{W}, Sacrifice this creature: Regenerate each creature you control.\"},{\"id\":15,\"name\":\"Mindleech Mass\",\"manaCost\":\"{5}{U}{B}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Trample\\nWhenever this creature deals combat damage to a player, you may look at that player's hand. If you do, you may cast a spell from among those cards without paying its mana cost.\"},{\"id\":16,\"name\":\"Moroii\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying\\nAt the beginning of your upkeep, you lose 1 life.\"},{\"id\":17,\"name\":\"Perplex\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller discards their hand.\\nTransmute {1}{U}{B} ({1}{U}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":18,\"name\":\"Phytohydra\",\"manaCost\":\"{2}{G}{W}{W}\",\"typeLine\":\"Creature — Plant Hydra\",\"text\":\"If damage would be dealt to this creature, put that many +1/+1 counters on it instead.\"},{\"id\":19,\"name\":\"Pollenbright Wings\",\"manaCost\":\"{4}{G}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has flying.\\nWhenever enchanted creature deals combat damage to a player, create that many 1/1 green Saproling creature tokens.\"},{\"id\":20,\"name\":\"Psychic Drain\",\"manaCost\":\"{X}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills X cards and you gain X life.\"},{\"id\":21,\"name\":\"Putrefy\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or creature. It can't be regenerated.\"},{\"id\":22,\"name\":\"Rally the Righteous\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Untap target creature and each other creature that shares a color with it. Those creatures get +2/+0 until end of turn.\"},{\"id\":23,\"name\":\"Razia, Boros Archangel\",\"manaCost\":\"{4}{R}{R}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, vigilance, haste\\n{T}: The next 3 damage that would be dealt to target creature you control this turn is dealt to another target creature instead.\"},{\"id\":24,\"name\":\"Razia's Purification\",\"manaCost\":\"{4}{R}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player chooses three permanents they control, then sacrifices the rest.\"},{\"id\":25,\"name\":\"Savra, Queen of the Golgari\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Legendary Creature — Elf Shaman\",\"text\":\"Whenever you sacrifice a black creature, you may pay 2 life. If you do, each other player sacrifices a creature of their choice.\\nWhenever you sacrifice a green creature, you may gain 2 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1165,
+      "cacheCreationInputTokens": 32641,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7652190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7652190000000001,
+      "pricedUsd": 0.765219,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.765219 and its own usage prices at $0.765219"
+    }
+  }
+}

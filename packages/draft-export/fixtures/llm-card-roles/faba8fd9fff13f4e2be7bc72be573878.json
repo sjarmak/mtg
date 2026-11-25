@@ -1,0 +1,161 @@
+{
+  "key": "faba8fd9fff13f4e2be7bc72be573878",
+  "recordedAt": "2026-11-22T22:10:53.987Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Lightning Volley\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, creatures you control gain \\\"{T}: This creature deals 1 damage to any target.\\\"\"},{\"id\":2,\"name\":\"Nyxborn Rollicker\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment Creature — Satyr\",\"text\":\"Bestow {1}{R} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +1/+1.\"},{\"id\":3,\"name\":\"Oracle of Bones\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Minotaur Shaman\",\"text\":\"Haste\\nTribute 2 (As this creature enters, an opponent of your choice may put two +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, you may cast an instant or sorcery spell from your hand without paying its mana cost.\"},{\"id\":4,\"name\":\"Pharagax Giant\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Tribute 2 (As this creature enters, an opponent of your choice may put two +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, this creature deals 5 damage to each opponent.\"},{\"id\":5,\"name\":\"Pinnacle of Rage\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Pinnacle of Rage deals 3 damage to each of two targets.\"},{\"id\":6,\"name\":\"Reckless Reveler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"{R}, Sacrifice this creature: Destroy target artifact.\"},{\"id\":7,\"name\":\"Rise to the Challenge\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+0 and gains first strike until end of turn.\"},{\"id\":8,\"name\":\"Satyr Firedancer\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment Creature — Satyr\",\"text\":\"Whenever an instant or sorcery spell you control deals damage to an opponent, this creature deals that much damage to target creature that player controls.\"},{\"id\":9,\"name\":\"Satyr Nyx-Smith\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Satyr Shaman\",\"text\":\"Haste\\nInspired — Whenever this creature becomes untapped, you may pay {2}{R}. If you do, create a 3/1 red Elemental enchantment creature token with haste.\"},{\"id\":10,\"name\":\"Scouring Sands\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Scouring Sands deals 1 damage to each creature your opponents control. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":11,\"name\":\"Searing Blood\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Searing Blood deals 2 damage to target creature. When that creature dies this turn, Searing Blood deals 3 damage to the creature's controller.\"},{\"id\":12,\"name\":\"Stormcaller of Keranos\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Haste\\n{1}{U}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":13,\"name\":\"Thunder Brute\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Cyclops\",\"text\":\"Trample\\nTribute 3 (As this creature enters, an opponent of your choice may put three +1/+1 counters on it.)\\nWhen this creature enters, if tribute wasn't paid, it gains haste until end of turn.\"},{\"id\":14,\"name\":\"Thunderous Might\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature attacks, it gets +X/+0 until end of turn, where X is your devotion to red. (Each {R} in the mana costs of permanents you control counts toward your devotion to red.)\"},{\"id\":15,\"name\":\"Whims of the Fates\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Starting with you, each player separates all permanents they control into three piles. Then each player chooses one of their piles at random and sacrifices those permanents. (Piles can be empty.)\"},{\"id\":16,\"name\":\"Archetype of Endurance\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Enchantment Creature — Boar\",\"text\":\"Creatures you control have hexproof.\\nCreatures your opponents control lose hexproof and can't have or gain hexproof.\"},{\"id\":17,\"name\":\"Aspect of Hydra\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +X/+X until end of turn, where X is your devotion to green. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\"},{\"id\":18,\"name\":\"Charging Badger\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Badger\",\"text\":\"Trample\"},{\"id\":19,\"name\":\"Courser of Kruphix\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Enchantment Creature — Centaur\",\"text\":\"Play with the top card of your library revealed.\\nYou may play lands from the top of your library.\\nLandfall — Whenever a land you control enters, you gain 1 life.\"},{\"id\":20,\"name\":\"Culling Mark\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature blocks this turn if able.\"},{\"id\":21,\"name\":\"Fated Intervention\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Create two 3/3 green Centaur enchantment creature tokens. If it's your turn, scry 2.\"},{\"id\":22,\"name\":\"Graverobber Spider\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach\\n{3}{B}: This creature gets +X/+X until end of turn, where X is the number of creature cards in your graveyard. Activate only once each turn.\"},{\"id\":23,\"name\":\"Hero of Leina Tower\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, you may pay {X}. If you do, put X +1/+1 counters on this creature.\"},{\"id\":24,\"name\":\"Hunter's Prowess\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Until end of turn, target creature gets +3/+3 and gains trample and \\\"Whenever this creature deals combat damage to a player, draw that many cards.\\\"\"},{\"id\":25,\"name\":\"Karametra's Favor\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw a card.\\nEnchanted creature has \\\"{T}: Add one mana of any color.\\\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 417,
+      "cacheCreationInputTokens": 32642,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.727839,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.727839,
+      "pricedUsd": 0.727839,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.727839 and its own usage prices at $0.727839"
+    }
+  }
+}

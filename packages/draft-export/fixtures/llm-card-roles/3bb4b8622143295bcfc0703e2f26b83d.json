@@ -1,0 +1,161 @@
+{
+  "key": "3bb4b8622143295bcfc0703e2f26b83d",
+  "recordedAt": "2026-11-22T21:37:27.454Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Vault Skirge\",\"manaCost\":\"{1}{B/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Imp\",\"text\":\"({B/P} can be paid with either {B} or 2 life.)\\nFlying\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":2,\"name\":\"Whispering Specter\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Specter\",\"text\":\"Flying\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever this creature deals combat damage to a player, you may sacrifice it. If you do, that player discards a card for each poison counter they have.\"},{\"id\":3,\"name\":\"Act of Aggression\",\"manaCost\":\"{3}{R/P}{R/P}\",\"typeLine\":\"Instant\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nGain control of target creature an opponent controls until end of turn. Untap that creature. It gains haste until end of turn.\"},{\"id\":4,\"name\":\"Artillerize\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice an artifact or creature.\\nArtillerize deals 5 damage to any target.\"},{\"id\":5,\"name\":\"Bludgeon Brawl\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Each noncreature, non-Equipment artifact is an Equipment with equip {X} and \\\"Equipped creature gets +X/+0,\\\" where X is that artifact's mana value.\"},{\"id\":6,\"name\":\"Chancellor of the Forge\",\"manaCost\":\"{4}{R}{R}{R}\",\"typeLine\":\"Creature — Phyrexian Giant\",\"text\":\"You may reveal this card from your opening hand. If you do, at the beginning of the first upkeep, create a 1/1 red Phyrexian Goblin creature token with haste.\\nWhen this creature enters, create X 1/1 red Phyrexian Goblin creature tokens with haste, where X is the number of creatures you control.\"},{\"id\":7,\"name\":\"Fallen Ferromancer\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Phyrexian Human Shaman\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{1}{R}, {T}: This creature deals 1 damage to any target.\"},{\"id\":8,\"name\":\"Flameborn Viron\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Phyrexian Insect\",\"text\":\"\"},{\"id\":9,\"name\":\"Furnace Scamp\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Phyrexian Beast\",\"text\":\"Whenever this creature deals combat damage to a player, you may sacrifice it. If you do, this creature deals 3 damage to that player.\"},{\"id\":10,\"name\":\"Geosurge\",\"manaCost\":\"{R}{R}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Add {R}{R}{R}{R}{R}{R}{R}. Spend this mana only to cast artifact or creature spells.\"},{\"id\":11,\"name\":\"Gut Shot\",\"manaCost\":\"{R/P}\",\"typeLine\":\"Instant\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nGut Shot deals 1 damage to any target.\"},{\"id\":12,\"name\":\"Invader Parasite\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Phyrexian Insect\",\"text\":\"Imprint — When this creature enters, exile target land.\\nWhenever a land an opponent controls with the same name as the exiled card enters, this creature deals 2 damage to that player.\"},{\"id\":13,\"name\":\"Moltensteel Dragon\",\"manaCost\":\"{4}{R/P}{R/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Dragon\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nFlying\\n{R/P}: This creature gets +1/+0 until end of turn.\"},{\"id\":14,\"name\":\"Ogre Menial\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Phyrexian Ogre\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":15,\"name\":\"Priest of Urabrask\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Phyrexian Human Cleric\",\"text\":\"When this creature enters, add {R}{R}{R}.\"},{\"id\":16,\"name\":\"Rage Extractor\",\"manaCost\":\"{4}{R/P}\",\"typeLine\":\"Artifact\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nWhenever you cast a spell with {H} in its mana cost, this artifact deals damage equal to that spell's mana value to any target.\"},{\"id\":17,\"name\":\"Razor Swine\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Phyrexian Boar\",\"text\":\"First strike\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":18,\"name\":\"Ruthless Invasion\",\"manaCost\":\"{3}{R/P}\",\"typeLine\":\"Sorcery\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nNonartifact creatures can't block this turn.\"},{\"id\":19,\"name\":\"Scrapyard Salvo\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Scrapyard Salvo deals damage to target player or planeswalker equal to the number of artifact cards in your graveyard.\"},{\"id\":20,\"name\":\"Slag Fiend\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Phyrexian Construct\",\"text\":\"Slag Fiend's power and toughness are each equal to the number of artifact cards in all graveyards.\"},{\"id\":21,\"name\":\"Slash Panther\",\"manaCost\":\"{4}{R/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Cat\",\"text\":\"({R/P} can be paid with either {R} or 2 life.)\\nHaste\"},{\"id\":22,\"name\":\"Tormentor Exarch\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Phyrexian Cleric\",\"text\":\"When this creature enters, choose one —\\n• Target creature gets +2/+0 until end of turn.\\n• Target creature gets -0/-2 until end of turn.\"},{\"id\":23,\"name\":\"Urabrask the Hidden\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Legendary Creature — Phyrexian Praetor\",\"text\":\"Creatures you control have haste.\\nCreatures your opponents control enter tapped.\"},{\"id\":24,\"name\":\"Victorious Destruction\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land. Its controller loses 1 life.\"},{\"id\":25,\"name\":\"Volt Charge\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Volt Charge deals 3 damage to any target. Proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1505,
+      "cacheCreationInputTokens": 32725,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7838989999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7838989999999999,
+      "pricedUsd": 0.783899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.783899 and its own usage prices at $0.783899"
+    }
+  }
+}

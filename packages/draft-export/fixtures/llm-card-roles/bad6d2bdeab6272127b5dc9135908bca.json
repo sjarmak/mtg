@@ -1,0 +1,161 @@
+{
+  "key": "bad6d2bdeab6272127b5dc9135908bca",
+  "recordedAt": "2026-11-22T22:35:41.138Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ajani Goldmane\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Ajani\",\"text\":\"+1: You gain 2 life.\\n−1: Put a +1/+1 counter on each creature you control. Those creatures gain vigilance until end of turn.\\n−6: Create a white Avatar creature token. It has \\\"This token's power and toughness are each equal to your life total.\\\"\"},{\"id\":2,\"name\":\"Arbiter of Knollridge\",\"manaCost\":\"{6}{W}\",\"typeLine\":\"Creature — Giant Wizard\",\"text\":\"Vigilance\\nWhen this creature enters, each player's life total becomes the highest life total among all players.\"},{\"id\":3,\"name\":\"Austere Command\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose two —\\n• Destroy all artifacts.\\n• Destroy all enchantments.\\n• Destroy all creatures with mana value 3 or less.\\n• Destroy all creatures with mana value 4 or greater.\"},{\"id\":4,\"name\":\"Avian Changeling\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nFlying\"},{\"id\":5,\"name\":\"Battle Mastery\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has double strike. (It deals both first-strike and regular combat damage.)\"},{\"id\":6,\"name\":\"Brigid, Hero of Kinsbaile\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Legendary Creature — Kithkin Archer\",\"text\":\"First strike\\n{T}: Brigid deals 2 damage to each attacking or blocking creature target player controls.\"},{\"id\":7,\"name\":\"Burrenton Forge-Tender\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kithkin Wizard\",\"text\":\"Protection from red\\nSacrifice this creature: Prevent all damage a red source of your choice would deal this turn.\"},{\"id\":8,\"name\":\"Cenn's Heir\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"Whenever this creature attacks, it gets +1/+1 until end of turn for each other attacking Kithkin.\"},{\"id\":9,\"name\":\"Changeling Hero\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nChampion a creature (When this enters, sacrifice it unless you exile another creature you control. When this leaves the battlefield, that card returns to the battlefield.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":10,\"name\":\"Cloudgoat Ranger\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Giant Warrior Ranger\",\"text\":\"When this creature enters, create three 1/1 white Kithkin Soldier creature tokens.\\nTap three untapped Kithkin you control: This creature gets +2/+0 and gains flying until end of turn.\"},{\"id\":11,\"name\":\"Crib Swap\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Kindred Instant — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nExile target creature. Its controller creates a 1/1 colorless Shapeshifter creature token with changeling.\"},{\"id\":12,\"name\":\"Dawnfluke\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flash\\nWhen this creature enters, prevent the next 3 damage that would be dealt to any target this turn.\\nEvoke {W} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":13,\"name\":\"Entangling Trap\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you clash, tap target creature an opponent controls. If you won, that creature doesn't untap during its controller's next untap step. (This ability triggers after the clash ends.)\"},{\"id\":14,\"name\":\"Favor of the Mighty\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Kindred Enchantment — Giant\",\"text\":\"Each creature with the greatest mana value has protection from each color.\"},{\"id\":15,\"name\":\"Galepowder Mage\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Kithkin Wizard\",\"text\":\"Flying\\nWhenever this creature attacks, exile another target creature. Return that card to the battlefield under its owner's control at the beginning of the next end step.\"},{\"id\":16,\"name\":\"Goldmeadow Dodger\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kithkin Rogue\",\"text\":\"This creature can't be blocked by creatures with power 4 or greater.\"},{\"id\":17,\"name\":\"Goldmeadow Harrier\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"{W}, {T}: Tap target creature.\"},{\"id\":18,\"name\":\"Goldmeadow Stalwart\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"As an additional cost to cast this spell, reveal a Kithkin card from your hand or pay {3}.\"},{\"id\":19,\"name\":\"Harpoon Sniper\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Merfolk Archer\",\"text\":\"{W}, {T}: This creature deals X damage to target attacking or blocking creature, where X is the number of Merfolk you control.\"},{\"id\":20,\"name\":\"Hillcomber Giant\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Giant Scout\",\"text\":\"Mountainwalk (This creature can't be blocked as long as defending player controls a Mountain.)\"},{\"id\":21,\"name\":\"Hoofprints of the Stag\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Kindred Enchantment — Elemental\",\"text\":\"Whenever you draw a card, you may put a hoofprint counter on this enchantment.\\n{2}{W}, Remove four hoofprint counters from this enchantment: Create a 4/4 white Elemental creature token with flying. Activate only during your turn.\"},{\"id\":22,\"name\":\"Judge of Currents\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Whenever a Merfolk you control becomes tapped, you may gain 1 life.\"},{\"id\":23,\"name\":\"Kinsbaile Balloonist\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"Flying\\nWhenever this creature attacks, you may have target creature gain flying until end of turn.\"},{\"id\":24,\"name\":\"Kinsbaile Skirmisher\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"When this creature enters, target creature gets +1/+1 until end of turn.\"},{\"id\":25,\"name\":\"Kithkin Greatheart\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"As long as you control a Giant, this creature gets +1/+1 and has first strike.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1148,
+      "cacheCreationInputTokens": 32689,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.765329,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.765329,
+      "pricedUsd": 0.765329,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.765329 and its own usage prices at $0.765329"
+    }
+  }
+}

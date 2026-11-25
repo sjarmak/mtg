@@ -1,0 +1,161 @@
+{
+  "key": "3f4c9e1641ba2532e2dceaf2a3282791",
+  "recordedAt": "2026-11-22T22:12:36.662Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Nightmarish End\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -X/-X until end of turn, where X is the number of cards in your hand.\"},{\"id\":2,\"name\":\"Nyx Infusion\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 as long as it's an enchantment. Otherwise, it gets -2/-2.\"},{\"id\":3,\"name\":\"Pharika's Chosen\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":4,\"name\":\"Returned Reveler\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Satyr\",\"text\":\"When this creature dies, each player mills three cards.\"},{\"id\":5,\"name\":\"Ritual of the Returned\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature card from your graveyard. Create a black Zombie creature token. Its power is equal to that card's power and its toughness is equal to that card's toughness.\"},{\"id\":6,\"name\":\"Rotted Hulk\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"\"},{\"id\":7,\"name\":\"Silence the Believers\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Strive — This spell costs {2}{B} more to cast for each target beyond the first.\\nExile any number of target creatures and all Auras attached to them.\"},{\"id\":8,\"name\":\"Spiteful Blow\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature and target land.\"},{\"id\":9,\"name\":\"Squelching Leeches\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Leech\",\"text\":\"Squelching Leeches's power and toughness are each equal to the number of Swamps you control.\"},{\"id\":10,\"name\":\"Thoughtrender Lamia\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Enchantment Creature — Lamia\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, each opponent discards a card.\"},{\"id\":11,\"name\":\"Tormented Thoughts\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nTarget player discards a number of cards equal to the sacrificed creature's power.\"},{\"id\":12,\"name\":\"Worst Fears\",\"manaCost\":\"{7}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"You control target player during that player's next turn. Exile Worst Fears. (You see all cards that player could see and make all decisions for them.)\"},{\"id\":13,\"name\":\"Akroan Line Breaker\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, this creature gets +2/+0 and gains intimidate until end of turn. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":14,\"name\":\"Bearer of the Heavens\",\"manaCost\":\"{7}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"When this creature dies, destroy all permanents at the beginning of the next end step.\"},{\"id\":15,\"name\":\"Bladetusk Boar\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Boar\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":16,\"name\":\"Blinding Flare\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Strive — This spell costs {R} more to cast for each target beyond the first.\\nAny number of target creatures can't block this turn.\"},{\"id\":17,\"name\":\"Cyclops of Eternal Fury\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Enchantment Creature — Cyclops\",\"text\":\"Creatures you control have haste.\"},{\"id\":18,\"name\":\"Dictate of the Twin Gods\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Flash\\nIf a source would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.\"},{\"id\":19,\"name\":\"Eidolon of the Great Revel\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Whenever a player casts a spell with mana value 3 or less, this creature deals 2 damage to that player.\"},{\"id\":20,\"name\":\"Flamespeaker's Will\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nEnchanted creature gets +1/+1.\\nWhenever enchanted creature deals combat damage to a player, you may sacrifice this Aura. If you do, destroy target artifact.\"},{\"id\":21,\"name\":\"Flurry of Horns\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 2/3 red Minotaur creature tokens with haste.\"},{\"id\":22,\"name\":\"Font of Ire\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"{3}{R}, Sacrifice this enchantment: It deals 5 damage to target player or planeswalker.\"},{\"id\":23,\"name\":\"Forgeborn Oreads\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, this creature deals 1 damage to any target.\"},{\"id\":24,\"name\":\"Gluttonous Cyclops\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Cyclops\",\"text\":\"{5}{R}{R}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\"},{\"id\":25,\"name\":\"Harness by Force\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Strive — This spell costs {2}{R} more to cast for each target beyond the first.\\nGain control of any number of target creatures until end of turn. Untap those creatures. They gain haste until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1990,
+      "cacheCreationInputTokens": 32383,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.801309,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.801309,
+      "pricedUsd": 0.801309,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.801309 and its own usage prices at $0.801309"
+    }
+  }
+}

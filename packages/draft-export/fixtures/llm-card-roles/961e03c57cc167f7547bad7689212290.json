@@ -1,0 +1,161 @@
+{
+  "key": "961e03c57cc167f7547bad7689212290",
+  "recordedAt": "2026-11-22T22:06:30.048Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Haunter of Nightveil\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Creatures your opponents control get -1/-0.\"},{\"id\":2,\"name\":\"Jelenn Sphinx\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying, vigilance\\nWhenever this creature attacks, other attacking creatures get +1/+1 until end of turn.\"},{\"id\":3,\"name\":\"Korozda Gorgon\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Creature — Gorgon\",\"text\":\"Deathtouch\\n{2}, Remove a +1/+1 counter from a creature you control: Target creature gets -1/-1 until end of turn.\"},{\"id\":4,\"name\":\"Krasis Incubation\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\\n{1}{G}{U}, Return this Aura to its owner's hand: Put two +1/+1 counters on enchanted creature.\"},{\"id\":5,\"name\":\"Lavinia of the Tenth\",\"manaCost\":\"{3}{W}{U}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"Protection from red\\nWhen Lavinia enters, detain each nonland permanent your opponents control with mana value 4 or less. (Until your next turn, those permanents can't attack or block and their activated abilities can't be activated.)\"},{\"id\":6,\"name\":\"Legion's Initiative\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Red creatures you control get +1/+0.\\nWhite creatures you control get +0/+1.\\n{R}{W}, Exile this enchantment: Exile all creatures you control. At the beginning of the next combat, return those cards to the battlefield under their owner's control and those creatures gain haste until end of turn.\"},{\"id\":7,\"name\":\"Master of Cruelties\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Demon\",\"text\":\"First strike, deathtouch\\nThis creature can only attack alone.\\nWhenever this creature attacks a player and isn't blocked, that player's life total becomes 1. This creature assigns no combat damage this combat.\"},{\"id\":8,\"name\":\"Maw of the Obzedat\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"Sacrifice a creature: Creatures you control get +1/+1 until end of turn.\"},{\"id\":9,\"name\":\"Melek, Izzet Paragon\",\"manaCost\":\"{4}{U}{R}\",\"typeLine\":\"Legendary Creature — Weird Wizard\",\"text\":\"Play with the top card of your library revealed.\\nYou may cast instant and sorcery spells from the top of your library.\\nWhenever you cast an instant or sorcery spell from your library, copy it. You may choose new targets for the copy.\"},{\"id\":10,\"name\":\"Mirko Vosk, Mind Drinker\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Legendary Creature — Vampire\",\"text\":\"Flying\\nWhenever Mirko Vosk deals combat damage to a player, that player reveals cards from the top of their library until they reveal four land cards, then puts those cards into their graveyard.\"},{\"id\":11,\"name\":\"Morgue Burst\",\"manaCost\":\"{4}{B}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to your hand. Morgue Burst deals damage to any target equal to the power of the card returned this way.\"},{\"id\":12,\"name\":\"Nivix Cyclops\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Cyclops\",\"text\":\"Defender\\nWhenever you cast an instant or sorcery spell, this creature gets +3/+0 until end of turn and can attack this turn as though it didn't have defender.\"},{\"id\":13,\"name\":\"Notion Thief\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Flash\\nIf an opponent would draw a card except the first one they draw in each of their draw steps, instead that player skips that draw and you draw a card.\"},{\"id\":14,\"name\":\"Obzedat's Aid\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target permanent card from your graveyard to the battlefield.\"},{\"id\":15,\"name\":\"Pilfered Plans\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills two cards. Draw two cards.\"},{\"id\":16,\"name\":\"Plasm Capture\",\"manaCost\":\"{G}{G}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. At the beginning of your next first main phase, add X mana in any combination of colors, where X is that spell's mana value.\"},{\"id\":17,\"name\":\"Progenitor Mimic\",\"manaCost\":\"{4}{G}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield, except it has \\\"At the beginning of your upkeep, if this creature isn't a token, create a token that's a copy of this creature.\\\"\"},{\"id\":18,\"name\":\"Putrefy\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or creature. It can't be regenerated.\"},{\"id\":19,\"name\":\"Ral Zarek\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Legendary Planeswalker — Ral\",\"text\":\"+1: Tap target permanent, then untap another target permanent.\\n−2: Ral Zarek deals 3 damage to any target.\\n−7: Flip five coins. Take an extra turn after this one for each coin that comes up heads.\"},{\"id\":20,\"name\":\"Reap Intellect\",\"manaCost\":\"{X}{2}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose up to X nonland cards from it and exile them. For each card exiled this way, search that player's graveyard, hand, and library for any number of cards with the same name as that card and exile them. Then that player shuffles.\"},{\"id\":21,\"name\":\"Render Silent\",\"manaCost\":\"{W}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Its controller can't cast spells this turn.\"},{\"id\":22,\"name\":\"Restore the Peace\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return each creature that dealt damage this turn to its owner's hand.\"},{\"id\":23,\"name\":\"Rot Farm Skeleton\",\"manaCost\":\"{2}{B}{G}\",\"typeLine\":\"Creature — Plant Skeleton\",\"text\":\"This creature can't block.\\n{2}{B}{G}, Mill four cards: Return this card from your graveyard to the battlefield. Activate only as a sorcery.\"},{\"id\":24,\"name\":\"Ruric Thar, the Unbowed\",\"manaCost\":\"{4}{R}{G}\",\"typeLine\":\"Legendary Creature — Ogre Warrior\",\"text\":\"Reach, vigilance\\nRuric Thar attacks each combat if able.\\nWhenever a player casts a noncreature spell, Ruric Thar deals 6 damage to that player.\"},{\"id\":25,\"name\":\"Savageborn Hydra\",\"manaCost\":\"{X}{R}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"Double strike\\nThis creature enters with X +1/+1 counters on it.\\n{1}{R/G}: Put a +1/+1 counter on this creature. Activate only as a sorcery.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\",\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction", "fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1488,
+      "cacheCreationInputTokens": 32820,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7849490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7849490000000001,
+      "pricedUsd": 0.784949,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.784949 and its own usage prices at $0.784949"
+    }
+  }
+}

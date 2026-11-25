@@ -1,0 +1,161 @@
+{
+  "key": "137f869c1b3b07a5fb5662478142ae71",
+  "recordedAt": "2026-11-22T21:38:05.107Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Vital Splicer\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Phyrexian Human Artificer\",\"text\":\"When this creature enters, create a 3/3 colorless Phyrexian Golem artifact creature token.\\n{1}: Regenerate target Golem you control.\"},{\"id\":2,\"name\":\"Vorinclex, Voice of Hunger\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Legendary Creature — Phyrexian Praetor\",\"text\":\"Trample\\nWhenever you tap a land for mana, add one mana of any type that land produced.\\nWhenever an opponent taps a land for mana, that land doesn't untap during its controller's next untap step.\"},{\"id\":3,\"name\":\"Jor Kadeen, the Prevailer\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Legendary Creature — Human Warrior\",\"text\":\"First strike\\nMetalcraft — Creatures you control get +3/+0 as long as you control three or more artifacts.\"},{\"id\":4,\"name\":\"Alloy Myr\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add one mana of any color.\"},{\"id\":5,\"name\":\"Batterskull\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +4/+4 and has vigilance and lifelink.\\n{3}: Return this Equipment to its owner's hand.\\nEquip {5}\"},{\"id\":6,\"name\":\"Blinding Souleater\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Phyrexian Cleric\",\"text\":\"{W/P}, {T}: Tap target creature. ({W/P} can be paid with either {W} or 2 life.)\"},{\"id\":7,\"name\":\"Caged Sun\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a color.\\nCreatures you control of the chosen color get +1/+1.\\nWhenever a land's ability causes you to add one or more mana of the chosen color, add an additional one mana of that color.\"},{\"id\":8,\"name\":\"Conversion Chamber\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Exile target artifact card from a graveyard. Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Create a 3/3 colorless Phyrexian Golem artifact creature token.\"},{\"id\":9,\"name\":\"Darksteel Relic\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact\",\"text\":\"Indestructible (Effects that say \\\"destroy\\\" don't destroy this artifact.)\"},{\"id\":10,\"name\":\"Etched Monstrosity\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Phyrexian Golem\",\"text\":\"This creature enters with five -1/-1 counters on it.\\n{W}{U}{B}{R}{G}, Remove five -1/-1 counters from this creature: Target player draws three cards.\"},{\"id\":11,\"name\":\"Gremlin Mine\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}, Sacrifice this artifact: It deals 4 damage to target artifact creature.\\n{1}, {T}, Sacrifice this artifact: Remove up to four charge counters from target noncreature artifact.\"},{\"id\":12,\"name\":\"Hex Parasite\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact Creature — Phyrexian Insect\",\"text\":\"{X}{B/P}: Remove up to X counters from target permanent. For each counter removed this way, this creature gets +1/+0 until end of turn. ({B/P} can be paid with either {B} or 2 life.)\"},{\"id\":13,\"name\":\"Hovermyr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"Flying, vigilance\"},{\"id\":14,\"name\":\"Immolating Souleater\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Dog\",\"text\":\"{R/P}: This creature gets +1/+0 until end of turn. ({R/P} can be paid with either {R} or 2 life.)\"},{\"id\":15,\"name\":\"Insatiable Souleater\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Beast\",\"text\":\"{G/P}: This creature gains trample until end of turn. ({G/P} can be paid with either {G} or 2 life.)\"},{\"id\":16,\"name\":\"Isolation Cell\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever an opponent casts a creature spell, that player loses 2 life unless they pay {2}.\"},{\"id\":17,\"name\":\"Kiln Walker\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Phyrexian Construct\",\"text\":\"Whenever this creature attacks, it gets +3/+0 until end of turn.\"},{\"id\":18,\"name\":\"Lashwrithe\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +1/+1 for each Swamp you control.\\nEquip {B/P}{B/P} ({B/P} can be paid with either {B} or 2 life.)\"},{\"id\":19,\"name\":\"Mindcrank\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever an opponent loses life, that player mills that many cards. (Damage causes loss of life.)\"},{\"id\":20,\"name\":\"Mycosynth Wellspring\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters or is put into a graveyard from the battlefield, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":21,\"name\":\"Myr Superion\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"Spend only mana produced by creatures to cast this spell.\"},{\"id\":22,\"name\":\"Necropouncer\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +3/+1 and has haste.\\nEquip {2}\"},{\"id\":23,\"name\":\"Omen Machine\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"Players can't draw cards.\\nAt the beginning of each player's draw step, that player exiles the top card of their library. If it's a land card, the player puts it onto the battlefield. Otherwise, the player casts it without paying its mana cost if able.\"},{\"id\":24,\"name\":\"Pestilent Souleater\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Phyrexian Insect\",\"text\":\"{B/P}: This creature gains infect until end of turn. ({B/P} can be paid with either {B} or 2 life. A creature with infect deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":25,\"name\":\"Phyrexian Hulk\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Phyrexian Golem\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"fixing\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1482,
+      "cacheCreationInputTokens": 32745,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7831490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7831490000000001,
+      "pricedUsd": 0.783149,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.783149 and its own usage prices at $0.783149"
+    }
+  }
+}

@@ -195,7 +195,7 @@ change, use output `play-admission-v8/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `xln` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v7`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher reads every supported entry at boot and `startBackendService` admits
 all of them behind one Forge identity, so a launcher started before this entry
 landed needs a restart to serve Ixalan. Card art is not staged: the catalog

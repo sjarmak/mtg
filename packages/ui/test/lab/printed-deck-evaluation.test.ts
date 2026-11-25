@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import { prepareLimitedDeck, validateLimitedDeck } from '@mtg/limited';
+import { parsePrintedCardCatalog } from '@mtg/printed-card';
 import type { PrintedCardCatalogEntry } from '@mtg/printed-card';
-import { printedSourceFingerprint } from '@mtg/draft-export';
+import { printedCardRolesOf, printedSourceFingerprint, validatePrintedCardRoles } from '@mtg/draft-export';
 import type { PreparedPrintedLimitedFormat, PrintedBoosterCopy } from '@mtg/draft-export';
 import { PrintedDraftRatingsSchema } from '../../src/lab/printed-draft-ratings';
 import { printedLimitedFacts } from '../../src/routes/printed/limited-facts';
@@ -16,6 +17,7 @@ import {
   printedBotCalibrationNote,
   printedBotLabel,
   printedBotForPolicy,
+  roleAwarePrintedBot,
 } from '../../src/routes/printed/draft-bot';
 
 const cards = ['akh', 'hou', 'mp2'].flatMap(
@@ -248,4 +250,41 @@ it('uses staged set rankings when constructing an unauthored printed pool', () =
   expect(structural.selectedPhysicalIds).not.toContain('copy-24');
   expect(ranked.selectedPhysicalIds).toContain('copy-24');
   expect(validateLimitedDeck(ranked).legal).toBe(true);
+});
+
+it('layers labeled card roles on the structural bot only under a policy that names them', () => {
+  const isd = parsePrintedCardCatalog(
+    JSON.parse(readFileSync('packages/data/data/isd/isd-printed-catalog-v1.json', 'utf8')),
+  );
+  const roles = validatePrintedCardRoles(
+    JSON.parse(readFileSync('packages/data/data/isd/card-roles-v1.json', 'utf8')),
+    [{ code: 'ISD', catalog: isd }],
+  );
+  const bot = roleAwarePrintedBot(roles);
+  expect(bot.botPolicy.startsWith(`${PRINTED_GENERAL_BOT.botPolicy}+roles/`)).toBe(true);
+  expect(printedBotForPolicy(bot.botPolicy, undefined, roles).botPolicy).toBe(bot.botPolicy);
+  expect(() => printedBotForPolicy(bot.botPolicy)).toThrow(/unavailable/u);
+  expect(createPrintedReplayBot(bot.botPolicy, undefined, roles).botPolicy).toBe(bot.botPolicy);
+  expect(printedBotLabel(bot.botPolicy)).toBe('General structural with card roles');
+
+  const isdCopy = (printing: PrintedCardCatalogEntry, physicalId: string): PrintedBoosterCopy => ({
+    physicalId,
+    payload: { printing, sourceSetCode: 'ISD', productId: 'fixture', slot: { sheet: 'common', foil: null } },
+  });
+  const roleless = isd.cards.filter(
+    (card) => printedCardRolesOf(roles, card).length === 0 && /\bCreature\b/u.test(card.typeLine),
+  );
+  const answer = isd.cards.find(
+    (card) =>
+      printedCardRolesOf(roles, card).includes('interaction') &&
+      !/\b(?:Creature|Land)\b/u.test(card.typeLine),
+  )!;
+  const picked = roleless.slice(0, 10).map((card, index) => isdCopy(card, `picked-${index}`));
+  type ScoreInput = Parameters<typeof bot.score>[0];
+  const gain = (card: PrintedCardCatalogEntry): number => {
+    const input = { card: isdCopy(card, 'offered'), picked } as unknown as ScoreInput;
+    return bot.score(input) - PRINTED_GENERAL_BOT.score(input);
+  };
+  expect(gain(answer)).toBeGreaterThan(0);
+  expect(gain(roleless[20]!)).toBe(0);
 });

@@ -1,0 +1,161 @@
+{
+  "key": "a84f52190f0d79cdc86d1dd9cd97dbb8",
+  "recordedAt": "2026-11-22T22:38:30.208Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Lammastide Weave\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose a card name, then target player mills a card. If a card with the chosen name was milled this way, you gain life equal to its mana value.\\nDraw a card.\"},{\"id\":2,\"name\":\"Leaf Gilder\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":3,\"name\":\"Lignify\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Kindred Enchantment — Treefolk Aura\",\"text\":\"Enchant creature\\nEnchanted creature is a Treefolk with base power and toughness 0/4 and loses all abilities.\"},{\"id\":4,\"name\":\"Lys Alana Huntmaster\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Whenever you cast an Elf spell, you may create a 1/1 green Elf Warrior creature token.\"},{\"id\":5,\"name\":\"Masked Admirers\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, draw a card.\\nWhenever you cast a creature spell, you may pay {G}{G}. If you do, return this card from your graveyard to your hand.\"},{\"id\":6,\"name\":\"Nath's Elite\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"All creatures able to block this creature do so.\\nWhen this creature enters, clash with an opponent. If you win, put a +1/+1 counter on this creature. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":7,\"name\":\"Oakgnarl Warrior\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Vigilance, trample\"},{\"id\":8,\"name\":\"Primal Command\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose two —\\n• Target player gains 7 life.\\n• Put target noncreature permanent on top of its owner's library.\\n• Target player shuffles their graveyard into their library.\\n• Search your library for a creature card, reveal it, put it into your hand, then shuffle.\"},{\"id\":9,\"name\":\"Rootgrapple\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Kindred Instant — Treefolk\",\"text\":\"Destroy target noncreature permanent. If you control a Treefolk, draw a card.\"},{\"id\":10,\"name\":\"Seedguide Ash\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Treefolk Druid\",\"text\":\"When this creature dies, you may search your library for up to three Forest cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":11,\"name\":\"Spring Cleaning\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment. Clash with an opponent. If you win, destroy all enchantments your opponents control. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":12,\"name\":\"Sylvan Echoes\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you clash and win, you may draw a card. (This ability triggers after the clash ends.)\"},{\"id\":13,\"name\":\"Timber Protector\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Other Treefolk creatures you control get +1/+1.\\nOther Treefolk and Forests you control have indestructible.\"},{\"id\":14,\"name\":\"Treefolk Harbinger\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Treefolk Druid\",\"text\":\"When this creature enters, you may search your library for a Treefolk or Forest card, reveal it, then shuffle and put that card on top.\"},{\"id\":15,\"name\":\"Vigor\",\"manaCost\":\"{3}{G}{G}{G}\",\"typeLine\":\"Creature — Elemental Incarnation\",\"text\":\"Trample\\nIf damage would be dealt to another creature you control, prevent that damage. Put a +1/+1 counter on that creature for each 1 damage prevented this way.\\nWhen Vigor is put into a graveyard from anywhere, shuffle it into its owner's library.\"},{\"id\":16,\"name\":\"Warren-Scourge Elf\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Protection from Goblins\"},{\"id\":17,\"name\":\"Woodland Changeling\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\"},{\"id\":18,\"name\":\"Woodland Guidance\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target card from your graveyard to your hand. Clash with an opponent. If you win, untap all Forests you control. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\\nExile Woodland Guidance.\"},{\"id\":19,\"name\":\"Wren's Run Packmaster\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Champion an Elf (When this creature enters, sacrifice it unless you exile another Elf you control. When this creature leaves the battlefield, that card returns to the battlefield.)\\n{2}{G}: Create a 2/2 green Wolf creature token.\\nWolves you control have deathtouch.\"},{\"id\":20,\"name\":\"Wren's Run Vanquisher\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"As an additional cost to cast this spell, reveal an Elf card from your hand or pay {3}.\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":21,\"name\":\"Brion Stoutarm\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Legendary Creature — Giant Warrior\",\"text\":\"Lifelink\\n{R}, {T}, Sacrifice another creature: Brion Stoutarm deals damage equal to the sacrificed creature's power to target player or planeswalker.\"},{\"id\":22,\"name\":\"Doran, the Siege Tower\",\"manaCost\":\"{W}{B}{G}\",\"typeLine\":\"Legendary Creature — Treefolk Shaman\",\"text\":\"Each creature assigns combat damage equal to its toughness rather than its power.\"},{\"id\":23,\"name\":\"Gaddock Teeg\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Legendary Creature — Kithkin Advisor\",\"text\":\"Noncreature spells with mana value 4 or greater can't be cast.\\nNoncreature spells with {X} in their mana costs can't be cast.\"},{\"id\":24,\"name\":\"Horde of Notions\",\"manaCost\":\"{W}{U}{B}{R}{G}\",\"typeLine\":\"Legendary Creature — Elemental\",\"text\":\"Vigilance, trample, haste\\n{W}{U}{B}{R}{G}: You may play target Elemental card from your graveyard without paying its mana cost.\"},{\"id\":25,\"name\":\"Nath of the Gilt-Leaf\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Legendary Creature — Elf Warrior\",\"text\":\"At the beginning of your upkeep, you may have target opponent discard a card at random.\\nWhenever an opponent discards a card, you may create a 1/1 green Elf Warrior creature token.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1862,
+      "cacheCreationInputTokens": 32838,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.804009,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.804009,
+      "pricedUsd": 0.804009,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.804009 and its own usage prices at $0.804009"
+    }
+  }
+}

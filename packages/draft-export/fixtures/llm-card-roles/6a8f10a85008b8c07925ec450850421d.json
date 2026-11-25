@@ -1,0 +1,161 @@
+{
+  "key": "6a8f10a85008b8c07925ec450850421d",
+  "recordedAt": "2026-11-22T21:49:37.002Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Djinn of Wishes\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"Flying\\nThis creature enters with three wish counters on it.\\n{2}{U}{U}, Remove a wish counter from this creature: Reveal the top card of your library. You may play that card without paying its mana cost. If you don't, exile it.\"},{\"id\":2,\"name\":\"Flashfreeze\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target red or green spell.\"},{\"id\":3,\"name\":\"Flight\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has flying.\"},{\"id\":4,\"name\":\"Frost Breath\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap up to two target creatures. Those creatures don't untap during their controller's next untap step.\"},{\"id\":5,\"name\":\"Frost Titan\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Whenever this creature becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays {2}.\\nWhenever this creature enters or attacks, tap target permanent. It doesn't untap during its controller's next untap step.\"},{\"id\":6,\"name\":\"Harbor Serpent\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nThis creature can't attack unless there are five or more Islands on the battlefield.\"},{\"id\":7,\"name\":\"Ice Cage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\\nWhen enchanted creature becomes the target of a spell or ability, destroy this Aura.\"},{\"id\":8,\"name\":\"Jace, Memory Adept\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+1: Draw a card. Target player mills a card.\\n0: Target player mills ten cards.\\n−7: Any number of target players each draw twenty cards.\"},{\"id\":9,\"name\":\"Jace's Archivist\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"{U}, {T}: Each player discards their hand, then draws cards equal to the greatest number of cards a player discarded this way.\"},{\"id\":10,\"name\":\"Jace's Erasure\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you draw a card, you may have target player mill a card.\"},{\"id\":11,\"name\":\"Levitation\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control have flying.\"},{\"id\":12,\"name\":\"Lord of the Unreal\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Illusion creatures you control get +1/+1 and have hexproof. (They can't be the targets of spells or abilities your opponents control.)\"},{\"id\":13,\"name\":\"Mana Leak\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {3}.\"},{\"id\":14,\"name\":\"Master Thief\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"When this creature enters, gain control of target artifact for as long as you control this creature.\"},{\"id\":15,\"name\":\"Merfolk Looter\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"{T}: Draw a card, then discard a card.\"},{\"id\":16,\"name\":\"Merfolk Mesmerist\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"{U}, {T}: Target player mills two cards.\"},{\"id\":17,\"name\":\"Mind Control\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\"},{\"id\":18,\"name\":\"Mind Unbound\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, put a lore counter on this enchantment, then draw a card for each lore counter on this enchantment.\"},{\"id\":19,\"name\":\"Negate\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\"},{\"id\":20,\"name\":\"Phantasmal Bear\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Bear Illusion\",\"text\":\"When this creature becomes the target of a spell or ability, sacrifice it.\"},{\"id\":21,\"name\":\"Phantasmal Dragon\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Dragon Illusion\",\"text\":\"Flying\\nWhen this creature becomes the target of a spell or ability, sacrifice it.\"},{\"id\":22,\"name\":\"Phantasmal Image\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield, except it's an Illusion in addition to its other types and it has \\\"When this creature becomes the target of a spell or ability, sacrifice it.\\\"\"},{\"id\":23,\"name\":\"Ponder\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of your library, then put them back in any order. You may shuffle.\\nDraw a card.\"},{\"id\":24,\"name\":\"Redirect\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"You may choose new targets for target spell.\"},{\"id\":25,\"name\":\"Skywinder Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nThis creature can block only creatures with flying.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1176,
+      "cacheCreationInputTokens": 32271,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.758369,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.758369,
+      "pricedUsd": 0.758369,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.758369 and its own usage prices at $0.758369"
+    }
+  }
+}

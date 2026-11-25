@@ -1,0 +1,161 @@
+{
+  "key": "057759ce7cfdf6b01b416a58b16cd4f2",
+  "recordedAt": "2026-11-22T21:56:00.438Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Quickling\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\\nWhen this creature enters, sacrifice it unless you return another creature you control to its owner's hand.\"},{\"id\":2,\"name\":\"Research Assistant\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{3}{U}, {T}: Draw a card, then discard a card.\"},{\"id\":3,\"name\":\"Soul of Ravnica\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Flying\\n{5}{U}{U}: Draw a card for each color among permanents you control.\\n{5}{U}{U}, Exile this card from your graveyard: Draw a card for each color among permanents you control.\"},{\"id\":4,\"name\":\"Statute of Denial\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. If you control a blue creature, draw a card, then discard a card.\"},{\"id\":5,\"name\":\"Stormtide Leviathan\",\"manaCost\":\"{5}{U}{U}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nAll lands are Islands in addition to their other types.\\nCreatures without flying or islandwalk can't attack.\"},{\"id\":6,\"name\":\"Turn to Frog\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature loses all abilities and becomes a blue Frog with base power and toughness 1/1.\"},{\"id\":7,\"name\":\"Void Snare\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target nonland permanent to its owner's hand.\"},{\"id\":8,\"name\":\"Wall of Frost\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\nWhenever this creature blocks a creature, that creature doesn't untap during its controller's next untap step.\"},{\"id\":9,\"name\":\"Welkin Tern\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature can block only creatures with flying.\"},{\"id\":10,\"name\":\"Accursed Spirit\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":11,\"name\":\"Black Cat\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Cat\",\"text\":\"When this creature dies, target opponent discards a card at random.\"},{\"id\":12,\"name\":\"Blood Host\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"{1}{B}, Sacrifice another creature: Put a +1/+1 counter on this creature and you gain 2 life.\"},{\"id\":13,\"name\":\"Carrion Crow\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Bird\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature enters tapped.\"},{\"id\":14,\"name\":\"Caustic Tar\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{T}: Target player loses 3 life.\\\"\"},{\"id\":15,\"name\":\"Child of Night\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Lifelink\"},{\"id\":16,\"name\":\"Covenant of Blood\",\"manaCost\":\"{6}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nCovenant of Blood deals 4 damage to any target and you gain 4 life.\"},{\"id\":17,\"name\":\"Crippling Blight\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -1/-1 and can't block.\"},{\"id\":18,\"name\":\"Cruel Sadist\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"{B}, {T}, Pay 1 life: Put a +1/+1 counter on this creature.\\n{2}{B}, {T}, Remove X +1/+1 counters from this creature: It deals X damage to target creature.\"},{\"id\":19,\"name\":\"Endless Obedience\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nPut target creature card from a graveyard onto the battlefield under your control.\"},{\"id\":20,\"name\":\"Eternal Thirst\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has lifelink and \\\"Whenever a creature an opponent controls dies, put a +1/+1 counter on this creature.\\\" (Damage dealt by a creature with lifelink also causes its controller to gain that much life.)\"},{\"id\":21,\"name\":\"Feast on the Fallen\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each upkeep, if an opponent lost life last turn, put a +1/+1 counter on target creature you control.\"},{\"id\":22,\"name\":\"Festergloom\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Nonblack creatures get -1/-1 until end of turn.\"},{\"id\":23,\"name\":\"Flesh to Dust\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature. It can't be regenerated.\"},{\"id\":24,\"name\":\"Gravedigger\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, you may return target creature card from your graveyard to your hand.\"},{\"id\":25,\"name\":\"In Garruk's Wake\",\"manaCost\":\"{7}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures you don't control and all planeswalkers you don't control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 431,
+      "cacheCreationInputTokens": 32433,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7243589999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7243589999999999,
+      "pricedUsd": 0.724359,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.724359 and its own usage prices at $0.724359"
+    }
+  }
+}

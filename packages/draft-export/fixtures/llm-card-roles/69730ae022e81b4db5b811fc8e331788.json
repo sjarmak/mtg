@@ -1,0 +1,161 @@
+{
+  "key": "69730ae022e81b4db5b811fc8e331788",
+  "recordedAt": "2026-11-22T21:50:49.127Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Adaptive Automaton\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"As this creature enters, choose a creature type.\\nThis creature is the chosen type in addition to its other types.\\nOther creatures you control of the chosen type get +1/+1.\"},{\"id\":2,\"name\":\"Angel's Feather\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a white spell, you may gain 1 life.\"},{\"id\":3,\"name\":\"Crown of Empires\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: Tap target creature. Gain control of that creature instead if you control artifacts named Scepter of Empires and Throne of Empires.\"},{\"id\":4,\"name\":\"Crumbling Colossus\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nWhen this creature attacks, sacrifice it at end of combat.\"},{\"id\":5,\"name\":\"Demon's Horn\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a black spell, you may gain 1 life.\"},{\"id\":6,\"name\":\"Dragon's Claw\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a red spell, you may gain 1 life.\"},{\"id\":7,\"name\":\"Druidic Satchel\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Reveal the top card of your library. If it's a creature card, create a 1/1 green Saproling creature token. If it's a land card, put that card onto the battlefield under your control. If it's a noncreature, nonland card, you gain 2 life.\"},{\"id\":8,\"name\":\"Elixir of Immortality\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: You gain 5 life. Shuffle this artifact and your graveyard into their owner's library.\"},{\"id\":9,\"name\":\"Greatsword\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +3/+0.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":10,\"name\":\"Kite Shield\",\"manaCost\":\"{0}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +0/+3.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":11,\"name\":\"Kraken's Eye\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a blue spell, you may gain 1 life.\"},{\"id\":12,\"name\":\"Manalith\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add one mana of any color.\"},{\"id\":13,\"name\":\"Pentavus\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"This creature enters with five +1/+1 counters on it.\\n{1}, Remove a +1/+1 counter from this creature: Create a 1/1 colorless Pentavite artifact creature token with flying.\\n{1}, Sacrifice a Pentavite: Put a +1/+1 counter on this creature.\"},{\"id\":14,\"name\":\"Quicksilver Amulet\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{4}, {T}: You may put a creature card from your hand onto the battlefield.\"},{\"id\":15,\"name\":\"Rusted Sentinel\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"This creature enters tapped.\"},{\"id\":16,\"name\":\"Scepter of Empires\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: This artifact deals 1 damage to target player or planeswalker. It deals 3 damage instead if you control artifacts named Crown of Empires and Throne of Empires.\"},{\"id\":17,\"name\":\"Solemn Simulacrum\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"When this creature enters, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\\nWhen this creature dies, you may draw a card.\"},{\"id\":18,\"name\":\"Sundial of the Infinite\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: End the turn. Activate only during your turn. (Exile all spells and abilities from the stack. Discard down to your maximum hand size. Damage wears off, and \\\"this turn\\\" and \\\"until end of turn\\\" effects end.)\"},{\"id\":19,\"name\":\"Swiftfoot Boots\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has hexproof and haste. (It can't be the target of spells or abilities your opponents control. It can attack and {T} no matter when it came under your control.)\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":20,\"name\":\"Thran Golem\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"As long as this creature is enchanted, it gets +2/+2 and has flying, first strike, and trample.\"},{\"id\":21,\"name\":\"Throne of Empires\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Create a 1/1 white Soldier creature token. Create five of those tokens instead if you control artifacts named Crown of Empires and Scepter of Empires.\"},{\"id\":22,\"name\":\"Worldslayer\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever equipped creature deals combat damage to a player, destroy all permanents other than this Equipment.\\nEquip {5} ({5}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":23,\"name\":\"Wurm's Tooth\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever a player casts a green spell, you may gain 1 life.\"},{\"id\":24,\"name\":\"Buried Ruin\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}, {T}, Sacrifice this land: Return target artifact card from your graveyard to your hand.\"},{\"id\":25,\"name\":\"Dragonskull Summit\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control a Swamp or a Mountain.\\n{T}: Add {B} or {R}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"draw\",\"fixing\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1453,
+      "cacheCreationInputTokens": 32475,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776299,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776299,
+      "pricedUsd": 0.776299,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776299 and its own usage prices at $0.776299"
+    }
+  }
+}

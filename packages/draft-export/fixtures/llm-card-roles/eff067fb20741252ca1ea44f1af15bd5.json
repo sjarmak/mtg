@@ -1,0 +1,161 @@
+{
+  "key": "eff067fb20741252ca1ea44f1af15bd5",
+  "recordedAt": "2026-11-22T22:02:54.874Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Syndic of Tithes\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":2,\"name\":\"Urbis Protector\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, create a 4/4 white Angel creature token with flying.\"},{\"id\":3,\"name\":\"Zarichi Tiger\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"{1}{W}, {T}: You gain 2 life.\"},{\"id\":4,\"name\":\"Aetherize\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return all attacking creatures to their owner's hand.\"},{\"id\":5,\"name\":\"Agoraphobia\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -5/-0.\\n{2}{U}: Return this Aura to its owner's hand.\"},{\"id\":6,\"name\":\"Clinging Anemones\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Jellyfish\",\"text\":\"Defender\\nEvolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\"},{\"id\":7,\"name\":\"Cloudfin Raptor\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Bird Mutant\",\"text\":\"Flying\\nEvolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\"},{\"id\":8,\"name\":\"Diluvian Primordial\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Flying\\nWhen this creature enters, for each opponent, you may cast up to one target instant or sorcery card from that player's graveyard without paying its mana cost. If a spell cast this way would be put into a graveyard, exile it instead.\"},{\"id\":9,\"name\":\"Enter the Infinite\",\"manaCost\":\"{8}{U}{U}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw cards equal to the number of cards in your library, then put a card from your hand on top of your library. You have no maximum hand size until your next turn.\"},{\"id\":10,\"name\":\"Frilled Oculus\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Homunculus\",\"text\":\"{1}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\"},{\"id\":11,\"name\":\"Gridlock\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap X target nonland permanents.\"},{\"id\":12,\"name\":\"Hands of Binding\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Tap target creature an opponent controls. That creature doesn't untap during its controller's next untap step.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":13,\"name\":\"Incursion Specialist\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever you cast your second spell each turn, this creature gets +2/+0 until end of turn and can't be blocked this turn.\"},{\"id\":14,\"name\":\"Keymaster Rogue\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"This creature can't be blocked.\\nWhen this creature enters, return a creature you control to its owner's hand.\"},{\"id\":15,\"name\":\"Last Thoughts\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":16,\"name\":\"Leyline Phantom\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"When this creature deals combat damage, return it to its owner's hand. (Return it only if it survived combat.)\"},{\"id\":17,\"name\":\"Metropolis Sprite\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\n{U}: This creature gets +1/-1 until end of turn.\"},{\"id\":18,\"name\":\"Mindeye Drake\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nWhen this creature dies, target player mills five cards.\"},{\"id\":19,\"name\":\"Rapid Hybridization\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature. It can't be regenerated. That creature's controller creates a 3/3 green Frog Lizard creature token.\"},{\"id\":20,\"name\":\"Realmwright\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"As this creature enters, choose a basic land type.\\nLands you control are the chosen type in addition to their other types.\"},{\"id\":21,\"name\":\"Sage's Row Denizen\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"Whenever another blue creature you control enters, target player mills two cards.\"},{\"id\":22,\"name\":\"Sapphire Drake\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nEach creature you control with a +1/+1 counter on it has flying.\"},{\"id\":23,\"name\":\"Scatter Arc\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\\nDraw a card.\"},{\"id\":24,\"name\":\"Simic Fluxmage\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Evolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\\n{1}{U}, {T}: Move a +1/+1 counter from this creature onto target creature.\"},{\"id\":25,\"name\":\"Simic Manipulator\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Mutant Wizard\",\"text\":\"Evolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\\n{T}, Remove one or more +1/+1 counters from this creature: Gain control of target creature with power less than or equal to the number of +1/+1 counters removed this way.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1319,
+      "cacheCreationInputTokens": 32542,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.770939,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.770939,
+      "pricedUsd": 0.770939,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.770939 and its own usage prices at $0.770939"
+    }
+  }
+}

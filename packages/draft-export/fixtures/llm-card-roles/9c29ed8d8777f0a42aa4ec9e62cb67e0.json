@@ -1,0 +1,161 @@
+{
+  "key": "9c29ed8d8777f0a42aa4ec9e62cb67e0",
+  "recordedAt": "2026-11-22T22:09:05.111Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Artisan's Sorrow\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment. Scry 2. (Look at the top two cards of your library, then put any number of them on the bottom and the rest on top in any order.)\"},{\"id\":2,\"name\":\"Boon Satyr\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Enchantment Creature — Satyr\",\"text\":\"Flash\\nBestow {3}{G}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nEnchanted creature gets +4/+2.\"},{\"id\":3,\"name\":\"Bow of Nylea\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Legendary Enchantment Artifact\",\"text\":\"Attacking creatures you control have deathtouch.\\n{1}{G}, {T}: Choose one —\\n• Put a +1/+1 counter on target creature.\\n• Bow of Nylea deals 2 damage to target creature with flying.\\n• You gain 3 life.\\n• Put up to four target cards from your graveyard on the bottom of your library in any order.\"},{\"id\":4,\"name\":\"Centaur Battlemaster\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put three +1/+1 counters on this creature.\"},{\"id\":5,\"name\":\"Commune with the Gods\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top five cards of your library. You may put a creature or enchantment card from among them into your hand. Put the rest into your graveyard.\"},{\"id\":6,\"name\":\"Defend the Hearth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt to players this turn.\"},{\"id\":7,\"name\":\"Fade into Antiquity\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target artifact or enchantment.\"},{\"id\":8,\"name\":\"Feral Invocation\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nEnchant creature\\nEnchanted creature gets +2/+2.\"},{\"id\":9,\"name\":\"Hunt the Hunter\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target green creature you control gets +2/+2 until end of turn. It fights target green creature an opponent controls.\"},{\"id\":10,\"name\":\"Karametra's Acolyte\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"{T}: Add an amount of {G} equal to your devotion to green. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\"},{\"id\":11,\"name\":\"Leafcrown Dryad\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment Creature — Nymph Dryad\",\"text\":\"Bestow {3}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nReach\\nEnchanted creature gets +2/+2 and has reach.\"},{\"id\":12,\"name\":\"Mistcutter Hydra\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"This spell can't be countered.\\nHaste, protection from blue\\nThis creature enters with X +1/+1 counters on it.\"},{\"id\":13,\"name\":\"Nemesis of Mortals\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"This spell costs {1} less to cast for each creature card in your graveyard.\\n{7}{G}{G}: Monstrosity 5. This ability costs {1} less to activate for each creature card in your graveyard. (If this creature isn't monstrous, put five +1/+1 counters on it and it becomes monstrous.)\"},{\"id\":14,\"name\":\"Nessian Asp\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Reach\\n{6}{G}: Monstrosity 4. (If this creature isn't monstrous, put four +1/+1 counters on it and it becomes monstrous.)\"},{\"id\":15,\"name\":\"Nessian Courser\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"\"},{\"id\":16,\"name\":\"Nylea, God of the Hunt\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to green is less than five, Nylea isn't a creature. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\\nOther creatures you control have trample.\\n{3}{G}: Target creature gets +2/+2 until end of turn.\"},{\"id\":17,\"name\":\"Nylea's Disciple\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Centaur Archer\",\"text\":\"When this creature enters, you gain life equal to your devotion to green. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\"},{\"id\":18,\"name\":\"Nylea's Emissary\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment Creature — Cat\",\"text\":\"Bestow {5}{G} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nTrample\\nEnchanted creature gets +3/+3 and has trample.\"},{\"id\":19,\"name\":\"Nylea's Presence\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, draw a card.\\nEnchanted land is every basic land type in addition to its other types.\"},{\"id\":20,\"name\":\"Ordeal of Nylea\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature attacks, put a +1/+1 counter on it. Then if it has three or more +1/+1 counters on it, sacrifice this Aura.\\nWhen you sacrifice this Aura, search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.\"},{\"id\":21,\"name\":\"Pheres-Band Centaurs\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"\"},{\"id\":22,\"name\":\"Polukranos, World Eater\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Creature — Hydra\",\"text\":\"{X}{X}{G}: Monstrosity X. (If this creature isn't monstrous, put X +1/+1 counters on it and it becomes monstrous.)\\nWhen Polukranos becomes monstrous, it deals X damage divided as you choose among any number of target creatures your opponents control. Each of those creatures deals damage equal to its power to Polukranos.\"},{\"id\":23,\"name\":\"Reverent Hunter\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"When this creature enters, put a number of +1/+1 counters on it equal to your devotion to green. (Each {G} in the mana costs of permanents you control counts toward your devotion to green.)\"},{\"id\":24,\"name\":\"Satyr Hedonist\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Satyr\",\"text\":\"{R}, Sacrifice this creature: Add {R}{R}{R}.\"},{\"id\":25,\"name\":\"Satyr Piper\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Satyr Rogue\",\"text\":\"{3}{G}: Target creature must be blocked this turn if able.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1482,
+      "cacheCreationInputTokens": 32917,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.786589,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.786589,
+      "pricedUsd": 0.786589,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786589 and its own usage prices at $0.786589"
+    }
+  }
+}

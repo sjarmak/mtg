@@ -1,0 +1,161 @@
+{
+  "key": "ca683f054ce7a797d980d4620c1f9f67",
+  "recordedAt": "2026-11-22T21:31:51.021Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Pyreheart Wolf\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Whenever this creature attacks, creatures you control gain menace until end of turn. (They can't be blocked except by two or more creatures.)\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":2,\"name\":\"Russet Wolves\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"\"},{\"id\":3,\"name\":\"Scorch the Fields\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Scorch the Fields deals 1 damage to each Human creature.\"},{\"id\":4,\"name\":\"Shattered Perception\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Discard all the cards in your hand, then draw that many cards.\\nFlashback {5}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":5,\"name\":\"Talons of Falkenrath\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nEnchant creature\\nEnchanted creature has \\\"{1}{R}: This creature gets +2/+0 until end of turn.\\\"\"},{\"id\":6,\"name\":\"Torch Fiend\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"{R}, Sacrifice this creature: Destroy target artifact.\"},{\"id\":7,\"name\":\"Wrack with Madness\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature deals damage to itself equal to its power.\"},{\"id\":8,\"name\":\"Briarpack Alpha\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, target creature gets +2/+2 until end of turn.\"},{\"id\":9,\"name\":\"Clinging Mists\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt this turn.\\nFateful hour — If you have 5 or less life, tap all attacking creatures. Those creatures don't untap during their controller's next untap step.\"},{\"id\":10,\"name\":\"Crushing Vines\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Destroy target creature with flying.\\n• Destroy target artifact.\"},{\"id\":11,\"name\":\"Dawntreader Elk\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elk\",\"text\":\"{G}, Sacrifice this creature: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":12,\"name\":\"Deranged Outcast\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{1}{G}, Sacrifice a Human: Put two +1/+1 counters on target creature.\"},{\"id\":13,\"name\":\"Favor of the Woods\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature blocks, you gain 3 life.\"},{\"id\":14,\"name\":\"Feed the Pack\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your end step, you may sacrifice a nontoken creature. If you do, create X 2/2 green Wolf creature tokens, where X is the sacrificed creature's toughness.\"},{\"id\":15,\"name\":\"Ghoultree\",\"manaCost\":\"{7}{G}\",\"typeLine\":\"Creature — Zombie Treefolk\",\"text\":\"This spell costs {1} less to cast for each creature card in your graveyard.\"},{\"id\":16,\"name\":\"Gravetiller Wurm\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Trample\\nMorbid — This creature enters with four +1/+1 counters on it if a creature died this turn.\"},{\"id\":17,\"name\":\"Grim Flowering\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card for each creature card in your graveyard.\"},{\"id\":18,\"name\":\"Hollowhenge Beast\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":19,\"name\":\"Hunger of the Howlpack\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Put a +1/+1 counter on target creature.\\nMorbid — Put three +1/+1 counters on that creature instead if a creature died this turn.\"},{\"id\":20,\"name\":\"Increasing Savagery\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put five +1/+1 counters on target creature. If this spell was cast from a graveyard, put ten +1/+1 counters on that creature instead.\\nFlashback {5}{G}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":21,\"name\":\"Kessig Recluse\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":22,\"name\":\"Lambholt Elder\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Lambholt Elder\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Silverpelt Werewolf\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Whenever this creature deals combat damage to a player, draw a card.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":23,\"name\":\"Lost in the Woods\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature attacks you or a planeswalker you control, reveal the top card of your library. If it's a Forest card, remove that creature from combat. Then put the revealed card on the bottom of your library.\"},{\"id\":24,\"name\":\"Predator Ooze\",\"manaCost\":\"{G}{G}{G}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"Indestructible (Damage and effects that say \\\"destroy\\\" don't destroy this creature.)\\nWhenever this creature attacks, put a +1/+1 counter on it.\\nWhenever a creature dealt damage by this creature this turn dies, put a +1/+1 counter on this creature.\"},{\"id\":25,\"name\":\"Scorned Villager\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Scorned Villager\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"{T}: Add {G}.\\nAt the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Moonscarred Werewolf\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Vigilance\\n{T}: Add {G}{G}.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1232,
+      "cacheCreationInputTokens": 32847,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7726890000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7726890000000001,
+      "pricedUsd": 0.772689,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.772689 and its own usage prices at $0.772689"
+    }
+  }
+}

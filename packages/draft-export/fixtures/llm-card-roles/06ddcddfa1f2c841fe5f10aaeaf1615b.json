@@ -1,0 +1,161 @@
+{
+  "key": "06ddcddfa1f2c841fe5f10aaeaf1615b",
+  "recordedAt": "2026-11-22T22:03:22.717Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Skygames\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land has \\\"{T}: Target creature gains flying until end of turn. Activate only as a sorcery.\\\"\"},{\"id\":2,\"name\":\"Spell Rupture\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {X}, where X is the greatest power among creatures you control.\"},{\"id\":3,\"name\":\"Stolen Identity\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a token that's a copy of target artifact or creature.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":4,\"name\":\"Totally Lost\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Instant\",\"text\":\"Put target nonland permanent on top of its owner's library.\"},{\"id\":5,\"name\":\"Voidwalk\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target creature. Return it to the battlefield under its owner's control at the beginning of the next end step.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":6,\"name\":\"Way of the Thief\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2.\\nEnchanted creature can't be blocked as long as you control a Gate.\"},{\"id\":7,\"name\":\"Balustrade Spy\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Vampire Rogue\",\"text\":\"Flying\\nWhen this creature enters, target player reveals cards from the top of their library until they reveal a land card, then puts those cards into their graveyard.\"},{\"id\":8,\"name\":\"Basilica Screecher\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\\nExtort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":9,\"name\":\"Contaminated Ground\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land is a Swamp.\\nWhenever enchanted land becomes tapped, its controller loses 2 life.\"},{\"id\":10,\"name\":\"Corpse Blockade\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Defender\\nSacrifice another creature: This creature gains deathtouch until end of turn.\"},{\"id\":11,\"name\":\"Crypt Ghast\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\\nWhenever you tap a Swamp for mana, add an additional {B}.\"},{\"id\":12,\"name\":\"Death's Approach\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -X/-X, where X is the number of creature cards in its controller's graveyard.\"},{\"id\":13,\"name\":\"Devour Flesh\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices a creature of their choice, then gains life equal to that creature's toughness.\"},{\"id\":14,\"name\":\"Dying Wish\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you control\\nWhen enchanted creature dies, target player loses X life and you gain X life, where X is its power.\"},{\"id\":15,\"name\":\"Gateway Shade\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"{B}: This creature gets +1/+1 until end of turn.\\nTap an untapped Gate you control: This creature gets +2/+2 until end of turn.\"},{\"id\":16,\"name\":\"Grisly Spectacle\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonartifact creature. Its controller mills cards equal to that creature's power.\"},{\"id\":17,\"name\":\"Gutter Skulk\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Rat\",\"text\":\"\"},{\"id\":18,\"name\":\"Horror of the Dim\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"{U}: This creature gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":19,\"name\":\"Illness in the Ranks\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Creature tokens get -1/-1.\"},{\"id\":20,\"name\":\"Killing Glare\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power X or less.\"},{\"id\":21,\"name\":\"Lord of the Void\",\"manaCost\":\"{4}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, exile the top seven cards of that player's library, then put a creature card from among them onto the battlefield under your control.\"},{\"id\":22,\"name\":\"Mental Vapors\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards a card.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":23,\"name\":\"Midnight Recovery\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to your hand.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":24,\"name\":\"Ogre Slumlord\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Ogre Rogue\",\"text\":\"Whenever another nontoken creature dies, you may create a 1/1 black Rat creature token.\\nRats you control have deathtouch.\"},{\"id\":25,\"name\":\"Sepulchral Primordial\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhen this creature enters, for each opponent, you may put up to one target creature card from that player's graveyard onto the battlefield under your control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1979,
+      "cacheCreationInputTokens": 32583,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.804759,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.804759,
+      "pricedUsd": 0.804759,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.804759 and its own usage prices at $0.804759"
+    }
+  }
+}

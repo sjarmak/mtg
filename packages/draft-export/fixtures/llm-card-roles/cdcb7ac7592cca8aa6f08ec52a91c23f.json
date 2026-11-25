@@ -1,0 +1,161 @@
+{
+  "key": "cdcb7ac7592cca8aa6f08ec52a91c23f",
+  "recordedAt": "2026-11-22T22:32:36.691Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aurora Eidolon\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{W}, Sacrifice this creature: Prevent the next 3 damage that would be dealt to any target this turn.\\nWhenever you cast a multicolored spell, you may return this card from your graveyard to your hand.\"},{\"id\":2,\"name\":\"Azorius Herald\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked.\\nWhen this creature enters, you gain 4 life.\\nWhen this creature enters, sacrifice it unless {U} was spent to cast it.\"},{\"id\":3,\"name\":\"Beacon Hawk\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, you may untap target creature.\\n{W}: This creature gets +0/+1 until end of turn.\"},{\"id\":4,\"name\":\"Blessing of the Nephilim\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 for each of its colors.\"},{\"id\":5,\"name\":\"Brace for Impact\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage that would be dealt to target multicolored creature this turn. For each 1 damage prevented this way, put a +1/+1 counter on that creature.\"},{\"id\":6,\"name\":\"Carom\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"The next 1 damage that would be dealt to target creature this turn is dealt to another target creature instead.\\nDraw a card.\"},{\"id\":7,\"name\":\"Celestial Ancient\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nWhenever you cast an enchantment spell, put a +1/+1 counter on each creature you control.\"},{\"id\":8,\"name\":\"Condemn\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Put target attacking creature on the bottom of its owner's library. Its controller gains life equal to its toughness.\"},{\"id\":9,\"name\":\"Freewind Equenaut\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"Flying\\nAs long as this creature is enchanted, it has \\\"{T}: This creature deals 2 damage to target attacking or blocking creature.\\\"\"},{\"id\":10,\"name\":\"Guardian of the Guildpact\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Protection from monocolored\"},{\"id\":11,\"name\":\"Haazda Exonerator\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}, Sacrifice this creature: Destroy target Aura.\"},{\"id\":12,\"name\":\"Haazda Shield Mate\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"At the beginning of your upkeep, sacrifice this creature unless you pay {W}{W}.\\n{W}: The next time a source of your choice would deal damage to you this turn, prevent that damage.\"},{\"id\":13,\"name\":\"Mistral Charger\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Pegasus\",\"text\":\"Flying\"},{\"id\":14,\"name\":\"Paladin of Prahv\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Whenever this creature deals damage, you gain that much life.\\nForecast — {1}{W}, Reveal this card from your hand: Whenever target creature deals damage this turn, you gain that much life. (Activate only during your upkeep and only once each turn.)\"},{\"id\":15,\"name\":\"Proclamation of Rebirth\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to three target creature cards with mana value 1 or less from your graveyard to the battlefield.\\nForecast — {5}{W}, Reveal this card from your hand: Return target creature card with mana value 1 or less from your graveyard to the battlefield. (Activate only during your upkeep and only once each turn.)\"},{\"id\":16,\"name\":\"Proper Burial\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control dies, you gain life equal to that creature's toughness.\"},{\"id\":17,\"name\":\"Soulsworn Jury\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\n{1}{U}, Sacrifice this creature: Counter target creature spell.\"},{\"id\":18,\"name\":\"Steeling Stance\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+1 until end of turn.\\nForecast — {W}, Reveal this card from your hand: Target creature gets +1/+1 until end of turn. (Activate only during your upkeep and only once each turn.)\"},{\"id\":19,\"name\":\"Stoic Ephemera\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\nFlying\\nWhen this creature blocks, sacrifice it at end of combat.\"},{\"id\":20,\"name\":\"Valor Made Real\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature can block any number of creatures this turn.\"},{\"id\":21,\"name\":\"Wakestone Gargoyle\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Gargoyle\",\"text\":\"Defender, flying\\n{1}{W}: Creatures you control with defender can attack this turn as though they didn't have defender.\"},{\"id\":22,\"name\":\"Court Hussar\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Knight\",\"text\":\"Vigilance\\nWhen this creature enters, look at the top three cards of your library, then put one of them into your hand and the rest on the bottom of your library in any order.\\nWhen this creature enters, sacrifice it unless {W} was spent to cast it.\"},{\"id\":23,\"name\":\"Cytoplast Manipulator\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Human Wizard Mutant\",\"text\":\"Graft 2 (This creature enters with two +1/+1 counters on it. Whenever another creature enters, you may move a +1/+1 counter from this creature onto it.)\\n{U}, {T}: Gain control of target creature with a +1/+1 counter on it for as long as this creature remains on the battlefield.\"},{\"id\":24,\"name\":\"Enigma Eidolon\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{U}, Sacrifice this creature: Target player mills three cards.\\nWhenever you cast a multicolored spell, you may return this card from your graveyard to your hand.\"},{\"id\":25,\"name\":\"Govern the Guildless\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target monocolored creature.\\nForecast — {1}{U}, Reveal this card from your hand: Target creature becomes the color or colors of your choice until end of turn. (Activate only during your upkeep and only once each turn.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1503,
+      "cacheCreationInputTokens": 32699,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7832790000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7832790000000001,
+      "pricedUsd": 0.783279,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.783279 and its own usage prices at $0.783279"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "596613dc3f7a031f4a35a514a6c529e4",
+  "recordedAt": "2026-11-22T22:17:40.097Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Weight of the Underworld\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -3/-2.\"},{\"id\":2,\"name\":\"Abbot of Keral Keep\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nWhen this creature enters, exile the top card of your library. Until end of turn, you may play that card.\"},{\"id\":3,\"name\":\"Acolyte of the Inferno\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\nWhenever this creature becomes blocked by a creature, it deals 2 damage to that creature.\"},{\"id\":4,\"name\":\"Act of Treason\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":5,\"name\":\"Akroan Sergeant\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"First strike (This creature deals combat damage before creatures without first strike.)\\nRenown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\"},{\"id\":6,\"name\":\"Avaricious Dragon\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nAt the beginning of your draw step, draw an additional card.\\nAt the beginning of your end step, discard your hand.\"},{\"id\":7,\"name\":\"Bellows Lizard\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":8,\"name\":\"Boggart Brute\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Menace (This creature can't be blocked except by two or more creatures.)\"},{\"id\":9,\"name\":\"Call of the Full Moon\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+2 and has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, sacrifice this Aura.\"},{\"id\":10,\"name\":\"Chandra, Fire of Kaladesh\",\"manaCost\":null,\"typeLine\":\"Legendary Creature — Human Shaman // Legendary Planeswalker — Chandra\",\"text\":null,\"faces\":[{\"name\":\"Chandra, Fire of Kaladesh\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Legendary Creature — Human Shaman\",\"text\":\"Whenever you cast a red spell, untap Chandra.\\n{T}: Chandra deals 1 damage to target player or planeswalker. If Chandra has dealt 3 or more damage this turn, exile her, then return her to the battlefield transformed under her owner's control.\"},{\"name\":\"Chandra, Roaring Flame\",\"manaCost\":\"\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Chandra deals 2 damage to target player or planeswalker.\\n−2: Chandra deals 2 damage to target creature.\\n−7: Chandra deals 6 damage to each opponent. Each player dealt damage this way gets an emblem with \\\"At the beginning of your upkeep, this emblem deals 3 damage to you.\\\"\"}]},{\"id\":11,\"name\":\"Chandra's Fury\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Chandra's Fury deals 4 damage to target player or planeswalker and 1 damage to each creature that player or that planeswalker's controller controls.\"},{\"id\":12,\"name\":\"Chandra's Ignition\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control deals damage equal to its power to each other creature and each opponent.\"},{\"id\":13,\"name\":\"Cobblebrute\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"\"},{\"id\":14,\"name\":\"Demolish\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\"},{\"id\":15,\"name\":\"Dragon Fodder\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 1/1 red Goblin creature tokens.\"},{\"id\":16,\"name\":\"Embermaw Hellion\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Hellion\",\"text\":\"Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)\\nIf another red source you control would deal damage to a permanent or player, it deals that much damage plus 1 to that permanent or player instead.\"},{\"id\":17,\"name\":\"Enthralling Victor\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, gain control of target creature an opponent controls with power 2 or less until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":18,\"name\":\"Exquisite Firecraft\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Exquisite Firecraft deals 4 damage to any target.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, this spell can't be countered.\"},{\"id\":19,\"name\":\"Fiery Conclusion\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nFiery Conclusion deals 5 damage to target creature.\"},{\"id\":20,\"name\":\"Fiery Impulse\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Fiery Impulse deals 2 damage to target creature.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, Fiery Impulse deals 3 damage instead.\"},{\"id\":21,\"name\":\"Firefiend Elemental\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nRenown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\"},{\"id\":22,\"name\":\"Flameshadow Conjuring\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a nontoken creature you control enters, you may pay {R}. If you do, create a token that's a copy of that creature. That token gains haste. Exile it at the beginning of the next end step.\"},{\"id\":23,\"name\":\"Ghirapur Aether Grid\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Tap two untapped artifacts you control: This enchantment deals 1 damage to any target.\"},{\"id\":24,\"name\":\"Ghirapur Gearcrafter\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"When this creature enters, create a 1/1 colorless Thopter artifact creature token with flying. (A creature with flying can't be blocked except by creatures with flying or reach.)\"},{\"id\":25,\"name\":\"Goblin Glory Chaser\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Renown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\nAs long as this creature is renowned, it has menace. (It can't be blocked except by two or more creatures.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1276,
+      "cacheCreationInputTokens": 33013,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.778209,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.778209,
+      "pricedUsd": 0.778209,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.778209 and its own usage prices at $0.778209"
+    }
+  }
+}

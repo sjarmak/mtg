@@ -1,0 +1,161 @@
+{
+  "key": "5a338ead85184ed001c5736af1041709",
+  "recordedAt": "2026-11-22T21:21:07.142Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Drake Haven\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cycle or discard a card, you may pay {1}. If you do, create a 2/2 blue Drake creature token with flying.\"},{\"id\":2,\"name\":\"Essence Scatter\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target creature spell.\"},{\"id\":3,\"name\":\"Floodwaters\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target creatures to their owners' hands.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":4,\"name\":\"Galestrike\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target tapped creature to its owner's hand.\\nDraw a card.\"},{\"id\":5,\"name\":\"Glyph Keeper\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever this creature becomes the target of a spell or ability for the first time each turn, counter that spell or ability.\\nEmbalm {5}{U}{U} ({5}{U}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Sphinx with no mana cost. Embalm only as a sorcery.)\"},{\"id\":6,\"name\":\"Hekma Sentinels\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Whenever you cycle or discard a card, this creature gets +1/+1 until end of turn.\"},{\"id\":7,\"name\":\"Hieroglyphic Illumination\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw two cards.\\nCycling {U} ({U}, Discard this card: Draw a card.)\"},{\"id\":8,\"name\":\"Illusory Wrappings\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has base power and toughness 0/2.\"},{\"id\":9,\"name\":\"Kefnet the Mindful\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Flying, indestructible\\nKefnet can't attack or block unless you have seven or more cards in hand.\\n{3}{U}: Draw a card, then you may return a land you control to its owner's hand.\"},{\"id\":10,\"name\":\"Labyrinth Guardian\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Illusion Warrior\",\"text\":\"When this creature becomes the target of a spell, sacrifice it.\\nEmbalm {3}{U} ({3}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Illusion Warrior with no mana cost. Embalm only as a sorcery.)\"},{\"id\":11,\"name\":\"Lay Claim\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant permanent\\nYou control enchanted permanent.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":12,\"name\":\"Naga Oracle\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Snake Cleric\",\"text\":\"When this creature enters, surveil 3. (Look at the top three cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)\"},{\"id\":13,\"name\":\"New Perspectives\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, draw three cards.\\nAs long as you have seven or more cards in hand, you may pay {0} rather than pay cycling costs.\"},{\"id\":14,\"name\":\"Open into Wonder\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"X target creatures can't be blocked this turn. Until end of turn, those creatures gain \\\"Whenever this creature deals combat damage to a player, draw a card.\\\"\"},{\"id\":15,\"name\":\"Pull from Tomorrow\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw X cards, then discard a card.\"},{\"id\":16,\"name\":\"River Serpent\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"This creature can't attack unless there are five or more cards in your graveyard.\\nCycling {U} ({U}, Discard this card: Draw a card.)\"},{\"id\":17,\"name\":\"Sacred Excavation\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target cards with cycling from your graveyard to your hand.\"},{\"id\":18,\"name\":\"Scribe of the Mindful\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{1}, {T}, Sacrifice this creature: Return target instant or sorcery card from your graveyard to your hand.\"},{\"id\":19,\"name\":\"Seeker of Insight\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}: Draw a card, then discard a card. Activate only if you've cast a noncreature spell this turn.\"},{\"id\":20,\"name\":\"Shimmerscale Drake\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":21,\"name\":\"Slither Blade\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Snake Rogue\",\"text\":\"This creature can't be blocked.\"},{\"id\":22,\"name\":\"Tah-Crop Skirmisher\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Snake Warrior\",\"text\":\"Embalm {3}{U} ({3}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Snake Warrior with no mana cost. Embalm only as a sorcery.)\"},{\"id\":23,\"name\":\"Trial of Knowledge\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, draw three cards, then discard a card.\\nWhen a Cartouche you control enters, return this enchantment to its owner's hand.\"},{\"id\":24,\"name\":\"Vizier of Many Faces\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Shapeshifter Cleric\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield, except if this creature was embalmed, the token has no mana cost, it's white, and it's a Zombie in addition to its other types.\\nEmbalm {3}{U}{U}\"},{\"id\":25,\"name\":\"Vizier of Tumbling Sands\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}: Untap another target permanent.\\nCycling {1}{U} ({1}{U}, Discard this card: Draw a card.)\\nWhen you cycle this card, untap target permanent.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\",\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 425,
+      "cacheCreationInputTokens": 32626,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.727919,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.727919,
+      "pricedUsd": 0.727919,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.727919 and its own usage prices at $0.727919"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "3b6c50f48aea568714219fb6338a89165922c7f4ebf8c557888b7b41adb741cd",
+    "adapterSha256": "9d47e457381dc8705a6ad664501b48a3e7488680855677db54b17fa9ec6ba687",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "s/slash_panther.txt",
+    "sha256": "378c092c60491543711317e7b130d66b553797468ce7659d07e41868df437d29"
+  },
+  "decisionFamilies": [
+    "combat",
+    "mana-x",
+    "priority"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-mana-x",
+    "controller-contract-priority",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "mana-x",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "mana-x-v1",
+        "priority-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "mana-x",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "mana-x-v1",
+        "priority-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "1a4dfd504c70a30240af53cb508ec8b6919e1466c1377c06733afd09a4ee8e4c"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "60bf36841d74ee3e2c608c516fd57868c6354eea0f422689efd614690f5baf28"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "mana-x-v1",
+        "file": {
+          "path": "contracts/mana-x-v1.json",
+          "sha256": "c006cacdf576b0d6ea64cde8f930ef387734ddf68fdf9ec7f5a1d621c278b54e"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      }
+    ]
+  }
+}

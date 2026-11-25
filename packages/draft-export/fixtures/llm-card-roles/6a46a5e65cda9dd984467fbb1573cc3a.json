@@ -1,0 +1,161 @@
+{
+  "key": "6a46a5e65cda9dd984467fbb1573cc3a",
+  "recordedAt": "2026-11-22T22:16:24.967Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Day's Undoing\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player shuffles their hand and graveyard into their library, then draws seven cards. If it's your turn, end the turn. (Exile all spells and abilities from the stack, including this card. Discard down to your maximum hand size. Damage wears off, and \\\"this turn\\\" and \\\"until end of turn\\\" effects end.)\"},{\"id\":2,\"name\":\"Deep-Sea Terror\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"This creature can't attack unless there are seven or more cards in your graveyard.\"},{\"id\":3,\"name\":\"Disciple of the Ring\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}, Exile an instant or sorcery card from your graveyard: Choose one —\\n• Counter target noncreature spell unless its controller pays {2}.\\n• This creature gets +1/+1 until end of turn.\\n• Tap target creature.\\n• Untap target creature.\"},{\"id\":4,\"name\":\"Disperse\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand.\"},{\"id\":5,\"name\":\"Displacement Wave\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all nonland permanents with mana value X or less to their owners' hands.\"},{\"id\":6,\"name\":\"Dreadwaters\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player mills X cards, where X is the number of lands you control.\"},{\"id\":7,\"name\":\"Faerie Miscreant\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\nWhen this creature enters, if you control another creature named Faerie Miscreant, draw a card.\"},{\"id\":8,\"name\":\"Harbinger of the Tides\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"You may cast this spell as though it had flash if you pay {2} more to cast it. (You may cast it any time you could cast an instant.)\\nWhen this creature enters, you may return target tapped creature an opponent controls to its owner's hand.\"},{\"id\":9,\"name\":\"Hydrolash\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures get -2/-0 until end of turn.\\nDraw a card.\"},{\"id\":10,\"name\":\"Jace, Vryn's Prodigy\",\"manaCost\":null,\"typeLine\":\"Legendary Creature — Human Wizard // Legendary Planeswalker — Jace\",\"text\":null,\"faces\":[{\"name\":\"Jace, Vryn's Prodigy\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Legendary Creature — Human Wizard\",\"text\":\"{T}: Draw a card, then discard a card. If there are five or more cards in your graveyard, exile Jace, then return him to the battlefield transformed under his owner's control.\"},{\"name\":\"Jace, Telepath Unbound\",\"manaCost\":\"\",\"typeLine\":\"Legendary Planeswalker — Jace\",\"text\":\"+1: Up to one target creature gets -2/-0 until your next turn.\\n−3: You may cast target instant or sorcery card from your graveyard this turn. If that spell would be put into your graveyard, exile it instead.\\n−9: You get an emblem with \\\"Whenever you cast a spell, target opponent mills five cards.\\\"\"}]},{\"id\":11,\"name\":\"Jace's Sanctum\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Instant and sorcery spells you cast cost {1} less to cast.\\nWhenever you cast an instant or sorcery spell, scry 1.\"},{\"id\":12,\"name\":\"Jhessian Thief\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nWhenever this creature deals combat damage to a player, draw a card.\"},{\"id\":13,\"name\":\"Maritime Guard\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Soldier\",\"text\":\"\"},{\"id\":14,\"name\":\"Mizzium Meddler\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, you may change a target of target spell or ability to this creature.\"},{\"id\":15,\"name\":\"Negate\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\"},{\"id\":16,\"name\":\"Nivix Barrier\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Illusion Wall\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nDefender (This creature can't attack.)\\nWhen this creature enters, target attacking creature gets -4/-0 until end of turn.\"},{\"id\":17,\"name\":\"Psychic Rebuttal\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target instant or sorcery spell that targets you.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, you may copy the spell countered this way. You may choose new targets for the copy.\"},{\"id\":18,\"name\":\"Ringwarden Owl\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nProwess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":19,\"name\":\"Scrapskin Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Zombie Drake\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature can block only creatures with flying.\"},{\"id\":20,\"name\":\"Screeching Skaab\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature enters, mill two cards.\"},{\"id\":21,\"name\":\"Send to Sleep\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap up to two target creatures.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, those creatures don't untap during their controllers' next untap steps.\"},{\"id\":22,\"name\":\"Separatist Voidmage\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may return target creature to its owner's hand.\"},{\"id\":23,\"name\":\"Sigiled Starfish\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Starfish\",\"text\":\"{T}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":24,\"name\":\"Skaab Goliath\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"As an additional cost to cast this spell, exile two creature cards from your graveyard.\\nTrample\"},{\"id\":25,\"name\":\"Soulblade Djinn\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"Flying\\nWhenever you cast a noncreature spell, creatures you control get +1/+1 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\",\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 435,
+      "cacheCreationInputTokens": 32778,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7314590000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7314590000000001,
+      "pricedUsd": 0.731459,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.731459 and its own usage prices at $0.731459"
+    }
+  }
+}

@@ -522,11 +522,14 @@ public final class ForgeBridge {
         private final List<ManaPaymentSelection> priorityManaHistory = new ArrayList<>();
         private final List<MindslaverTurn> reviewedMindslaverTurns = new ArrayList<>();
         private final List<PrivateReveal> privateReveals = new ArrayList<>();
+        private final List<ComputerChoice> computerChoices = new ArrayList<>();
         private Throwable failure;
         private boolean finished;
         private boolean closed;
         private boolean evaluateCycling;
         private boolean supportsScopedContracts;
+        /** Whether the local seat's unreviewed choices go to Forge's AI instead of ending the game (#66). */
+        private boolean computerAnswersUnreviewed;
         private int revision;
 
         static BridgeSession open(Map<String, Object> request, List<String> unresolved) throws Exception {
@@ -565,6 +568,15 @@ public final class ForgeBridge {
             // The scoped contracts are reviewed per decision family, not per format:
             // any format whose scripts close under those families reuses them.
             supportsScopedContracts = scopedInventory;
+            // Absent means stop, so every admission probe and qualification run,
+            // none of which sends the field, keeps its evidence strict.
+            String unreviewedChoices = nullableString(request, "unreviewedChoices");
+            if (unreviewedChoices != null
+                    && !unreviewedChoices.equals("stop")
+                    && !unreviewedChoices.equals("computer")) {
+                throw new IllegalArgumentException("unreviewedChoices must be stop or computer");
+            }
+            computerAnswersUnreviewed = "computer".equals(unreviewedChoices);
             seed(request);
             List<Object> requestedSeats = list(request, "seats");
             if (requestedSeats.size() != 2) throw new IllegalArgumentException("seats must contain two entries");
@@ -15298,6 +15310,17 @@ public final class ForgeBridge {
                     event.put("reveals", licenses);
                     events.add(event);
                 }
+                for (ComputerChoice choice : computerChoices) {
+                    if (choice.afterLogCount() != boundary) continue;
+                    Map<String, Object> event = new LinkedHashMap<>();
+                    event.put("seq", sequence++);
+                    event.put("type", "Unreviewed choice");
+                    event.put("text", "The computer chose for " + choice.seatName() + ": "
+                            + choice.source() + " \u2192 " + choice.answer() + " (no reviewed screen yet)");
+                    event.put("detail", choice.detail());
+                    event.put("reveals", List.of());
+                    events.add(event);
+                }
                 if (boundary == log.size()) continue;
                 GameLogEntry entry = log.get(boundary);
                 Map<String, Object> event = new LinkedHashMap<>();
@@ -15336,6 +15359,95 @@ public final class ForgeBridge {
                         seatOf(viewer),
                         List.copyOf(cards)));
             }
+        }
+
+        /** The revision a decision started at; any submitted answer moves it. */
+        int answeredRevision() {
+            synchronized (monitor) {
+                return revision;
+            }
+        }
+
+        /**
+         * Whether the computer may answer a choice the bridge just refused: the
+         * session opted in, is still live, and the seat answered nothing since
+         * the decision started, so the AI is not answering on top of a half-made one.
+         */
+        boolean mayAnswerForSeat(int asked) {
+            synchronized (monitor) {
+                return computerAnswersUnreviewed && !closed && failure == null && revision == asked;
+            }
+        }
+
+        void recordComputerChoice(
+                Player player, String method, Object[] arguments, IllegalStateException refusal, Object answer) {
+            SpellAbility ability = null;
+            Card card = null;
+            for (Object argument : arguments) {
+                if (ability == null && argument instanceof SpellAbility found) ability = found;
+                if (card == null && argument instanceof Card found) card = found;
+            }
+            if (card == null && ability != null) card = ability.getHostCard();
+            // A question about several cards at once, such as which attackers enlist, names the first.
+            for (Object argument : arguments) {
+                if (card != null) break;
+                if (argument instanceof Collection<?> items) {
+                    for (Object item : items) {
+                        if (item instanceof Card found) {
+                            card = found;
+                            break;
+                        }
+                    }
+                }
+            }
+            String source = card == null ? "a rules question" : card.getName();
+            Map<String, Object> detail = new LinkedHashMap<>();
+            detail.put("kind", "unreviewed-choice");
+            detail.put("method", method);
+            detail.put("source", source);
+            detail.put("api", ability == null || ability.getApi() == null ? null : ability.getApi().name());
+            detail.put("params", ability == null ? null : clip(String.valueOf(ability.getMapParams()), 600));
+            detail.put("trigger", ability != null && ability.isTrigger());
+            // False when the seat is choosing for another player's effect, which is
+            // #66's second family (Geier Reach Sanitarium, Syphon Mind, Kheru Mind-Eater).
+            detail.put("seatsOwnEffect", ability == null || ability.getActivatingPlayer() == null
+                    ? null : ability.getActivatingPlayer() == player);
+            detail.put("seat", seatOf(player));
+            detail.put("turn", game.getPhaseHandler().getTurn());
+            detail.put("refusal", clip(String.valueOf(refusal.getMessage()), 1200));
+            String said = clip(describeComputerAnswer(answer), 200);
+            detail.put("answer", said);
+            synchronized (monitor) {
+                computerChoices.add(new ComputerChoice(
+                        game.getGameLog().getAllEntries().size(), player.getName(), source, said, detail));
+            }
+        }
+
+        private static String clip(String text, int limit) {
+            return text.length() <= limit ? text : text.substring(0, limit - 1) + "\u2026";
+        }
+
+        private static String describeComputerAnswer(Object answer) {
+            if (answer == null) return "nothing";
+            if (answer instanceof CostDecisionMakerBase) return "Forge's own payment";
+            if (answer instanceof Boolean yes) return yes ? "yes" : "no";
+            if (answer instanceof Card card) return card.getName();
+            if (answer instanceof SpellAbility ability) {
+                return ability.getHostCard() == null ? ability.toString() : ability.getHostCard().getName()
+                        + ": " + ability;
+            }
+            if (answer instanceof Player player) return player.getName();
+            if (answer instanceof Collection<?> items) {
+                if (items.isEmpty()) return "none";
+                return items.stream().map(BridgeSession::describeComputerAnswer)
+                        .collect(Collectors.joining(", "));
+            }
+            if (answer instanceof Map<?, ?> entries) {
+                return entries.entrySet().stream()
+                        .map(entry -> describeComputerAnswer(entry.getKey()) + " " + describeComputerAnswer(entry.getValue()))
+                        .collect(Collectors.joining(", "));
+            }
+            return String.valueOf(answer);
         }
 
         private Map<String, Object> decision() {
@@ -15549,6 +15661,9 @@ public final class ForgeBridge {
                 String ownerName,
                 int viewerSeat,
                 List<RevealedCard> cards) {}
+
+        private record ComputerChoice(
+                int afterLogCount, String seatName, String source, String answer, Map<String, Object> detail) {}
         private enum PhyrexianLife { INSTANCE }
         private enum CombatCommit { INSTANCE }
         private record ManaPaymentSelection(SpellAbility ability, byte color) {}
@@ -15736,14 +15851,18 @@ public final class ForgeBridge {
         @Override
         public Player createIngamePlayer(Game game, int id) {
             Player player = new Player(getName(), game, id);
-            player.setFirstController(new BridgeController(game, player, this, session));
+            player.setFirstController(session.computerAnswersUnreviewed
+                    ? new FallbackBridgeController(game, player, this, session, player)
+                    : new BridgeController(game, player, this, session));
             return player;
         }
 
         @Override
         public PlayerController createMindSlaveController(Player master, Player slave) {
             Player decisionPrincipal = session.claimReviewedMindslaverPrincipal(master, slave);
-            return new BridgeController(slave.getGame(), slave, this, session, decisionPrincipal);
+            return session.computerAnswersUnreviewed
+                    ? new FallbackBridgeController(slave.getGame(), slave, this, session, decisionPrincipal)
+                    : new BridgeController(slave.getGame(), slave, this, session, decisionPrincipal);
         }
 
         @Override
@@ -15751,7 +15870,7 @@ public final class ForgeBridge {
     }
 
     /** The wire owns ordinary mana payment, priority, pregame, and bounded card-family choices. */
-    private static final class BridgeController extends PlayerControllerAi {
+    private static class BridgeController extends PlayerControllerAi {
         private final BridgeSession session;
         private final Player decisionPrincipal;
 
@@ -21365,7 +21484,29 @@ public final class ForgeBridge {
                 automatic = new AiCostDecision(payer, ability, effect);
             }
 
+            /**
+             * The reviewed payment, or, in a session that lets the computer answer
+             * unreviewed choices (#66), Forge's own AI payment when the reviewed
+             * route refuses before the seat answered anything.
+             */
             private PaymentDecision decide(CostPart part) {
+                int asked = session.answeredRevision();
+                try {
+                    return decideReviewed(part);
+                } catch (IllegalStateException refusal) {
+                    if (!session.mayAnswerForSeat(asked)) throw refusal;
+                    PaymentDecision chosen = part.accept(automatic);
+                    session.recordComputerChoice(
+                            player,
+                            "payCost " + part.getClass().getSimpleName(),
+                            new Object[] {ability},
+                            refusal,
+                            chosen == null ? null : chosen.cards.isEmpty() ? (Object) ("" + chosen.c) : chosen.cards);
+                    return chosen;
+                }
+            }
+
+            private PaymentDecision decideReviewed(CostPart part) {
                 requireSupportedCost(part, ability);
                 if (part instanceof CostTapType tap) {
                     if (isReviewedKldVehicleCrewCost(tap, ability)) {
@@ -21740,6 +21881,989 @@ public final class ForgeBridge {
         public Player choosePlayerToAssistPayment(
                 FCollectionView<Player> payers, SpellAbility ability, String prompt, int max) {
             throw new IllegalStateException("Forge reached Assist outside the legacy cube session");
+        }
+    }
+
+    /**
+     * The bridge controller for a session whose seat lets the computer answer
+     * what the bridge has no reviewed screen for (#66).
+     *
+     * Every decision still goes to `BridgeController` first, unchanged. Only
+     * when it refuses with an `IllegalStateException` before the seat answered
+     * anything in this call does Forge's own AI answer for the seat, and the
+     * session records the answer as an `Unreviewed choice` event so the game log
+     * says so and the lab can queue the screen for review. A refusal after the
+     * seat answered, or once the session closed or failed, still ends the game:
+     * the AI would be answering on top of a half-made choice.
+     *
+     * Priority, playing a chosen ability and mana payment are not wrapped. A
+     * refusal there falls mid-cast, where a second, computer-made attempt could
+     * pay or play twice.
+     */
+    private static final class FallbackBridgeController extends BridgeController {
+        private final BridgeSession session;
+        private final PlayerControllerAi computer;
+
+        FallbackBridgeController(
+                Game game, Player player, LobbyPlayer lobby, BridgeSession session, Player decisionPrincipal) {
+            super(game, player, lobby, session, decisionPrincipal);
+            this.session = session;
+            this.computer = new PlayerControllerAi(game, player, lobby);
+        }
+
+        private <T> T answerForSeat(
+                String method,
+                Object[] arguments,
+                IllegalStateException refusal,
+                int asked,
+                java.util.function.Supplier<T> answer) {
+            if (!session.mayAnswerForSeat(asked)) throw refusal;
+            T chosen = answer.get();
+            session.recordComputerChoice(getPlayer(), method, arguments, refusal, chosen);
+            return chosen;
+        }
+
+        @Override
+        public final boolean payCostToPreventEffect(Cost cost, SpellAbility ability, boolean alreadyPaid, FCollectionView<Player> payers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.payCostToPreventEffect(cost, ability, alreadyPaid, payers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("payCostToPreventEffect", new Object[] {cost, ability, alreadyPaid, payers}, refusal, asked,
+                        () -> computer.payCostToPreventEffect(cost, ability, alreadyPaid, payers));
+            }
+        }
+
+        @Override
+        public final ColorSet chooseColors(String message, SpellAbility ability, int minimum, int maximum, ColorSet colors) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseColors(message, ability, minimum, maximum, colors);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseColors", new Object[] {message, ability, minimum, maximum, colors}, refusal, asked,
+                        () -> computer.chooseColors(message, ability, minimum, maximum, colors));
+            }
+        }
+
+        @Override
+        public final byte chooseColor(String message, SpellAbility ability, ColorSet colors) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseColor(message, ability, colors);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseColor", new Object[] {message, ability, colors}, refusal, asked,
+                        () -> computer.chooseColor(message, ability, colors));
+            }
+        }
+
+        @Override
+        public final byte chooseColorAllowColorless(String message, Card card, ColorSet colors) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseColorAllowColorless(message, card, colors);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseColorAllowColorless", new Object[] {message, card, colors}, refusal, asked,
+                        () -> computer.chooseColorAllowColorless(message, card, colors));
+            }
+        }
+
+        @Override
+        public final boolean chooseBinary(SpellAbility ability, String message, BinaryChoiceType choiceType, Boolean defaultValue) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseBinary(ability, message, choiceType, defaultValue);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseBinary", new Object[] {ability, message, choiceType, defaultValue}, refusal, asked,
+                        () -> computer.chooseBinary(ability, message, choiceType, defaultValue));
+            }
+        }
+
+        @Override
+        public final boolean chooseTargetsFor(SpellAbility ability) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseTargetsFor(ability);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseTargetsFor", new Object[] {ability}, refusal, asked,
+                        () -> computer.chooseTargetsFor(ability));
+            }
+        }
+
+        @Override
+        public final Pair<SpellAbilityStackInstance, GameObject> chooseTarget(SpellAbility ability, List<Pair<SpellAbilityStackInstance, GameObject>> pairs) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseTarget(ability, pairs);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseTarget", new Object[] {ability, pairs}, refusal, asked,
+                        () -> computer.chooseTarget(ability, pairs));
+            }
+        }
+
+        @Override
+        public final TargetChoices chooseNewTargetsFor(SpellAbility ability, Predicate<GameObject> filter, boolean optional) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNewTargetsFor(ability, filter, optional);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNewTargetsFor", new Object[] {ability, filter, optional}, refusal, asked,
+                        () -> computer.chooseNewTargetsFor(ability, filter, optional));
+            }
+        }
+
+        @Override
+        public final Map<GameEntity, Integer> divideShield(Card effectSource, Map<GameEntity, Integer> affected, int shieldAmount) {
+            int asked = session.answeredRevision();
+            try {
+                return super.divideShield(effectSource, affected, shieldAmount);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("divideShield", new Object[] {effectSource, affected, shieldAmount}, refusal, asked,
+                        () -> computer.divideShield(effectSource, affected, shieldAmount));
+            }
+        }
+
+        @Override
+        public final void orderAndPlaySimultaneousSa(List<SpellAbility> abilities) {
+            int asked = session.answeredRevision();
+            try {
+                super.orderAndPlaySimultaneousSa(abilities);
+            } catch (IllegalStateException refusal) {
+                answerForSeat("orderAndPlaySimultaneousSa", new Object[] {abilities}, refusal, asked, () -> {
+                    computer.orderAndPlaySimultaneousSa(abilities);
+                    return null;
+                });
+            }
+        }
+
+        @Override
+        public final void declareAttackers(Player attackingPlayer, Combat combat) {
+            int asked = session.answeredRevision();
+            try {
+                super.declareAttackers(attackingPlayer, combat);
+            } catch (IllegalStateException refusal) {
+                answerForSeat("declareAttackers", new Object[] {attackingPlayer, combat}, refusal, asked, () -> {
+                    computer.declareAttackers(attackingPlayer, combat);
+                    return null;
+                });
+            }
+        }
+
+        @Override
+        public final void declareBlockers(Player defendingPlayer, Combat combat) {
+            int asked = session.answeredRevision();
+            try {
+                super.declareBlockers(defendingPlayer, combat);
+            } catch (IllegalStateException refusal) {
+                answerForSeat("declareBlockers", new Object[] {defendingPlayer, combat}, refusal, asked, () -> {
+                    computer.declareBlockers(defendingPlayer, combat);
+                    return null;
+                });
+            }
+        }
+
+        @Override
+        public final CardCollection orderBlockers(Card attacker, CardCollection blockers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderBlockers(attacker, blockers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderBlockers", new Object[] {attacker, blockers}, refusal, asked,
+                        () -> computer.orderBlockers(attacker, blockers));
+            }
+        }
+
+        @Override
+        public final CardCollection orderBlocker(Card attacker, Card blocker, CardCollection blockers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderBlocker(attacker, blocker, blockers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderBlocker", new Object[] {attacker, blocker, blockers}, refusal, asked,
+                        () -> computer.orderBlocker(attacker, blocker, blockers));
+            }
+        }
+
+        @Override
+        public final CardCollection orderAttackers(Card blocker, CardCollection attackers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderAttackers(blocker, attackers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderAttackers", new Object[] {blocker, attackers}, refusal, asked,
+                        () -> computer.orderAttackers(blocker, attackers));
+            }
+        }
+
+        @Override
+        public final List<SpellAbility> orderSimultaneousSa(List<SpellAbility> abilities) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderSimultaneousSa(abilities);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderSimultaneousSa", new Object[] {abilities}, refusal, asked,
+                        () -> computer.orderSimultaneousSa(abilities));
+            }
+        }
+
+        @Override
+        public final ImmutablePair<CardCollection, CardCollection> arrangeForScry(CardCollection topN) {
+            int asked = session.answeredRevision();
+            try {
+                return super.arrangeForScry(topN);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("arrangeForScry", new Object[] {topN}, refusal, asked,
+                        () -> computer.arrangeForScry(topN));
+            }
+        }
+
+        @Override
+        public final ImmutablePair<CardCollection, CardCollection> arrangeForSurveil(CardCollection topN) {
+            int asked = session.answeredRevision();
+            try {
+                return super.arrangeForSurveil(topN);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("arrangeForSurveil", new Object[] {topN}, refusal, asked,
+                        () -> computer.arrangeForSurveil(topN));
+            }
+        }
+
+        @Override
+        public final CardCollectionView orderMoveToZoneList(CardCollectionView cards, ZoneType destination, SpellAbility source) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderMoveToZoneList(cards, destination, source);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderMoveToZoneList", new Object[] {cards, destination, source}, refusal, asked,
+                        () -> computer.orderMoveToZoneList(cards, destination, source));
+            }
+        }
+
+        @Override
+        public final List<CostPart> orderCosts(List<CostPart> costs) {
+            int asked = session.answeredRevision();
+            try {
+                return super.orderCosts(costs);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("orderCosts", new Object[] {costs}, refusal, asked,
+                        () -> computer.orderCosts(costs));
+            }
+        }
+
+        @Override
+        public final Map<Card, Integer> assignCombatDamage(Card source, CardCollectionView recipients, CardCollectionView remainingSources, int damage, GameEntity defender, boolean overrideOrder) {
+            int asked = session.answeredRevision();
+            try {
+                return super.assignCombatDamage(source, recipients, remainingSources, damage, defender, overrideOrder);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("assignCombatDamage", new Object[] {source, recipients, remainingSources, damage, defender, overrideOrder}, refusal, asked,
+                        () -> computer.assignCombatDamage(source, recipients, remainingSources, damage, defender, overrideOrder));
+            }
+        }
+
+        @Override
+        public final List<Card> exertAttackers(List<Card> attackers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.exertAttackers(attackers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("exertAttackers", new Object[] {attackers}, refusal, asked,
+                        () -> computer.exertAttackers(attackers));
+            }
+        }
+
+        @Override
+        public final List<Card> enlistAttackers(List<Card> attackers) {
+            int asked = session.answeredRevision();
+            try {
+                return super.enlistAttackers(attackers);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("enlistAttackers", new Object[] {attackers}, refusal, asked,
+                        () -> computer.enlistAttackers(attackers));
+            }
+        }
+
+        @Override
+        public final boolean payCombatCost(Card card, Cost cost, SpellAbility ability, String prompt) {
+            int asked = session.answeredRevision();
+            try {
+                return super.payCombatCost(card, cost, ability, prompt);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("payCombatCost", new Object[] {card, cost, ability, prompt}, refusal, asked,
+                        () -> computer.payCombatCost(card, cost, ability, prompt));
+            }
+        }
+
+        @Override
+        public final Card chooseSingleCardForZoneChange(ZoneType destination, List<ZoneType> origin, SpellAbility ability, CardCollection fetchList, DelayedReveal delayedReveal, String selectPrompt, boolean isOptional, Player decider) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleCardForZoneChange(destination, origin, ability, fetchList, delayedReveal, selectPrompt, isOptional, decider);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleCardForZoneChange", new Object[] {destination, origin, ability, fetchList, delayedReveal, selectPrompt, isOptional, decider}, refusal, asked,
+                        () -> computer.chooseSingleCardForZoneChange(destination, origin, ability, fetchList, delayedReveal, selectPrompt, isOptional, decider));
+            }
+        }
+
+        @Override
+        public final CardCollection chooseCardsToDiscardFrom(Player discardingPlayer, SpellAbility ability, CardCollection validCards, int min, int max, CardCollectionView alreadyChosen) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsToDiscardFrom(discardingPlayer, ability, validCards, min, max, alreadyChosen);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsToDiscardFrom", new Object[] {discardingPlayer, ability, validCards, min, max, alreadyChosen}, refusal, asked,
+                        () -> computer.chooseCardsToDiscardFrom(discardingPlayer, ability, validCards, min, max, alreadyChosen));
+            }
+        }
+
+        @Override
+        public final Player chooseStartingPlayer(boolean firstGame) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseStartingPlayer(firstGame);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseStartingPlayer", new Object[] {firstGame}, refusal, asked,
+                        () -> computer.chooseStartingPlayer(firstGame));
+            }
+        }
+
+        @Override
+        public final boolean mulliganKeepHand(Player firstPlayer, int mulligansTaken) {
+            int asked = session.answeredRevision();
+            try {
+                return super.mulliganKeepHand(firstPlayer, mulligansTaken);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("mulliganKeepHand", new Object[] {firstPlayer, mulligansTaken}, refusal, asked,
+                        () -> computer.mulliganKeepHand(firstPlayer, mulligansTaken));
+            }
+        }
+
+        @Override
+        public final CardCollectionView tuckCardsViaMulligan(CardCollectionView cards, int count) {
+            int asked = session.answeredRevision();
+            try {
+                return super.tuckCardsViaMulligan(cards, count);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("tuckCardsViaMulligan", new Object[] {cards, count}, refusal, asked,
+                        () -> computer.tuckCardsViaMulligan(cards, count));
+            }
+        }
+
+        @Override
+        public final List<SpellAbility> chooseSaToActivateFromOpeningHand(List<SpellAbility> usable) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSaToActivateFromOpeningHand(usable);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSaToActivateFromOpeningHand", new Object[] {usable}, refusal, asked,
+                        () -> computer.chooseSaToActivateFromOpeningHand(usable));
+            }
+        }
+
+        @Override
+        public final boolean playTrigger(Card host, WrappedAbility wrapper, boolean isMandatory) {
+            int asked = session.answeredRevision();
+            try {
+                return super.playTrigger(host, wrapper, isMandatory);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("playTrigger", new Object[] {host, wrapper, isMandatory}, refusal, asked,
+                        () -> computer.playTrigger(host, wrapper, isMandatory));
+            }
+        }
+
+        @Override
+        public final void playSpellAbilityNoStack(SpellAbility ability, boolean targetsAlreadyChosen) {
+            int asked = session.answeredRevision();
+            try {
+                super.playSpellAbilityNoStack(ability, targetsAlreadyChosen);
+            } catch (IllegalStateException refusal) {
+                answerForSeat("playSpellAbilityNoStack", new Object[] {ability, targetsAlreadyChosen}, refusal, asked, () -> {
+                    computer.playSpellAbilityNoStack(ability, targetsAlreadyChosen);
+                    return null;
+                });
+            }
+        }
+
+        @Override
+        public final ReplacementEffect chooseSingleReplacementEffect(List<ReplacementEffect> effects) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleReplacementEffect(effects);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleReplacementEffect", new Object[] {effects}, refusal, asked,
+                        () -> computer.chooseSingleReplacementEffect(effects));
+            }
+        }
+
+        @Override
+        public final StaticAbility chooseSingleStaticAbility(List<StaticAbility> abilities) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleStaticAbility(abilities);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleStaticAbility", new Object[] {abilities}, refusal, asked,
+                        () -> computer.chooseSingleStaticAbility(abilities));
+            }
+        }
+
+        @Override
+        public final boolean confirmAction(SpellAbility ability, PlayerActionConfirmMode mode, String message, List<String> options, Card cardToShow, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmAction(ability, mode, message, options, cardToShow, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmAction", new Object[] {ability, mode, message, options, cardToShow, params}, refusal, asked,
+                        () -> computer.confirmAction(ability, mode, message, options, cardToShow, params));
+            }
+        }
+
+        @Override
+        public final boolean confirmTrigger(WrappedAbility wrapper) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmTrigger(wrapper);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmTrigger", new Object[] {wrapper}, refusal, asked,
+                        () -> computer.confirmTrigger(wrapper));
+            }
+        }
+
+        @Override
+        public final boolean confirmReplacementEffect(ReplacementEffect effect, SpellAbility ability, GameEntity affected, String question) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmReplacementEffect(effect, ability, affected, question);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmReplacementEffect", new Object[] {effect, ability, affected, question}, refusal, asked,
+                        () -> computer.confirmReplacementEffect(effect, ability, affected, question));
+            }
+        }
+
+        @Override
+        public final boolean confirmStaticApplication(Card host, PlayerActionConfirmMode mode, String message, String logic) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmStaticApplication(host, mode, message, logic);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmStaticApplication", new Object[] {host, mode, message, logic}, refusal, asked,
+                        () -> computer.confirmStaticApplication(host, mode, message, logic));
+            }
+        }
+
+        @Override
+        public final boolean confirmPayment(CostPart part, String question, SpellAbility ability) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmPayment(part, question, ability);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmPayment", new Object[] {part, question, ability}, refusal, asked,
+                        () -> computer.confirmPayment(part, question, ability));
+            }
+        }
+
+        @Override
+        public final boolean willPutCardOnTop(Card card) {
+            int asked = session.answeredRevision();
+            try {
+                return super.willPutCardOnTop(card);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("willPutCardOnTop", new Object[] {card}, refusal, asked,
+                        () -> computer.willPutCardOnTop(card));
+            }
+        }
+
+        @Override
+        public final boolean chooseFlipResult(SpellAbility ability, Player flipper, boolean call) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseFlipResult(ability, flipper, call);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseFlipResult", new Object[] {ability, flipper, call}, refusal, asked,
+                        () -> computer.chooseFlipResult(ability, flipper, call));
+            }
+        }
+
+        @Override
+        public final boolean chooseCardsPile(SpellAbility ability, CardCollectionView first, CardCollectionView second, String faceUp) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsPile(ability, first, second, faceUp);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsPile", new Object[] {ability, first, second, faceUp}, refusal, asked,
+                        () -> computer.chooseCardsPile(ability, first, second, faceUp));
+            }
+        }
+
+        @Override
+        public final CardCollectionView choosePermanentsToSacrifice(SpellAbility ability, int min, int max, CardCollectionView valid, String message) {
+            int asked = session.answeredRevision();
+            try {
+                return super.choosePermanentsToSacrifice(ability, min, max, valid, message);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("choosePermanentsToSacrifice", new Object[] {ability, min, max, valid, message}, refusal, asked,
+                        () -> computer.choosePermanentsToSacrifice(ability, min, max, valid, message));
+            }
+        }
+
+        @Override
+        public final CardCollectionView choosePermanentsToDestroy(SpellAbility ability, int min, int max, CardCollectionView valid, String message) {
+            int asked = session.answeredRevision();
+            try {
+                return super.choosePermanentsToDestroy(ability, min, max, valid, message);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("choosePermanentsToDestroy", new Object[] {ability, min, max, valid, message}, refusal, asked,
+                        () -> computer.choosePermanentsToDestroy(ability, min, max, valid, message));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsForEffect(CardCollectionView sourceList, SpellAbility ability, String title, int min, int max, boolean isOptional, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForEffect(sourceList, ability, title, min, max, isOptional, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForEffect", new Object[] {sourceList, ability, title, min, max, isOptional, params}, refusal, asked,
+                        () -> computer.chooseCardsForEffect(sourceList, ability, title, min, max, isOptional, params));
+            }
+        }
+
+        @Override
+        public final CardCollection chooseCardsForEffectMultiple(Map<String, CardCollection> validMap, SpellAbility ability, String title, boolean isOptional) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForEffectMultiple(validMap, ability, title, isOptional);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForEffectMultiple", new Object[] {validMap, ability, title, isOptional}, refusal, asked,
+                        () -> computer.chooseCardsForEffectMultiple(validMap, ability, title, isOptional));
+            }
+        }
+
+        @Override
+        public final <T extends GameEntity> T chooseSingleEntityForEffect(FCollectionView<T> optionList, DelayedReveal delayedReveal, SpellAbility ability, String title, boolean isOptional, Player targetedPlayer, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleEntityForEffect(optionList, delayedReveal, ability, title, isOptional, targetedPlayer, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleEntityForEffect", new Object[] {optionList, delayedReveal, ability, title, isOptional, targetedPlayer, params}, refusal, asked,
+                        () -> computer.chooseSingleEntityForEffect(optionList, delayedReveal, ability, title, isOptional, targetedPlayer, params));
+            }
+        }
+
+        @Override
+        public final <T extends GameEntity> List<T> chooseEntitiesForEffect(FCollectionView<T> optionList, int min, int max, DelayedReveal delayedReveal, SpellAbility ability, String title, Player targetedPlayer, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseEntitiesForEffect(optionList, min, max, delayedReveal, ability, title, targetedPlayer, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseEntitiesForEffect", new Object[] {optionList, min, max, delayedReveal, ability, title, targetedPlayer, params}, refusal, asked,
+                        () -> computer.chooseEntitiesForEffect(optionList, min, max, delayedReveal, ability, title, targetedPlayer, params));
+            }
+        }
+
+        @Override
+        public final List<SpellAbility> chooseSpellAbilitiesForEffect(List<SpellAbility> spells, SpellAbility ability, String title, int num, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSpellAbilitiesForEffect(spells, ability, title, num, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSpellAbilitiesForEffect", new Object[] {spells, ability, title, num, params}, refusal, asked,
+                        () -> computer.chooseSpellAbilitiesForEffect(spells, ability, title, num, params));
+            }
+        }
+
+        @Override
+        public final SpellAbility chooseSingleSpellForEffect(List<SpellAbility> spells, SpellAbility ability, String title, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleSpellForEffect(spells, ability, title, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleSpellForEffect", new Object[] {spells, ability, title, params}, refusal, asked,
+                        () -> computer.chooseSingleSpellForEffect(spells, ability, title, params));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsToDiscardUnlessType(int num, CardCollectionView hand, String[] uTypes, SpellAbility ability) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsToDiscardUnlessType(num, hand, uTypes, ability);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsToDiscardUnlessType", new Object[] {num, hand, uTypes, ability}, refusal, asked,
+                        () -> computer.chooseCardsToDiscardUnlessType(num, hand, uTypes, ability));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsToDiscardToMaximumHandSize(int numDiscard) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsToDiscardToMaximumHandSize(numDiscard);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsToDiscardToMaximumHandSize", new Object[] {numDiscard}, refusal, asked,
+                        () -> computer.chooseCardsToDiscardToMaximumHandSize(numDiscard));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsToDelve(int genericAmount, CardCollection grave) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsToDelve(genericAmount, grave);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsToDelve", new Object[] {genericAmount, grave}, refusal, asked,
+                        () -> computer.chooseCardsToDelve(genericAmount, grave));
+            }
+        }
+
+        @Override
+        public final List<Card> chooseCardsForSplice(SpellAbility ability, List<Card> cards) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForSplice(ability, cards);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForSplice", new Object[] {ability, cards}, refusal, asked,
+                        () -> computer.chooseCardsForSplice(ability, cards));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsToRevealFromHand(int min, int max, CardCollectionView valid) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsToRevealFromHand(min, max, valid);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsToRevealFromHand", new Object[] {min, max, valid}, refusal, asked,
+                        () -> computer.chooseCardsToRevealFromHand(min, max, valid));
+            }
+        }
+
+        @Override
+        public final List<AbilitySub> chooseModeForAbility(SpellAbility ability, List<AbilitySub> possible, int min, int num, boolean allowRepeat) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseModeForAbility(ability, possible, min, num, allowRepeat);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseModeForAbility", new Object[] {ability, possible, min, num, allowRepeat}, refusal, asked,
+                        () -> computer.chooseModeForAbility(ability, possible, min, num, allowRepeat));
+            }
+        }
+
+        @Override
+        public final CardCollectionView chooseCardsForCost(CardCollectionView valid, SpellAbility ability, CostPartWithList costPart, int num, boolean isOptional, String prompt) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForCost(valid, ability, costPart, num, isOptional, prompt);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForCost", new Object[] {valid, ability, costPart, num, isOptional, prompt}, refusal, asked,
+                        () -> computer.chooseCardsForCost(valid, ability, costPart, num, isOptional, prompt));
+            }
+        }
+
+        @Override
+        public final List<Card> chooseCardsForZoneChange(ZoneType destination, List<ZoneType> origin, SpellAbility ability, CardCollection fetchList, int min, int max, DelayedReveal delayedReveal, String selectPrompt, Player decider) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForZoneChange(destination, origin, ability, fetchList, min, max, delayedReveal, selectPrompt, decider);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForZoneChange", new Object[] {destination, origin, ability, fetchList, min, max, delayedReveal, selectPrompt, decider}, refusal, asked,
+                        () -> computer.chooseCardsForZoneChange(destination, origin, ability, fetchList, min, max, delayedReveal, selectPrompt, decider));
+            }
+        }
+
+        @Override
+        public final Map<Card, ManaCostShard> chooseCardsForConvokeOrImprovise(SpellAbility ability, ManaCost cost, CardCollectionView untapped, boolean artifacts, boolean creatures, Integer maxReduction) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardsForConvokeOrImprovise(ability, cost, untapped, artifacts, creatures, maxReduction);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardsForConvokeOrImprovise", new Object[] {ability, cost, untapped, artifacts, creatures, maxReduction}, refusal, asked,
+                        () -> computer.chooseCardsForConvokeOrImprovise(ability, cost, untapped, artifacts, creatures, maxReduction));
+            }
+        }
+
+        @Override
+        public final String chooseSomeType(String kindOfType, SpellAbility ability, Collection<String> validTypes, boolean isOptional) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSomeType(kindOfType, ability, validTypes, isOptional);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSomeType", new Object[] {kindOfType, ability, validTypes, isOptional}, refusal, asked,
+                        () -> computer.chooseSomeType(kindOfType, ability, validTypes, isOptional));
+            }
+        }
+
+        @Override
+        public final String chooseSector(Card assignee, String aiLogic, List<String> sectors) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSector(assignee, aiLogic, sectors);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSector", new Object[] {assignee, aiLogic, sectors}, refusal, asked,
+                        () -> computer.chooseSector(assignee, aiLogic, sectors));
+            }
+        }
+
+        @Override
+        public final String chooseProtectionType(SpellAbility ability, List<String> choices) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseProtectionType(ability, choices);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseProtectionType", new Object[] {ability, choices}, refusal, asked,
+                        () -> computer.chooseProtectionType(ability, choices));
+            }
+        }
+
+        @Override
+        public final String chooseKeywordForPump(List<String> options, SpellAbility ability, String prompt, Card affected) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseKeywordForPump(options, ability, prompt, affected);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseKeywordForPump", new Object[] {options, ability, prompt, affected}, refusal, asked,
+                        () -> computer.chooseKeywordForPump(options, ability, prompt, affected));
+            }
+        }
+
+        @Override
+        public final CounterType chooseCounterType(List<CounterType> options, SpellAbility ability, String prompt, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCounterType(options, ability, prompt, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCounterType", new Object[] {options, ability, prompt, params}, refusal, asked,
+                        () -> computer.chooseCounterType(options, ability, prompt, params));
+            }
+        }
+
+        @Override
+        public final CardState chooseSingleCardState(SpellAbility ability, List<CardState> states, String prompt, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleCardState(ability, states, prompt, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleCardState", new Object[] {ability, states, prompt, params}, refusal, asked,
+                        () -> computer.chooseSingleCardState(ability, states, prompt, params));
+            }
+        }
+
+        @Override
+        public final ICardFace chooseSingleCardFace(SpellAbility ability, List<ICardFace> faces, String prompt) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleCardFace(ability, faces, prompt);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleCardFace", new Object[] {ability, faces, prompt}, refusal, asked,
+                        () -> computer.chooseSingleCardFace(ability, faces, prompt));
+            }
+        }
+
+        @Override
+        public final String chooseCardName(SpellAbility ability, List<ICardFace> faces, String prompt) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardName(ability, faces, prompt);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardName", new Object[] {ability, faces, prompt}, refusal, asked,
+                        () -> computer.chooseCardName(ability, faces, prompt));
+            }
+        }
+
+        @Override
+        public final ICardFace chooseSingleCardFace(SpellAbility ability, String prompt, Predicate<ICardFace> filter, String logic) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseSingleCardFace(ability, prompt, filter, logic);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseSingleCardFace", new Object[] {ability, prompt, filter, logic}, refusal, asked,
+                        () -> computer.chooseSingleCardFace(ability, prompt, filter, logic));
+            }
+        }
+
+        @Override
+        public final String chooseCardName(SpellAbility ability, Predicate<ICardFace> filter, String validDescription, String prompt) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseCardName(ability, filter, validDescription, prompt);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseCardName", new Object[] {ability, filter, validDescription, prompt}, refusal, asked,
+                        () -> computer.chooseCardName(ability, filter, validDescription, prompt));
+            }
+        }
+
+        @Override
+        public final List<OptionalCostValue> chooseOptionalCosts(SpellAbility ability, List<OptionalCostValue> costs) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseOptionalCosts(ability, costs);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseOptionalCosts", new Object[] {ability, costs}, refusal, asked,
+                        () -> computer.chooseOptionalCosts(ability, costs));
+            }
+        }
+
+        @Override
+        public final int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNumber(ability, message, minimum, maximum);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNumber", new Object[] {ability, message, minimum, maximum}, refusal, asked,
+                        () -> computer.chooseNumber(ability, message, minimum, maximum));
+            }
+        }
+
+        @Override
+        public final int chooseNumber(SpellAbility ability, String message, int minimum, int maximum, Map<String, Object> params) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNumber(ability, message, minimum, maximum, params);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNumber", new Object[] {ability, message, minimum, maximum, params}, refusal, asked,
+                        () -> computer.chooseNumber(ability, message, minimum, maximum, params));
+            }
+        }
+
+        @Override
+        public final int chooseNumber(SpellAbility ability, String message, List<Integer> choices, Player relative) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNumber(ability, message, choices, relative);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNumber", new Object[] {ability, message, choices, relative}, refusal, asked,
+                        () -> computer.chooseNumber(ability, message, choices, relative));
+            }
+        }
+
+        @Override
+        public final Integer announceRequirements(SpellAbility ability, int minimum, int maximum, String announce) {
+            int asked = session.answeredRevision();
+            try {
+                return super.announceRequirements(ability, minimum, maximum, announce);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("announceRequirements", new Object[] {ability, minimum, maximum, announce}, refusal, asked,
+                        () -> computer.announceRequirements(ability, minimum, maximum, announce));
+            }
+        }
+
+        @Override
+        public final int chooseNumberForCostReduction(SpellAbility ability, int minimum, int maximum) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNumberForCostReduction(ability, minimum, maximum);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNumberForCostReduction", new Object[] {ability, minimum, maximum}, refusal, asked,
+                        () -> computer.chooseNumberForCostReduction(ability, minimum, maximum));
+            }
+        }
+
+        @Override
+        public final int chooseNumberForKeywordCost(SpellAbility ability, Cost cost, KeywordInterface keyword, String prompt, int max) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseNumberForKeywordCost(ability, cost, keyword, prompt, max);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseNumberForKeywordCost", new Object[] {ability, cost, keyword, prompt, max}, refusal, asked,
+                        () -> computer.chooseNumberForKeywordCost(ability, cost, keyword, prompt, max));
+            }
+        }
+
+        @Override
+        public final Object vote(SpellAbility ability, String prompt, List<Object> options, ListMultimap<Object, Player> votes, Player forPlayer, boolean optional) {
+            int asked = session.answeredRevision();
+            try {
+                return super.vote(ability, prompt, options, votes, forPlayer, optional);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("vote", new Object[] {ability, prompt, options, votes, forPlayer, optional}, refusal, asked,
+                        () -> computer.vote(ability, prompt, options, votes, forPlayer, optional));
+            }
+        }
+
+        @Override
+        public final Mana chooseManaFromPool(List<Mana> manaChoices) {
+            int asked = session.answeredRevision();
+            try {
+                return super.chooseManaFromPool(manaChoices);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("chooseManaFromPool", new Object[] {manaChoices}, refusal, asked,
+                        () -> computer.chooseManaFromPool(manaChoices));
+            }
+        }
+
+        @Override
+        public final SpellAbility getAbilityToPlay(Card host, List<SpellAbility> abilities, ITriggerEvent triggerEvent) {
+            int asked = session.answeredRevision();
+            try {
+                return super.getAbilityToPlay(host, abilities, triggerEvent);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("getAbilityToPlay", new Object[] {host, abilities, triggerEvent}, refusal, asked,
+                        () -> computer.getAbilityToPlay(host, abilities, triggerEvent));
+            }
+        }
+
+        @Override
+        public final Map<Byte, Integer> specifyManaCombo(SpellAbility ability, ColorSet colors, int manaAmount, boolean different) {
+            int asked = session.answeredRevision();
+            try {
+                return super.specifyManaCombo(ability, colors, manaAmount, different);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("specifyManaCombo", new Object[] {ability, colors, manaAmount, different}, refusal, asked,
+                        () -> computer.specifyManaCombo(ability, colors, manaAmount, different));
+            }
+        }
+
+        @Override
+        public final CostDecisionMakerBase getCostDecisionMaker(Player payer, SpellAbility ability, boolean effect, String announce) {
+            int asked = session.answeredRevision();
+            try {
+                return super.getCostDecisionMaker(payer, ability, effect, announce);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("getCostDecisionMaker", new Object[] {payer, ability, effect, announce}, refusal, asked,
+                        () -> computer.getCostDecisionMaker(payer, ability, effect, announce));
+            }
+        }
+
+        @Override
+        public final boolean confirmBidAction(SpellAbility ability, PlayerActionConfirmMode mode, String message, int bid, Player winner) {
+            int asked = session.answeredRevision();
+            try {
+                return super.confirmBidAction(ability, mode, message, bid, winner);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("confirmBidAction", new Object[] {ability, mode, message, bid, winner}, refusal, asked,
+                        () -> computer.confirmBidAction(ability, mode, message, bid, winner));
+            }
+        }
+
+        @Override
+        public final boolean payCostDuringRoll(Cost cost, SpellAbility ability) {
+            int asked = session.answeredRevision();
+            try {
+                return super.payCostDuringRoll(cost, ability);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("payCostDuringRoll", new Object[] {cost, ability}, refusal, asked,
+                        () -> computer.payCostDuringRoll(cost, ability));
+            }
+        }
+
+        @Override
+        public final boolean helpPayForAssistSpell(ManaCostBeingPaid cost, SpellAbility ability, int max, int requested) {
+            int asked = session.answeredRevision();
+            try {
+                return super.helpPayForAssistSpell(cost, ability, max, requested);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("helpPayForAssistSpell", new Object[] {cost, ability, max, requested}, refusal, asked,
+                        () -> computer.helpPayForAssistSpell(cost, ability, max, requested));
+            }
+        }
+
+        @Override
+        public final Player choosePlayerToAssistPayment(FCollectionView<Player> payers, SpellAbility ability, String prompt, int max) {
+            int asked = session.answeredRevision();
+            try {
+                return super.choosePlayerToAssistPayment(payers, ability, prompt, max);
+            } catch (IllegalStateException refusal) {
+                return answerForSeat("choosePlayerToAssistPayment", new Object[] {payers, ability, prompt, max}, refusal, asked,
+                        () -> computer.choosePlayerToAssistPayment(payers, ability, prompt, max));
+            }
         }
     }
 

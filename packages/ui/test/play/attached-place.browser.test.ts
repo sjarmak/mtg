@@ -72,16 +72,28 @@ const PLAINS = parseCard({
 });
 
 /** How many nonland places the near row draws. Eight is the count every
- *  crowded rule on the row is written against. */
-const PLACES = 8;
+ *  crowded rule on the row is written against; four is a roomy row, where the
+ *  host is sized by the row's width rather than by a crowded ceiling. */
+const PLACE_COUNTS = [4, 8] as const;
+type Places = (typeof PLACE_COUNTS)[number];
+
+/** How far the host's face may be from a bare neighbor's on the same row. The
+ *  0.3px of slack is the tray's keyline where the row's height caps the tray. */
+const HOST_FACE_TOLERANCE_PX = 1;
+
+const VIEWPORTS = [
+  [1440, 900],
+  [1280, 800],
+  [1024, 768],
+] as const;
 
 /** The crowded-board name legibility floor, measured at the rendered face. */
 const FACE_FLOOR_PX = 72;
 
 type Eighth = 'bare' | 'tray';
 
-function boardSession(eighth: Eighth): GameSession {
-  const near = Array.from({ length: PLACES }, (_unused, index) => ({
+function boardSession(eighth: Eighth, places: Places): GameSession {
+  const near = Array.from({ length: places }, (_unused, index) => ({
     card: CREATURES[index % CREATURES.length] ?? FIRST_CREATURE,
     controller: 0 as PlayerId,
     tapped: false,
@@ -122,7 +134,7 @@ function boardSession(eighth: Eighth): GameSession {
     const mine = state.battlefield.filter((oid) => state.objects[oid]?.controller === 0);
     const equipment = mine.find((oid) => state.objects[oid]?.card.id === EDGE.id);
     const hosts = mine.filter((oid) => state.objects[oid]?.card.kind === 'creature');
-    const host = hosts[PLACES - 1];
+    const host = hosts[places - 1];
     const object = equipment === undefined ? undefined : state.objects[equipment];
     if (equipment === undefined || host === undefined || object === undefined) {
       throw new Error('the tray arm could not find its Equipment and its eighth creature');
@@ -145,13 +157,13 @@ function boardSession(eighth: Eighth): GameSession {
   };
 }
 
-function page(eighth: Eighth): string {
+function page(eighth: Eighth, places: Places): string {
   const markup = renderToStaticMarkup(
     h(Shell, {
       mode: 'play',
       onSelectMode: () => undefined,
       children: h(PlayView, {
-        session: boardSession(eighth),
+        session: boardSession(eighth, places),
         viewer: 0,
         names: ['You', 'Bot'],
         onChoose: () => undefined,
@@ -181,6 +193,7 @@ const MEASURE = `(() => {
     bare: box(row.querySelector(":scope > .mtg-attach[data-holds='false'] > .mtg-slot")),
     bareFace: box(row.querySelector(":scope > .mtg-attach[data-holds='false'] > .mtg-slot > .mtg-card")),
     tray: box(tray),
+    neighborFace: box(row.querySelector(":scope > .mtg-attach[data-holds='false'] > .mtg-slot > .mtg-card")),
     host: box(tray === null ? null : tray.querySelector(':scope > .mtg-slot')),
     hostFace: box(tray === null ? null : tray.querySelector(':scope > .mtg-slot > .mtg-card')),
     held: box(tray === null ? null : tray.querySelector('.mtg-attach__held > .mtg-slot')),
@@ -201,6 +214,7 @@ interface Reading {
   readonly bare: Box;
   readonly bareFace: Box;
   readonly tray: Box | null;
+  readonly neighborFace: Box | null;
   readonly host: Box | null;
   readonly hostFace: Box | null;
   readonly held: Box | null;
@@ -216,26 +230,25 @@ describe('a battlefield row whose eighth place is holding an Equipment', () => {
     'counts the tray as a place and draws its host the size of a bare neighbor',
     async () => {
       const directory = await mkdtemp(join(tmpdir(), 'mtg-attached-place-'));
-      const files: Record<Eighth, string> = {
-        bare: join(directory, 'bare.html'),
-        tray: join(directory, 'tray.html'),
-      };
-      await writeFile(files.bare, page('bare'), 'utf8');
-      await writeFile(files.tray, page('tray'), 'utf8');
+      const file = (eighth: Eighth, places: Places): string =>
+        join(directory, `${eighth}-${String(places)}.html`);
+      for (const places of PLACE_COUNTS) {
+        for (const eighth of ['bare', 'tray'] as const) {
+          await writeFile(file(eighth, places), page(eighth, places), 'utf8');
+        }
+      }
       let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
       let bodyError: unknown;
       try {
         const launched = await launchChrome(join(directory, 'chrome'));
         chrome = launched;
-        for (const [width, height] of [
-          [1440, 900],
-          [1280, 800],
-          [1024, 768],
-        ] as const) {
+        for (const [places, width, height] of PLACE_COUNTS.flatMap((count) =>
+          VIEWPORTS.map(([w, h]) => [count, w, h] as const),
+        )) {
           const read = async (eighth: Eighth): Promise<Reading> =>
             (await measurePage(
               launched.client,
-              files[eighth],
+              file(eighth, places),
               width,
               height,
               MEASURE,
@@ -243,13 +256,13 @@ describe('a battlefield row whose eighth place is holding an Equipment', () => {
             )) as unknown as Reading;
           const bare = await read('bare');
           const tray = await read('tray');
-          const at = `${String(width)}x${String(height)}`;
+          const at = `${String(places)} places at ${String(width)}x${String(height)}`;
           const detail = `${at} ${JSON.stringify({ bare, tray })}`;
 
           // Both arms draw the same number of places, which is what makes the
           // rest of these comparable at all.
-          expect(bare.places, `bare places ${detail}`).toBe(PLACES);
-          expect(tray.places, `tray places ${detail}`).toBe(PLACES);
+          expect(bare.places, `bare places ${detail}`).toBe(places);
+          expect(tray.places, `tray places ${detail}`).toBe(places);
           expect(tray.tray, `tray element ${detail}`).not.toBeNull();
 
           // The crowded ceilings are about how many places are on the row, and
@@ -268,6 +281,14 @@ describe('a battlefield row whose eighth place is holding an Equipment', () => {
           // when the row's height share is the tighter bound, so its box is the
           // wrong subject on exactly the viewport this comparison is hardest on.
           expect(hostFace.width, `host face width ${detail}`).toBeGreaterThanOrEqual(FACE_FLOOR_PX);
+          // And the host is drawn at its neighbors' size on its own row. The
+          // bare arm is not the subject: the held card is real width on the row,
+          // so the tray arm may draw every place a little smaller than it.
+          const neighborFace = present(tray.neighborFace, 'neighbor face');
+          expect(
+            Math.abs(hostFace.width - neighborFace.width),
+            `host against neighbor ${detail}`,
+          ).toBeLessThanOrEqual(HOST_FACE_TOLERANCE_PX);
           expect(host.left, `host inside tray ${detail}`).toBeGreaterThanOrEqual(trayBox.left - 1);
           expect(held.right, `held inside tray ${detail}`).toBeLessThanOrEqual(trayBox.right + 1);
         }

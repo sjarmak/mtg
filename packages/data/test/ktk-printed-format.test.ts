@@ -93,7 +93,7 @@ describe('Khans of Tarkir printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v24/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))
@@ -126,7 +126,7 @@ describe('Khans of Tarkir printed format sources', () => {
   it('ships only exact legal Forge-admitted constructed pilot decks', () => {
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('ktk-constructed-format-v1.json')));
     const printings = new Map(ktk.cards.map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v24/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(

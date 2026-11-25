@@ -91,7 +91,7 @@ npx tsx packages/data/tools/build-controller-contract-bundle.ts --config out/nph
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/nph/probes/nph-scenario-probes-v1-config.json --out out/nph/scenario-probes-v1 --timeout-ms 500000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/nph/scenario-probes-v1 --inventory out/nph/decision-inventory-v5/inventory.json --out out/nph/script-qualifications-v1
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/nph/probes/nph-match-probes-v1-config.json --out out/nph/match-probes-v1 --timeout-ms 500000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/nph/nph-limited-format-v1.json --catalog packages/data/data/nph/nph-printed-catalog-v1.json --qualifications out/nph/script-qualifications-v1 --match-probes out/nph/match-probes-v1 --out packages/data/data/nph/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/nph/nph-limited-format-v1.json --catalog packages/data/data/nph/nph-printed-catalog-v1.json --qualifications out/nph/script-qualifications-v1 --match-probes out/nph/match-probes-v1 --out packages/data/data/nph/play-admission
 ```
 
 `play-admission-v2/` re-admits the same 170 scripts and four match probes

@@ -29,6 +29,7 @@
     "netplay": "tsx packages/ui/tools/netplay.ts",
     "table": "tsx packages/ui/tools/table.ts",
     "lab": "tsx packages/ui/tools/lab.ts",
+    "unreviewed-choices": "tsx packages/ui/tools/unreviewed-choices-cli.ts",
     "queue": "tsx packages/slice/tools/lane-queue/cli.ts",
     "stalled-work": "tsx packages/slice/tools/stalled-work/cli.ts",
     "gate": "tsx packages/slice/tools/gate/cli.ts",

@@ -1,0 +1,161 @@
+{
+  "key": "3f81f439a640b56558d4a20b824b7d3d",
+  "recordedAt": "2026-11-22T22:28:30.919Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Zephyr Spirit\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"When this creature blocks, return it to its owner's hand.\"},{\"id\":2,\"name\":\"Blood Funnel\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Noncreature spells you cast cost {2} less to cast.\\nWhenever you cast a noncreature spell, counter that spell unless you sacrifice a creature.\"},{\"id\":3,\"name\":\"Brainspoil\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature that isn't enchanted. It can't be regenerated.\\nTransmute {1}{B}{B} ({1}{B}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":4,\"name\":\"Carrion Howler\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Wolf\",\"text\":\"Pay 1 life: This creature gets +2/-1 until end of turn.\"},{\"id\":5,\"name\":\"Clinging Darkness\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -4/-1.\"},{\"id\":6,\"name\":\"Dark Confidant\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"At the beginning of your upkeep, reveal the top card of your library and put that card into your hand. You lose life equal to its mana value.\"},{\"id\":7,\"name\":\"Darkblast\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -1/-1 until end of turn.\\nDredge 3 (If you would draw a card, you may mill three cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":8,\"name\":\"Dimir House Guard\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Skeleton\",\"text\":\"Fear (This creature can't be blocked except by artifact creatures and/or black creatures.)\\nSacrifice a creature: Regenerate this creature.\\nTransmute {1}{B}{B} ({1}{B}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":9,\"name\":\"Dimir Machinations\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of target player's library. Exile any number of those cards, then put the rest back in any order.\\nTransmute {1}{B}{B} ({1}{B}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":10,\"name\":\"Disembowel\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with mana value X.\"},{\"id\":11,\"name\":\"Empty the Catacombs\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player returns all creature cards from their graveyard to their hand.\"},{\"id\":12,\"name\":\"Golgari Thug\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature dies, put target creature card from your graveyard on top of your library.\\nDredge 4 (If you would draw a card, you may mill four cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":13,\"name\":\"Helldozer\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"{B}{B}{B}, {T}: Destroy target land. If that land was nonbasic, untap this creature.\"},{\"id\":14,\"name\":\"Hex\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy six target creatures.\"},{\"id\":15,\"name\":\"Hunted Horror\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Trample\\nWhen this creature enters, target opponent creates two 3/3 green Centaur creature tokens with protection from black.\"},{\"id\":16,\"name\":\"Infectious Host\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, target player loses 2 life.\"},{\"id\":17,\"name\":\"Keening Banshee\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhen this creature enters, target creature gets -2/-2 until end of turn.\"},{\"id\":18,\"name\":\"Last Gasp\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -3/-3 until end of turn.\"},{\"id\":19,\"name\":\"Mausoleum Turnkey\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Ogre Rogue\",\"text\":\"When this creature enters, return target creature card of an opponent's choice from your graveyard to your hand.\"},{\"id\":20,\"name\":\"Moonlight Bargain\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Look at the top five cards of your library. For each card, put that card into your graveyard unless you pay 2 life. Then put the rest into your hand.\"},{\"id\":21,\"name\":\"Mortipede\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"{2}{G}: All creatures able to block this creature this turn do so.\"},{\"id\":22,\"name\":\"Necromantic Thirst\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature deals combat damage to a player, you may return target creature card from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Necroplasm\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"At the beginning of your upkeep, put a +1/+1 counter on this creature.\\nAt the beginning of your end step, destroy each creature with mana value equal to the number of +1/+1 counters on this creature.\\nDredge 2 (If you would draw a card, you may mill two cards instead. If you do, return this card from your graveyard to your hand.)\"},{\"id\":24,\"name\":\"Netherborn Phalanx\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"When this creature enters, each opponent loses 1 life for each creature they control.\\nTransmute {1}{B}{B} ({1}{B}{B}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":25,\"name\":\"Nightmare Void\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals their hand. You choose a card from it. That player discards that card.\\nDredge 2 (If you would draw a card, you may mill two cards instead. If you do, return this card from your graveyard to your hand.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1372,
+      "cacheCreationInputTokens": 32668,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776109,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776109,
+      "pricedUsd": 0.776109,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776109 and its own usage prices at $0.776109"
+    }
+  }
+}

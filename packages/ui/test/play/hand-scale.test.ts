@@ -283,7 +283,10 @@ describe('the hand is sized from its row rather than from a share of the column'
    * agree, and what this test still holds them to, is the count and the gap.
    */
   it('divides the hand row and the board curve by the same count and gap', () => {
-    const share = String.raw`\(100% (?:[-+] var\(--[a-z-]+\) )?- (\d+) \* var\((--mtg-space-\d)\)\) \/ (\d+)`;
+    // The battlefield names its row's width in cqw off combat and as a
+    // percentage in combat (issue 213); the hand's is a percentage. Either
+    // way it is the row's whole width, divided the same way.
+    const share = String.raw`\(100(?:%|cqw) (?:[-+] var\(--[a-z-]+\) )?- (\d+) \* var\((--mtg-space-\d)\)\) \/ (\d+)`;
     const slotRule = declarations(`${PLAY_SCOPE} ${HELD}`).replace(/\s+/g, ' ');
     const compactSheet = SHEET.replace(/\s+/g, ' ');
     const across = new RegExp(
@@ -516,8 +519,14 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
     const slot = declarations(`${playedSlot(`${PLAY_SCOPE} .mtg-board__spells`)}:not([data-empty='true'])`);
     expect(slot, 'the sizing rule names a seat').not.toContain('data-seat');
     const seated = [...SHEET.matchAll(/\n([^\n{]*)\{[^}]*--hand-slot:/g)].map((m) => m[1] ?? '');
-    expect(seated, 'the shared basis should be declared once').toHaveLength(1);
-    expect(seated[0]).not.toContain('data-seat');
+    // Twice since issue 213, and neither names a seat: once for every row,
+    // naming its width in cqw, and once restated in combat as a percentage,
+    // because a combat row is not a container for a cqw to resolve against.
+    expect(seated, 'the shared basis should be declared for every row and restated for combat').toHaveLength(
+      2,
+    );
+    for (const rule of seated) expect(rule).not.toContain('data-seat');
+    expect(seated.filter((rule) => rule.includes("data-combat='true'"))).toHaveLength(1);
     // And every rule that sizes a face is seat-blind. Two of them now: the
     // width basis, and the same face bounded by the row's height wherever the
     // row is a size container (mtg-5f9). Counting them was the old assertion

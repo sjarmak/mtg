@@ -124,7 +124,7 @@ export function PrintedFormatRoute(props: Props): ReactElement {
       ),
     );
   }
-  const { availability, catalogs, draftRatings, prepared, rarities, tokens } = props.state.value;
+  const { availability, cardRoles, catalogs, draftRatings, prepared, rarities, tokens } = props.state.value;
   const printedCards = catalogs.flatMap((source) =>
     source.catalog.cards.map((card) => ({
       ...card,
@@ -158,6 +158,7 @@ export function PrintedFormatRoute(props: Props): ReactElement {
       : h(PrintedDraftRoute, {
           prepared,
           ...(draftRatings === undefined ? {} : { draftRatings }),
+          ...(cardRoles === undefined ? {} : { cardRoles }),
           seed,
           onNewDraft,
           ...(props.backend === undefined ? {} : { backend: props.backend }),

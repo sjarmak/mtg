@@ -21,7 +21,7 @@
  *                   (CR 702.4b). `vocabulary.ts` says why it is a keyword
  *                   ability rather than a tenth entry in `KEYWORDS`.
  */
-import type { AttackAdmission, CombatModification, Keyword } from '@mtg/dsl';
+import type { AttackAdmission, CombatModification, Keyword, StaticAbility } from '@mtg/dsl';
 import { assertNever, isCombatStaticModification } from '@mtg/dsl';
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
@@ -71,16 +71,42 @@ export function hasCombatModification(
   target: ObjectId,
   kind: CombatModification['kind'],
 ): boolean {
-  return state.battlefield.some((source) => {
-    const object = state.objects[source];
-    if (object === undefined) return false;
-    return abilitiesOf(state, source).some((ability) => {
-      if (ability.kind !== 'static') return false;
-      if (!isCombatStaticModification(ability.modification)) return false;
-      if (ability.modification.kind !== kind) return false;
-      return liveStaticAbilityAffects(state, ability, source, target);
-    });
-  });
+  return battlefieldStatics(state).some(
+    ({ source, ability }) =>
+      isCombatStaticModification(ability.modification) &&
+      ability.modification.kind === kind &&
+      liveStaticAbilityAffects(state, ability, source, target),
+  );
+}
+
+interface BattlefieldStatic {
+  readonly source: ObjectId;
+  readonly ability: StaticAbility;
+}
+
+const BATTLEFIELD_STATICS = new WeakMap<GameState, readonly BattlefieldStatic[]>();
+
+/**
+ * Every static ability on the battlefield right now, with its source, in
+ * battlefield order and then ability order.
+ *
+ * The combat questions ask it once per creature, and they used to read every
+ * permanent's abilities each time, so one attack declaration cost the creatures
+ * times the board (#309). The list is a pure function of an immutable state, so
+ * it is collected once per state, which is how `layers.ts` caches its own walks.
+ */
+function battlefieldStatics(state: GameState): readonly BattlefieldStatic[] {
+  const cached = BATTLEFIELD_STATICS.get(state);
+  if (cached !== undefined) return cached;
+  const found: BattlefieldStatic[] = [];
+  for (const source of state.battlefield) {
+    if (state.objects[source] === undefined) continue;
+    for (const ability of abilitiesOf(state, source)) {
+      if (ability.kind === 'static') found.push({ source, ability });
+    }
+  }
+  BATTLEFIELD_STATICS.set(state, found);
+  return found;
 }
 
 /** Whether a creature is prohibited from attacking by any live restriction. */
@@ -243,15 +269,11 @@ function attackAdmissionHolds(state: GameState, creature: ObjectId, admission: A
 
 /** CR 508.1c: every live global restriction must independently admit the creature. */
 function satisfiesGlobalAttackRestrictions(state: GameState, creature: ObjectId): boolean {
-  for (const source of state.battlefield) {
-    if (state.objects[source] === undefined) continue;
-    for (const ability of abilitiesOf(state, source)) {
-      if (ability.kind !== 'static') continue;
-      if (ability.modification.kind !== 'cantAttackWithoutAnyOf') continue;
-      if (!liveStaticAbilityAffects(state, ability, source, creature)) continue;
-      if (!ability.modification.anyOf.some((admission) => attackAdmissionHolds(state, creature, admission))) {
-        return false;
-      }
+  for (const { source, ability } of battlefieldStatics(state)) {
+    if (ability.modification.kind !== 'cantAttackWithoutAnyOf') continue;
+    if (!liveStaticAbilityAffects(state, ability, source, creature)) continue;
+    if (!ability.modification.anyOf.some((admission) => attackAdmissionHolds(state, creature, admission))) {
+      return false;
     }
   }
   return true;

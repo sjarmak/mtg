@@ -1,0 +1,161 @@
+{
+  "key": "35a1ef5c8c36546ca3ae589cfabd0587",
+  "recordedAt": "2026-11-22T22:31:15.996Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Gigadrowse\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Replicate {U} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nTap target permanent.\"},{\"id\":2,\"name\":\"Hatching Plans\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment is put into a graveyard from the battlefield, draw three cards.\"},{\"id\":3,\"name\":\"Infiltrator's Magemark\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nCreatures you control that are enchanted get +1/+1 and can't be blocked except by creatures with defender.\"},{\"id\":4,\"name\":\"Leyline of Singularity\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"If this card is in your opening hand, you may begin the game with it on the battlefield.\\nAll nonland permanents are legendary.\"},{\"id\":5,\"name\":\"Mimeofacture\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Replicate {3}{U} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nChoose target permanent an opponent controls. Search that player's library for a card with the same name and put it onto the battlefield under your control. Then that player shuffles.\"},{\"id\":6,\"name\":\"Quicken\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"The next sorcery spell you cast this turn can be cast as though it had flash. (It can be cast any time you could cast an instant.)\\nDraw a card.\"},{\"id\":7,\"name\":\"Repeal\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent with mana value X to its owner's hand.\\nDraw a card.\"},{\"id\":8,\"name\":\"Runeboggle\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {1}.\\nDraw a card.\"},{\"id\":9,\"name\":\"Sky Swallower\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Flying\\nWhen this creature enters, target opponent gains control of all other permanents you control.\"},{\"id\":10,\"name\":\"Steamcore Weird\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Weird\",\"text\":\"When this creature enters, if {R} was spent to cast it, it deals 2 damage to any target.\"},{\"id\":11,\"name\":\"Stratozeppelid\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Flying\\nThis creature can block only creatures with flying.\"},{\"id\":12,\"name\":\"Thunderheads\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Replicate {2}{U} (When you cast this spell, copy it for each time you paid its replicate cost.)\\nCreate a 3/3 blue Weird creature token with defender and flying. Exile it at the beginning of the next end step.\"},{\"id\":13,\"name\":\"Torch Drake\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\n{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":14,\"name\":\"Train of Thought\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Replicate {1}{U} (When you cast this spell, copy it for each time you paid its replicate cost.)\\nDraw a card.\"},{\"id\":15,\"name\":\"Vacuumelt\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Replicate {2}{U} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nReturn target creature to its owner's hand.\"},{\"id\":16,\"name\":\"Vedalken Plotter\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"When this creature enters, exchange control of target land you control and target land an opponent controls.\"},{\"id\":17,\"name\":\"Vertigo Spawn\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"Defender\\nWhenever this creature blocks a creature, tap that creature. That creature doesn't untap during its controller's next untap step.\"},{\"id\":18,\"name\":\"Abyssal Nocturnus\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Whenever an opponent discards a card, this creature gets +2/+2 and gains fear until end of turn. (It can't be blocked except by artifact creatures and/or black creatures.)\"},{\"id\":19,\"name\":\"Caustic Rain\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target land.\"},{\"id\":20,\"name\":\"Cremate\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target card from a graveyard.\\nDraw a card.\"},{\"id\":21,\"name\":\"Cry of Contrition\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards a card.\\nHaunt (When this spell card is put into a graveyard after resolving, exile it haunting target creature.)\\nWhen the creature this card haunts dies, target player discards a card.\"},{\"id\":22,\"name\":\"Cryptwailing\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}, Exile two creature cards from your graveyard: Target player discards a card. Activate only as a sorcery.\"},{\"id\":23,\"name\":\"Daggerclaw Imp\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\nThis creature can't block.\"},{\"id\":24,\"name\":\"Douse in Gloom\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Douse in Gloom deals 2 damage to target creature and you gain 2 life.\"},{\"id\":25,\"name\":\"Exhumer Thrull\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"Haunt (When this creature dies, exile it haunting target creature.)\\nWhen this creature enters or the creature it haunts dies, return target creature card from your graveyard to your hand.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1508,
+      "cacheCreationInputTokens": 32366,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776869,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776869,
+      "pricedUsd": 0.776869,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776869 and its own usage prices at $0.776869"
+    }
+  }
+}

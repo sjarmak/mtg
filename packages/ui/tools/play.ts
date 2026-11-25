@@ -36,7 +36,7 @@ import { clearStagedFlatArt, describeClearedFlatArt } from './stage-art';
 import { cardsOf, printedCardIdsOf, setCodeOf } from './set-surfaces';
 import { DEFAULT_WEB_PORT, portBusyMessage, readPlayArgs, viteArgsFor } from './play-args';
 import { readBackendPort, startBackendService } from './backend-service';
-import type { ObservedFormats } from './backend-service';
+import type { BackendService, ObservedFormats } from './backend-service';
 import { observedDealer } from './observed-dealer';
 import type { SeatFormat } from './observed-dealer';
 import { gameplayDir, resolveDataDir } from './data-path';
@@ -76,7 +76,7 @@ import {
 import type { RunLogSearch } from './stage-run-log';
 import { buildThenStagePlayDocuments } from './stage-calibration-command';
 import { startTableService } from './table-service';
-import { stagePrintedFormats } from './stage-printed-formats';
+import { stagePrintedFormats, withholdPrintedPlay } from './stage-printed-formats';
 import { describePrintedReleaseDates, storeReleaseDates } from './printed-release-dates';
 import { buildInstalledPrintedDraftRatings, describePrintedDraftRatings } from './printed-draft-ratings';
 import {
@@ -131,6 +131,7 @@ const REPO_ROOT = resolve(UI_ROOT, '..', '..');
 
 export { SET_CANDIDATES } from './set-candidates';
 import { flagshipOnly, libraryCandidates, SET_CANDIDATES } from './set-candidates';
+import { unreviewedChoiceLogPath } from './unreviewed-choices';
 
 function fail(message: string): never {
   process.stderr.write(`\nnpm run play: ${message}\n\n`);
@@ -274,6 +275,8 @@ interface BackendStage {
   readonly message: string;
   /** What a LAN Forge table opens its game on; null when this run has no observed backend. */
   readonly observed: ObservedFormats | null;
+  /** Printed formats the backend refused; their Play is turned off in the staged index. */
+  readonly withheld: BackendService['withheld'];
   readonly close: () => Promise<void>;
 }
 
@@ -324,6 +327,8 @@ async function startBackendServer(
       gateway: null,
       message: `Legacy Cube backend: using the configured gateway on port ${process.env['MTG_BACKEND_GATEWAY_PORT']}.`,
       observed: null,
+      // That gateway's own launcher staged nothing here, so there is no verdict to apply.
+      withheld: [],
       close: () => Promise.resolve(),
     };
   }
@@ -332,6 +337,7 @@ async function startBackendServer(
     port: 0,
     printedAdmissions,
     recorder,
+    unreviewedChoiceLog: unreviewedChoiceLogPath(REPO_ROOT),
   });
 }
 
@@ -568,6 +574,8 @@ async function main(): Promise<void> {
       ),
   });
   const { tables, backend } = services;
+  // Before Vite serves the index: a format the backend refused must not offer a Play button.
+  withholdPrintedPlay(publicDir, printedIndex, backend.withheld);
   process.stdout.write(`${backend.message}\nRecording finished games under ${gameplayRoot}\n\n`);
   const viteArgs = viteArgsFor(webPort);
   const vite = spawn('npx', viteArgs, {

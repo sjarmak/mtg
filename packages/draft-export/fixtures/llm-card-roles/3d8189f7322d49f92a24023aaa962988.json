@@ -1,0 +1,161 @@
+{
+  "key": "3d8189f7322d49f92a24023aaa962988",
+  "recordedAt": "2026-11-22T21:32:42.145Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Abuna Acolyte\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Cleric\",\"text\":\"{T}: Prevent the next 1 damage that would be dealt to any target this turn.\\n{T}: Prevent the next 2 damage that would be dealt to target artifact creature this turn.\"},{\"id\":2,\"name\":\"Arrest\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block, and its activated abilities can't be activated.\"},{\"id\":3,\"name\":\"Auriok Edgewright\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Metalcraft — This creature has double strike as long as you control three or more artifacts.\"},{\"id\":4,\"name\":\"Auriok Sunchaser\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Metalcraft — As long as you control three or more artifacts, this creature gets +2/+2 and has flying.\"},{\"id\":5,\"name\":\"Dispense Justice\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices an attacking creature of their choice.\\nMetalcraft — That player sacrifices two attacking creatures of their choice instead if you control three or more artifacts.\"},{\"id\":6,\"name\":\"Elspeth Tirel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Elspeth\",\"text\":\"+2: You gain 1 life for each creature you control.\\n−2: Create three 1/1 white Soldier creature tokens.\\n−5: Destroy all other permanents except for lands and tokens.\"},{\"id\":7,\"name\":\"Fulgent Distraction\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Choose two target creatures. Tap those creatures, then unattach all Equipment from them.\"},{\"id\":8,\"name\":\"Ghalma's Warden\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Elephant Soldier\",\"text\":\"Metalcraft — This creature gets +2/+2 as long as you control three or more artifacts.\"},{\"id\":9,\"name\":\"Glimmerpoint Stag\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Elk\",\"text\":\"Vigilance\\nWhen this creature enters, exile another target permanent. Return that card to the battlefield under its owner's control at the beginning of the next end step.\"},{\"id\":10,\"name\":\"Glint Hawk\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, sacrifice it unless you return an artifact you control to its owner's hand.\"},{\"id\":11,\"name\":\"Indomitable Archangel\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nMetalcraft — Artifacts you control have shroud as long as you control three or more artifacts. (An artifact with shroud can't be the target of spells or abilities.)\"},{\"id\":12,\"name\":\"Kemba, Kha Regent\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Legendary Creature — Cat Cleric\",\"text\":\"At the beginning of your upkeep, create a 2/2 white Cat creature token for each Equipment attached to Kemba.\"},{\"id\":13,\"name\":\"Kemba's Skyguard\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Cat Knight\",\"text\":\"Flying\\nWhen this creature enters, you gain 2 life.\"},{\"id\":14,\"name\":\"Leonin Arbiter\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Cleric\",\"text\":\"Players can't search libraries. Any player may pay {2} for that player to ignore this effect until end of turn.\"},{\"id\":15,\"name\":\"Loxodon Wayfarer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Elephant Monk\",\"text\":\"\"},{\"id\":16,\"name\":\"Myrsmith\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever you cast an artifact spell, you may pay {1}. If you do, create a 1/1 colorless Myr artifact creature token.\"},{\"id\":17,\"name\":\"Razor Hippogriff\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Hippogriff\",\"text\":\"Flying\\nWhen this creature enters, return target artifact card from your graveyard to your hand. You gain life equal to that card's mana value.\"},{\"id\":18,\"name\":\"Revoke Existence\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target artifact or enchantment.\"},{\"id\":19,\"name\":\"Salvage Scout\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"{W}, Sacrifice this creature: Return target artifact card from your graveyard to your hand.\"},{\"id\":20,\"name\":\"Seize the Initiative\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains first strike until end of turn.\"},{\"id\":21,\"name\":\"Soul Parry\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage one or two target creatures would deal this turn.\"},{\"id\":22,\"name\":\"Sunblast Angel\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, destroy all tapped creatures.\"},{\"id\":23,\"name\":\"Sunspear Shikari\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Soldier\",\"text\":\"As long as this creature is equipped, it has first strike and lifelink. (It deals combat damage before creatures without first strike. Damage dealt by it also causes you to gain that much life.)\"},{\"id\":24,\"name\":\"Tempered Steel\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Artifact creatures you control get +2/+2.\"},{\"id\":25,\"name\":\"True Conviction\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control have double strike and lifelink.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1267,
+      "cacheCreationInputTokens": 32337,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.764239,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.764239,
+      "pricedUsd": 0.764239,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.764239 and its own usage prices at $0.764239"
+    }
+  }
+}

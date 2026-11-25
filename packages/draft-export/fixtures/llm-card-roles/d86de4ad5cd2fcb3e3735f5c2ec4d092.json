@@ -1,0 +1,161 @@
+{
+  "key": "d86de4ad5cd2fcb3e3735f5c2ec4d092",
+  "recordedAt": "2026-11-22T22:20:49.099Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Sword-Point Diplomacy\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top three cards of your library. For each of those cards, put that card into your hand unless any opponent pays 3 life. Then exile the rest.\"},{\"id\":2,\"name\":\"Vanquish the Weak\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power 3 or less.\"},{\"id\":3,\"name\":\"Vicious Conquistador\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"Whenever this creature attacks, each opponent loses 1 life.\"},{\"id\":4,\"name\":\"Vraska's Contempt\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature or planeswalker. You gain 2 life.\"},{\"id\":5,\"name\":\"Walk the Plank\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target non-Merfolk creature.\"},{\"id\":6,\"name\":\"Wanted Scoundrels\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature dies, target opponent creates two Treasure tokens. (They're artifacts with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":7,\"name\":\"Angrath's Marauders\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"If a source you control would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.\"},{\"id\":8,\"name\":\"Bonded Horncrest\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"This creature can't attack or block alone.\"},{\"id\":9,\"name\":\"Brazen Buccaneers\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Haste\\nWhen this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":10,\"name\":\"Burning Sun's Avatar\",\"manaCost\":\"{3}{R}{R}{R}\",\"typeLine\":\"Creature — Dinosaur Avatar\",\"text\":\"When this creature enters, it deals 3 damage to target opponent or planeswalker and 3 damage to up to one target creature.\"},{\"id\":11,\"name\":\"Captain Lannery Storm\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Legendary Creature — Human Pirate\",\"text\":\"Haste\\nWhenever Captain Lannery Storm attacks, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\\nWhenever you sacrifice a Treasure, Captain Lannery Storm gets +1/+0 until end of turn.\"},{\"id\":12,\"name\":\"Captivating Crew\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"{3}{R}: Gain control of target creature an opponent controls until end of turn. Untap that creature. It gains haste until end of turn. Activate only as a sorcery.\"},{\"id\":13,\"name\":\"Charging Monstrosaur\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Trample, haste\"},{\"id\":14,\"name\":\"Demolish\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\"},{\"id\":15,\"name\":\"Dinosaur Stampede\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures get +2/+0 until end of turn. Dinosaurs you control gain trample until end of turn.\"},{\"id\":16,\"name\":\"Dual Shot\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Dual Shot deals 1 damage to each of up to two target creatures.\"},{\"id\":17,\"name\":\"Fathom Fleet Firebrand\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":18,\"name\":\"Fiery Cannonade\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Fiery Cannonade deals 2 damage to each non-Pirate creature.\"},{\"id\":19,\"name\":\"Fire Shrine Keeper\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Menace\\n{7}{R}, {T}, Sacrifice this creature: It deals 3 damage to each of up to two target creatures.\"},{\"id\":20,\"name\":\"Firecannon Blast\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Firecannon Blast deals 3 damage to target creature.\\nRaid — Firecannon Blast deals 6 damage instead if you attacked this turn.\"},{\"id\":21,\"name\":\"Frenzied Raptor\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"\"},{\"id\":22,\"name\":\"Headstrong Brute\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Orc Pirate\",\"text\":\"This creature can't block.\\nThis creature has menace as long as you control another Pirate.\"},{\"id\":23,\"name\":\"Hijack\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target artifact or creature until end of turn. Untap it. It gains haste until end of turn.\"},{\"id\":24,\"name\":\"Lightning Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Lightning Strike deals 3 damage to any target.\"},{\"id\":25,\"name\":\"Lightning-Rig Crew\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Pirate\",\"text\":\"{T}: This creature deals 1 damage to each opponent.\\nWhenever you cast a Pirate spell, untap this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1017,
+      "cacheCreationInputTokens": 32315,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.751299,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.751299,
+      "pricedUsd": 0.751299,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.751299 and its own usage prices at $0.751299"
+    }
+  }
+}

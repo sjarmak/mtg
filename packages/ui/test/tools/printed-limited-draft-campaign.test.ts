@@ -2,7 +2,12 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { beforeAll, expect, it } from 'vitest';
 import { botEvidenceSha256 } from '@mtg/bot-evidence';
-import { preparePrintedLimitedFormat, printedSourceFingerprint } from '@mtg/draft-export';
+import {
+  preparePrintedLimitedFormat,
+  printedSourceFingerprint,
+  validatePrintedCardRoles,
+  type PrintedCardRoles,
+} from '@mtg/draft-export';
 import type { DeckRef, ObservedBackend } from '@mtg/engine';
 import type {
   ForgeObservedDecisionPolicy,
@@ -17,6 +22,7 @@ import {
   forgeGameplayPolicyIdentity,
   printedConstructionForgeRuntime,
   printedLimitedSubjectIdentity,
+  type PrintedLimitedComparison,
 } from '../../tools/printed-limited-construction-campaign';
 import {
   PRINTED_LIMITED_DRAFT_FEATURES,
@@ -116,7 +122,13 @@ beforeAll(async () => {
   });
 });
 
-it('records every full-pod choice and scores a fixed ranked build from the rotated focal seat', async () => {
+function isdCatalog() {
+  return parsePrintedCardCatalog(
+    JSON.parse(readFileSync('packages/data/data/isd/isd-printed-catalog-v1.json', 'utf8')),
+  );
+}
+
+async function runCampaign(comparison?: PrintedLimitedComparison, roles?: PrintedCardRoles) {
   const backend: ObservedBackend = {
     id: 'forge-test',
     determinism: 'observed',
@@ -126,7 +138,7 @@ it('records every full-pod choice and scores a fixed ranked build from the rotat
       throw new Error('injected game runner must not open the backend');
     },
   };
-  const policies = printedLimitedDraftPolicies(ratings);
+  const policies = printedLimitedDraftPolicies(ratings, comparison, roles);
   const identity = printedLimitedSubjectIdentity(subject);
   const plan: StageStrengthCampaignPlan = {
     version: 'stage-strength-campaign-plan/v1',
@@ -188,15 +200,9 @@ it('records every full-pod choice and scores a fixed ranked build from the rotat
           'isd',
           {
             prepared: subject,
-            catalogs: [
-              {
-                code: 'ISD',
-                catalog: parsePrintedCardCatalog(
-                  JSON.parse(readFileSync('packages/data/data/isd/isd-printed-catalog-v1.json', 'utf8')),
-                ),
-              },
-            ],
+            catalogs: [{ code: 'ISD', catalog: isdCatalog() }],
             ratings,
+            ...(roles === undefined ? {} : { roles }),
             backend: bindPrintedConstructionBackend(
               { admitted: true, subject: admission(), backend },
               opponentPolicy,
@@ -207,6 +213,7 @@ it('records every full-pod choice and scores a fixed ranked build from the rotat
       opponents: new Map([['frozen', opponent]]),
       maximumTurns: 50,
       maximumDecisions: 500,
+      ...(comparison === undefined ? {} : { comparison }),
     },
     async (options) => {
       games.push(options);
@@ -241,6 +248,11 @@ it('records every full-pod choice and scores a fixed ranked build from the rotat
       } satisfies ForgeObservedGameReport;
     },
   );
+  return { run, games, policies };
+}
+
+it('records every full-pod choice and scores a fixed ranked build from the rotated focal seat', async () => {
+  const { run, games } = await runCampaign();
   expect(run.trials).toHaveLength(4);
   expect(run.trials.every((trial) => trial.episode.decisions.length === 56)).toBe(true);
   expect(run.trials.every((trial) => trial.outcomeEvidence.status === 'completed')).toBe(true);
@@ -298,3 +310,36 @@ it('records every full-pod choice and scores a fixed ranked build from the rotat
     expect(baseline.map(fixedSchedule)).toEqual(candidate.map(fixedSchedule));
   }
 });
+
+it('pairs the roles candidate against its exact roleless control, with construction held fixed', async () => {
+  const roles = validatePrintedCardRoles(
+    JSON.parse(readFileSync('packages/data/data/isd/card-roles-v1.json', 'utf8')),
+    [{ code: 'ISD', catalog: isdCatalog() }],
+  );
+  const picks = (trial: { episode: { decisions: readonly { choice: unknown }[] } }) =>
+    trial.episode.decisions.map((decision) => decision.choice);
+  const arm = (trials: Awaited<ReturnType<typeof runCampaign>>['run']['trials'], name: string) =>
+    trials.filter((trial) => trial.arm === name);
+  const control = await runCampaign();
+
+  for (const [comparison, controlArm] of [
+    ['structural-vs-roles', 'baseline'],
+    ['ranked-vs-roles', 'candidate'],
+  ] as const) {
+    const { run, games, policies } = await runCampaign(comparison, roles);
+    const [base, fingerprint] = policies.candidate.policyId.split('+roles/');
+    expect(base).toBe(policies.baseline.policyId);
+    expect(fingerprint).toMatch(/^\d+$/u);
+    expect(policies.baseline.policyId).toBe(control.policies[controlArm].policyId);
+    expect(policies.candidate.dataSha256).not.toBe(policies.baseline.dataSha256);
+    // The control arm drafts exactly as the roleless bot of the default comparison.
+    expect(arm(run.trials, 'baseline').map(picks)).toEqual(arm(control.run.trials, controlArm).map(picks));
+    // Labeled roles reach the picks: some choice differs from the roleless control.
+    expect(arm(run.trials, 'candidate').map(picks)).not.toEqual(arm(run.trials, 'baseline').map(picks));
+    for (const trial of run.trials)
+      expect(trial.episode.episode.behavior.policyId).toBe(policies[trial.arm].policyId);
+    expect(games).toHaveLength(8);
+  }
+  await expect(runCampaign('structural-vs-roles')).rejects.toThrow('needs the format roles file');
+  // Three full campaigns: the roleless control and both roles comparisons.
+}, 20_000);

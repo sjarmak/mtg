@@ -1,0 +1,161 @@
+{
+  "key": "e590429a866b87713db5de73ce2b08fa",
+  "recordedAt": "2026-11-22T21:56:47.874Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Kird Chieftain\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Ape\",\"text\":\"This creature gets +1/+1 as long as you control a Forest.\\n{4}{G}: Target creature gets +2/+2 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":2,\"name\":\"Krenko's Enforcer\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":3,\"name\":\"Kurkesh, Onakke Ancient\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Creature — Ogre Spirit\",\"text\":\"Whenever you activate an ability of an artifact, if it isn't a mana ability, you may pay {R}. If you do, copy that ability. You may choose new targets for the copy.\"},{\"id\":4,\"name\":\"Lava Axe\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Lava Axe deals 5 damage to target player or planeswalker.\"},{\"id\":5,\"name\":\"Lightning Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Lightning Strike deals 3 damage to any target.\"},{\"id\":6,\"name\":\"Might Makes Right\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of combat on your turn, if you control each creature on the battlefield with the greatest power, gain control of target creature an opponent controls until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":7,\"name\":\"Miner's Bane\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{2}{R}: This creature gets +1/+0 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":8,\"name\":\"Paragon of Fierce Defiance\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Other red creatures you control get +1/+1.\\n{R}, {T}: Another target red creature you control gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":9,\"name\":\"Rummaging Goblin\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{T}, Discard a card: Draw a card.\"},{\"id\":10,\"name\":\"Scrapyard Mongrel\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Dog\",\"text\":\"As long as you control an artifact, this creature gets +2/+0 and has trample. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":11,\"name\":\"Shrapnel Blast\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice an artifact.\\nShrapnel Blast deals 5 damage to any target.\"},{\"id\":12,\"name\":\"Siege Dragon\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhen this creature enters, destroy all Walls your opponents control.\\nWhenever this creature attacks, if defending player controls no Walls, it deals 2 damage to each creature without flying that player controls.\"},{\"id\":13,\"name\":\"Soul of Shandalar\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"First strike\\n{3}{R}{R}: This creature deals 3 damage to target player or planeswalker and 3 damage to up to one target creature that player or that planeswalker's controller controls.\\n{3}{R}{R}, Exile this card from your graveyard: It deals 3 damage to target player or planeswalker and 3 damage to up to one target creature that player or that planeswalker's controller controls.\"},{\"id\":14,\"name\":\"Stoke the Flames\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nStoke the Flames deals 4 damage to any target.\"},{\"id\":15,\"name\":\"Thundering Giant\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":16,\"name\":\"Torch Fiend\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"{R}, Sacrifice this creature: Destroy target artifact.\"},{\"id\":17,\"name\":\"Wall of Fire\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":18,\"name\":\"Ancient Silverback\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Ape\",\"text\":\"{G}: Regenerate this creature. (The next time this creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":19,\"name\":\"Back to Nature\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy all enchantments.\"},{\"id\":20,\"name\":\"Carnivorous Moss-Beast\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Plant Elemental Beast\",\"text\":\"{5}{G}{G}: Put a +1/+1 counter on this creature.\"},{\"id\":21,\"name\":\"Charging Rhino\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Rhino\",\"text\":\"This creature can't be blocked by more than one creature.\"},{\"id\":22,\"name\":\"Chord of Calling\",\"manaCost\":\"{X}{G}{G}{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nSearch your library for a creature card with mana value X or less, put it onto the battlefield, then shuffle.\"},{\"id\":23,\"name\":\"Elvish Mystic\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":24,\"name\":\"Feral Incarnation\",\"manaCost\":\"{8}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nCreate three 3/3 green Beast creature tokens.\"},{\"id\":25,\"name\":\"Gather Courage\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Convoke (Your creatures can help cast this spell. Each creature you tap while casting this spell pays for {1} or one mana of that creature's color.)\\nTarget creature gets +2/+2 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 941,
+      "cacheCreationInputTokens": 32664,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.754479,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.754479,
+      "pricedUsd": 0.754479,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.754479 and its own usage prices at $0.754479"
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "3b6c50f48aea568714219fb6338a89165922c7f4ebf8c557888b7b41adb741cd",
+    "adapterSha256": "9d47e457381dc8705a6ad664501b48a3e7488680855677db54b17fa9ec6ba687",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "s/sunbirds_invocation.txt",
+    "sha256": "503b2abdd88784d3e2275c9385fd3585593874f05e08f1783851e732919e6e62"
+  },
+  "decisionFamilies": [
+    "ordering",
+    "priority",
+    "replacement-trigger-choices",
+    "zone-card-selection"
+  ],
+  "obligations": [
+    "controller-contract-ordering",
+    "controller-contract-priority",
+    "controller-contract-replacement-trigger-choices",
+    "controller-contract-zone-card-selection",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "ordering",
+        "priority",
+        "replacement-trigger-choices",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "ordering-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1",
+        "zone-card-selection-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "ordering",
+        "priority",
+        "replacement-trigger-choices",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "ordering-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1",
+        "zone-card-selection-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "8adea88d5748e513d699fde985356d049fedd33010893d2d2051e86a396b98b2"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "3959f872a07587fc1a1151c98498c1020eee68c35bb520b32a23c4169b535d1d"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "ordering-v1",
+        "file": {
+          "path": "contracts/ordering-v1.json",
+          "sha256": "300b26c2c6f83f557bcb4a2a9c477b8fa3ace408941389098893621f1af73403"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "replacement-trigger-choices-v1",
+        "file": {
+          "path": "contracts/replacement-trigger-choices-v1.json",
+          "sha256": "c3c57c1f5737cf99ec295625ef85e1580d42e14631609c96022abd1d6bee20ea"
+        }
+      },
+      {
+        "contractId": "zone-card-selection-v1",
+        "file": {
+          "path": "contracts/zone-card-selection-v1.json",
+          "sha256": "2c00d04ef403291623fce69092ada0107d565b7d91aaf9f4613346012186e952"
+        }
+      }
+    ]
+  }
+}

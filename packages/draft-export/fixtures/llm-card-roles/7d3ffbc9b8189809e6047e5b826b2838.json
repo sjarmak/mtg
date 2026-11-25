@@ -1,0 +1,161 @@
+{
+  "key": "7d3ffbc9b8189809e6047e5b826b2838",
+  "recordedAt": "2026-11-22T21:24:07.797Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Tragic Lesson\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw two cards. Then discard a card unless you return a land you control to its owner's hand.\"},{\"id\":2,\"name\":\"Unesh, Criosphinx Sovereign\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Legendary Creature — Sphinx\",\"text\":\"Flying\\nSphinx spells you cast cost {2} less to cast.\\nWhenever Unesh or another Sphinx you control enters, reveal the top four cards of your library. An opponent separates those cards into two piles. Put one pile into your hand and the other into your graveyard.\"},{\"id\":3,\"name\":\"Unquenchable Thirst\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, if you control a Desert or there is a Desert card in your graveyard, tap enchanted creature.\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":4,\"name\":\"Unsummon\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature to its owner's hand.\"},{\"id\":5,\"name\":\"Vizier of the Anointed\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, you may search your library for a creature card with eternalize or embalm, put that card into your graveyard, then shuffle.\\nWhenever you activate an eternalize or embalm ability, draw a card.\"},{\"id\":6,\"name\":\"Accursed Horde\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"{1}{B}: Target attacking Zombie gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it. If its toughness is 0 or less, it still dies.)\"},{\"id\":7,\"name\":\"Ammit Eternal\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Crocodile Demon\",\"text\":\"Afflict 3 (Whenever this creature becomes blocked, defending player loses 3 life.)\\nWhenever an opponent casts a spell, put a -1/-1 counter on this creature.\\nWhenever this creature deals combat damage to a player, remove all -1/-1 counters from it.\"},{\"id\":8,\"name\":\"Apocalypse Demon\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nApocalypse Demon's power and toughness are each equal to the number of cards in your graveyard.\\nAt the beginning of your upkeep, tap this creature unless you sacrifice another creature.\"},{\"id\":9,\"name\":\"Banewhip Punisher\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, you may put a -1/-1 counter on target creature.\\n{B}, Sacrifice this creature: Destroy target creature that has a -1/-1 counter on it.\"},{\"id\":10,\"name\":\"Bontu's Last Reckoning\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures. Lands you control don't untap during your next untap step.\"},{\"id\":11,\"name\":\"Carrion Screecher\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Bird\",\"text\":\"Flying\"},{\"id\":12,\"name\":\"Doomfall\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Target opponent exiles a creature they control.\\n• Target opponent reveals their hand. You choose a nonland card from it. Exile that card.\"},{\"id\":13,\"name\":\"Dreamstealer\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Menace\\nWhenever this creature deals combat damage to a player, that player discards that many cards.\\nEternalize {4}{B}{B} ({4}{B}{B}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Human Wizard with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":14,\"name\":\"Grisly Survivor\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Whenever you cycle or discard a card, this creature gets +2/+0 until end of turn.\"},{\"id\":15,\"name\":\"Hour of Glory\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature. If that creature was a God, its controller reveals their hand and exiles all cards from it with the same name as that creature.\"},{\"id\":16,\"name\":\"Khenra Eternal\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Jackal Warrior\",\"text\":\"Afflict 1 (Whenever this creature becomes blocked, defending player loses 1 life.)\"},{\"id\":17,\"name\":\"Lethal Sting\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, put a -1/-1 counter on a creature you control.\\nDestroy target creature.\"},{\"id\":18,\"name\":\"Liliana's Defeat\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target black creature or black planeswalker. If that permanent was a Liliana planeswalker, her controller loses 3 life.\"},{\"id\":19,\"name\":\"Lurching Rotbeast\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Beast\",\"text\":\"Cycling {B} ({B}, Discard this card: Draw a card.)\"},{\"id\":20,\"name\":\"Marauding Boneslasher\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Minotaur\",\"text\":\"This creature can't block unless you control another Zombie.\"},{\"id\":21,\"name\":\"Merciless Eternal\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Cleric\",\"text\":\"Afflict 2 (Whenever this creature becomes blocked, defending player loses 2 life.)\\n{2}{B}, Discard a card: This creature gets +2/+2 until end of turn.\"},{\"id\":22,\"name\":\"Moaning Wall\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Wall\",\"text\":\"Defender\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":23,\"name\":\"Razaketh, the Foulblooded\",\"manaCost\":\"{5}{B}{B}{B}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying, trample\\nPay 2 life, Sacrifice another creature: Search your library for a card, put that card into your hand, then shuffle.\"},{\"id\":24,\"name\":\"Razaketh's Rite\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a card, put that card into your hand, then shuffle.\\nCycling {B} ({B}, Discard this card: Draw a card.)\"},{\"id\":25,\"name\":\"Ruin Rat\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Deathtouch\\nWhen this creature dies, exile target card from an opponent's graveyard.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1379,
+      "cacheCreationInputTokens": 32704,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.777179,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.777179,
+      "pricedUsd": 0.777179,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.777179 and its own usage prices at $0.777179"
+    }
+  }
+}

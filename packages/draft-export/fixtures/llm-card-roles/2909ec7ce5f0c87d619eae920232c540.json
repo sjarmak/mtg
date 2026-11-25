@@ -1,0 +1,161 @@
+{
+  "key": "2909ec7ce5f0c87d619eae920232c540",
+  "recordedAt": "2026-11-22T22:15:25.805Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Flying Crane Technique\",\"manaCost\":\"{3}{U}{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Untap all creatures you control. They gain flying and double strike until end of turn.\"},{\"id\":2,\"name\":\"Highspire Mantis\",\"manaCost\":\"{2}{R}{W}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Flying, trample\"},{\"id\":3,\"name\":\"Icefeather Aven\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Creature — Bird Shaman\",\"text\":\"Flying\\nMorph {1}{G}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, you may return another target creature to its owner's hand.\"},{\"id\":4,\"name\":\"Ivorytusk Fortress\",\"manaCost\":\"{2}{W}{B}{G}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"Untap each creature you control with a +1/+1 counter on it during each other player's untap step.\"},{\"id\":5,\"name\":\"Jeskai Ascendancy\",\"manaCost\":\"{U}{R}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a noncreature spell, creatures you control get +1/+1 until end of turn. Untap those creatures.\\nWhenever you cast a noncreature spell, you may draw a card. If you do, discard a card.\"},{\"id\":6,\"name\":\"Jeskai Charm\",\"manaCost\":\"{U}{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Put target creature on top of its owner's library.\\n• Jeskai Charm deals 4 damage to target opponent or planeswalker.\\n• Creatures you control get +1/+1 and gain lifelink until end of turn.\"},{\"id\":7,\"name\":\"Kheru Lich Lord\",\"manaCost\":\"{3}{B}{G}{U}\",\"typeLine\":\"Creature — Zombie Wizard\",\"text\":\"At the beginning of your upkeep, you may pay {2}{B}. If you do, return a creature card at random from your graveyard to the battlefield. It gains flying, trample, and haste. Exile that card at the beginning of your next end step. If it would leave the battlefield, exile it instead of putting it anywhere else.\"},{\"id\":8,\"name\":\"Kin-Tree Invocation\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create an X/X black and green Spirit Warrior creature token, where X is the greatest toughness among creatures you control.\"},{\"id\":9,\"name\":\"Mantis Rider\",\"manaCost\":\"{U}{R}{W}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Flying, vigilance, haste\"},{\"id\":10,\"name\":\"Mardu Ascendancy\",\"manaCost\":\"{R}{W}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a nontoken creature you control attacks, create a 1/1 red Goblin creature token that's tapped and attacking.\\nSacrifice this enchantment: Creatures you control get +0/+3 until end of turn.\"},{\"id\":11,\"name\":\"Mardu Charm\",\"manaCost\":\"{R}{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Mardu Charm deals 4 damage to target creature.\\n• Create two 1/1 white Warrior creature tokens. They gain first strike until end of turn.\\n• Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card.\"},{\"id\":12,\"name\":\"Mardu Roughrider\",\"manaCost\":\"{2}{R}{W}{B}\",\"typeLine\":\"Creature — Orc Warrior\",\"text\":\"Whenever this creature attacks, target creature can't block this turn.\"},{\"id\":13,\"name\":\"Master the Way\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card. Master the Way deals damage to any target equal to the number of cards in your hand.\"},{\"id\":14,\"name\":\"Mindswipe\",\"manaCost\":\"{X}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {X}. Mindswipe deals X damage to that spell's controller.\"},{\"id\":15,\"name\":\"Narset, Enlightened Master\",\"manaCost\":\"{3}{U}{R}{W}\",\"typeLine\":\"Legendary Creature — Human Monk\",\"text\":\"First strike, hexproof\\nWhenever Narset attacks, exile the top four cards of your library. Until end of turn, you may cast noncreature spells from among those cards without paying their mana costs.\"},{\"id\":16,\"name\":\"Ponyback Brigade\",\"manaCost\":\"{3}{R}{W}{B}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"When this creature enters or is turned face up, create three 1/1 red Goblin creature tokens.\\nMorph {2}{R}{W}{B} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":17,\"name\":\"Rakshasa Deathdealer\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Creature — Demon\",\"text\":\"{B}{G}: This creature gets +2/+2 until end of turn.\\n{B}{G}: Regenerate this creature.\"},{\"id\":18,\"name\":\"Rakshasa Vizier\",\"manaCost\":\"{2}{B}{G}{U}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Whenever one or more cards are put into exile from your graveyard, put that many +1/+1 counters on this creature.\"},{\"id\":19,\"name\":\"Ride Down\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target blocking creature. Creatures that were blocked by that creature this combat gain trample until end of turn.\"},{\"id\":20,\"name\":\"Sage of the Inward Eye\",\"manaCost\":\"{2}{U}{R}{W}\",\"typeLine\":\"Creature — Djinn Wizard\",\"text\":\"Flying\\nWhenever you cast a noncreature spell, creatures you control gain lifelink until end of turn.\"},{\"id\":21,\"name\":\"Sagu Mauler\",\"manaCost\":\"{4}{G}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample, hexproof\\nMorph {3}{G}{U} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":22,\"name\":\"Savage Knuckleblade\",\"manaCost\":\"{G}{U}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"{2}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\\n{2}{U}: Return this creature to its owner's hand.\\n{R}: This creature gains haste until end of turn.\"},{\"id\":23,\"name\":\"Secret Plans\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Face-down creatures you control get +0/+1.\\nWhenever a permanent you control is turned face up, draw a card.\"},{\"id\":24,\"name\":\"Sidisi, Brood Tyrant\",\"manaCost\":\"{1}{B}{G}{U}\",\"typeLine\":\"Legendary Creature — Snake Shaman\",\"text\":\"Whenever Sidisi enters or attacks, mill three cards.\\nWhenever one or more creature cards are put into your graveyard from your library, create a 2/2 black Zombie creature token.\"},{\"id\":25,\"name\":\"Siege Rhino\",\"manaCost\":\"{1}{W}{B}{G}\",\"typeLine\":\"Creature — Rhino\",\"text\":\"Trample\\nWhen this creature enters, each opponent loses 3 life and you gain 3 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1262,
+      "cacheCreationInputTokens": 32802,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.773289,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.773289,
+      "pricedUsd": 0.773289,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773289 and its own usage prices at $0.773289"
+    }
+  }
+}

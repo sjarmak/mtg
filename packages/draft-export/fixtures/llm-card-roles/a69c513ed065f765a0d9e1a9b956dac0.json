@@ -1,0 +1,121 @@
+{
+  "key": "a69c513ed065f765a0d9e1a9b956dac0",
+  "recordedAt": "2026-11-22T22:13:25.541Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Keranos, God of Storms\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to blue and red is less than seven, Keranos isn't a creature.\\nReveal the first card you draw on each of your turns. Whenever you reveal a land card this way, draw a card. Whenever you reveal a nonland card this way, Keranos deals 3 damage to any target.\"},{\"id\":2,\"name\":\"Kruphix, God of Horizons\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to green and blue is less than seven, Kruphix isn't a creature.\\nYou have no maximum hand size.\\nIf you would lose unspent mana, that mana becomes colorless instead.\"},{\"id\":3,\"name\":\"Nyx Weaver\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Enchantment Creature — Spider\",\"text\":\"Reach\\nAt the beginning of your upkeep, mill two cards. (Put the top two cards of your library into your graveyard.)\\n{1}{B}{G}, Exile this creature: Return target card from your graveyard to your hand.\"},{\"id\":4,\"name\":\"Pharika, God of Affliction\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to black and green is less than seven, Pharika isn't a creature.\\n{B}{G}: Exile target creature card from a graveyard. Its owner creates a 1/1 black and green Snake enchantment creature token with deathtouch.\"},{\"id\":5,\"name\":\"Revel of the Fallen God\",\"manaCost\":\"{3}{R}{R}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create four 2/2 red and green Satyr creature tokens with haste.\"},{\"id\":6,\"name\":\"Stormchaser Chimera\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Creature — Chimera\",\"text\":\"Flying\\n{2}{U}{R}: Scry 1, then reveal the top card of your library. This creature gets +X/+0 until end of turn, where X is that card's mana value. (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\"},{\"id\":7,\"name\":\"Underworld Coinsmith\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Enchantment Creature — Human Cleric\",\"text\":\"Constellation — Whenever this creature or another enchantment you control enters, you gain 1 life.\\n{W}{B}, Pay 1 life: Each opponent loses 1 life.\"},{\"id\":8,\"name\":\"Armory of Iroas\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Whenever equipped creature attacks, put a +1/+1 counter on it.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":9,\"name\":\"Chariot of Victory\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has first strike, trample, and haste.\\nEquip {1}\"},{\"id\":10,\"name\":\"Deserter's Quarters\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"You may choose not to untap this artifact during your untap step.\\n{6}, {T}: Tap target creature. It doesn't untap during its controller's untap step for as long as this artifact remains tapped.\"},{\"id\":11,\"name\":\"Gold-Forged Sentinel\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Chimera\",\"text\":\"Flying\"},{\"id\":12,\"name\":\"Hall of Triumph\",\"manaCost\":\"{3}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"As Hall of Triumph enters, choose a color.\\nCreatures you control of the chosen color get +1/+1.\"},{\"id\":13,\"name\":\"Mana Confluence\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life: Add one mana of any color.\"},{\"id\":14,\"name\":\"Temple of Epiphany\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\\n{T}: Add {U} or {R}.\"},{\"id\":15,\"name\":\"Temple of Malady\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, scry 1. (Look at the top card of your library. You may put that card on the bottom.)\\n{T}: Add {B} or {G}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\",\"draw\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 720,
+      "cacheCreationInputTokens": 31788,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7259089999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7259089999999999,
+      "pricedUsd": 0.725909,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.725909 and its own usage prices at $0.725909"
+    }
+  }
+}

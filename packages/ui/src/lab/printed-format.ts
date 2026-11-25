@@ -7,8 +7,8 @@ import {
 } from '@mtg/printed-card';
 import type { PrintedRarity, PrintedTokenPrinting } from '@mtg/printed-card';
 import type { PrintedCardCatalog } from '@mtg/printed-card';
-import { preparePrintedLimitedFormat } from '@mtg/draft-export';
-import type { PreparedPrintedLimitedFormat } from '@mtg/draft-export';
+import { preparePrintedLimitedFormat, validatePrintedCardRoles } from '@mtg/draft-export';
+import type { PreparedPrintedLimitedFormat, PrintedCardRoles } from '@mtg/draft-export';
 import { sha256Text } from '../routes/analysis/calibration-read';
 import { validatePrintedDraftRatings } from './printed-draft-ratings';
 import type { PrintedDraftRatings } from './printed-draft-ratings';
@@ -56,6 +56,8 @@ export const PrintedFormatRowSchema = z
     tokenPrintingsUrl: LocalJsonPath.optional(),
     presentationCatalogUrl: LocalJsonPath.optional(),
     draftRatingsUrl: LocalJsonPath.optional(),
+    /** Issue 305: model-labeled card roles; read only by role-aware bot policies. */
+    cardRolesUrl: LocalJsonPath.optional(),
     deckWinRatesUrl: LocalJsonPath.optional(),
     headToHeadUrl: LocalJsonPath.optional(),
     catalogs: z
@@ -118,6 +120,7 @@ export interface LoadedPrintedFormat {
   readonly availability: PrintedFormatRow['availability'];
   readonly rarities: Readonly<Record<string, PrintedRarity>>;
   readonly draftRatings?: PrintedDraftRatings;
+  readonly cardRoles?: PrintedCardRoles;
   readonly prepared: PreparedPrintedLimitedFormat;
   /** The format's token printings, empty when none are staged. */
   readonly tokens: readonly PrintedTokenPrinting[];
@@ -173,6 +176,10 @@ export async function loadPrintedFormat(
     row.draftRatingsUrl === undefined
       ? undefined
       : await validatePrintedDraftRatings(await fetchJson(row.draftRatingsUrl), prepared, catalogs);
+  const cardRoles =
+    row.cardRolesUrl === undefined
+      ? undefined
+      : validatePrintedCardRoles(await fetchJson(row.cardRolesUrl), catalogs);
   const tokens = await loadTokenPrintings(row, fetchJson);
   return {
     availability: row.availability,
@@ -181,6 +188,7 @@ export async function loadPrintedFormat(
     rarities,
     tokens,
     ...(draftRatings === undefined ? {} : { draftRatings }),
+    ...(cardRoles === undefined ? {} : { cardRoles }),
   };
 }
 

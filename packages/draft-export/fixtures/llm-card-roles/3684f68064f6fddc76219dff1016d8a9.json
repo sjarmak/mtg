@@ -1,0 +1,161 @@
+{
+  "key": "3684f68064f6fddc76219dff1016d8a9",
+  "recordedAt": "2026-11-22T22:25:18.409Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Die Young\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose target creature. You get {E}{E} (two energy counters), then you may pay any amount of {E}. The creature gets -1/-1 until end of turn for each {E} paid this way.\"},{\"id\":2,\"name\":\"Dukhara Scavenger\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"When this creature enters, you may put target artifact or creature card from your graveyard on top of your library.\"},{\"id\":3,\"name\":\"Eliminate the Competition\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice X creatures.\\nDestroy X target creatures.\"},{\"id\":4,\"name\":\"Embraal Bruiser\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"This creature enters tapped.\\nThis creature has menace as long as you control an artifact.\"},{\"id\":5,\"name\":\"Essence Extraction\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Essence Extraction deals 3 damage to target creature and you gain 3 life.\"},{\"id\":6,\"name\":\"Fortuitous Find\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Return target artifact card from your graveyard to your hand.\\n• Return target creature card from your graveyard to your hand.\"},{\"id\":7,\"name\":\"Foundry Screecher\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\\nThis creature gets +1/+0 as long as you control an artifact.\"},{\"id\":8,\"name\":\"Fretwork Colony\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"This creature can't block.\\nAt the beginning of your upkeep, put a +1/+1 counter on this creature and you lose 1 life.\"},{\"id\":9,\"name\":\"Gonti, Lord of Luxury\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Legendary Creature — Aetherborn Rogue\",\"text\":\"Deathtouch\\nWhen Gonti enters, look at the top four cards of target opponent's library, exile one of them face down, then put the rest on the bottom of that library in a random order. You may cast that card for as long as it remains exiled, and mana of any type can be spent to cast that spell.\"},{\"id\":10,\"name\":\"Harsh Scrutiny\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a creature card from it. That player discards that card. Scry 1.\"},{\"id\":11,\"name\":\"Lawless Broker\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Aetherborn Rogue\",\"text\":\"When this creature dies, put a +1/+1 counter on target creature you control.\"},{\"id\":12,\"name\":\"Live Fast\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"You draw two cards, lose 2 life, and get {E}{E} (two energy counters).\"},{\"id\":13,\"name\":\"Lost Legacy\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose a nonartifact, nonland card name. Search target player's graveyard, hand, and library for any number of cards with that name and exile them. That player shuffles, then draws a card for each card exiled from their hand this way.\"},{\"id\":14,\"name\":\"Make Obsolete\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -1/-1 until end of turn.\"},{\"id\":15,\"name\":\"Marionette Master\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Fabricate 3 (When this creature enters, put three +1/+1 counters on it or create three 1/1 colorless Servo artifact creature tokens.)\\nWhenever an artifact you control is put into a graveyard from the battlefield, target opponent loses life equal to this creature's power.\"},{\"id\":16,\"name\":\"Maulfist Squad\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Menace\\nFabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":17,\"name\":\"Midnight Oil\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"This enchantment enters with seven hour counters on it.\\nAt the beginning of your draw step, draw an additional card and remove two hour counters from this enchantment.\\nYour maximum hand size is equal to the number of hour counters on this enchantment.\\nWhenever you discard a card, you lose 1 life.\"},{\"id\":18,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"},{\"id\":19,\"name\":\"Morbid Curiosity\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice an artifact or creature.\\nDraw cards equal to the mana value of the sacrificed permanent.\"},{\"id\":20,\"name\":\"Night Market Lookout\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Whenever this creature becomes tapped, each opponent loses 1 life and you gain 1 life.\"},{\"id\":21,\"name\":\"Noxious Gearhulk\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Menace\\nWhen this creature enters, you may destroy another target creature. If a creature is destroyed this way, you gain life equal to its toughness.\"},{\"id\":22,\"name\":\"Ovalchase Daredevil\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Pilot\",\"text\":\"Whenever an artifact you control enters, you may return this card from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Prakhata Club Security\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Aetherborn Warrior\",\"text\":\"\"},{\"id\":24,\"name\":\"Rush of Vitality\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains lifelink and indestructible until end of turn. (Damage dealt by that creature also causes its controller to gain that much life, and it can't be destroyed by damage or effects that say \\\"destroy.\\\")\"},{\"id\":25,\"name\":\"Subtle Strike\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Choose one or both —\\n• Target creature gets -1/-1 until end of turn.\\n• Put a +1/+1 counter on target creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1227,
+      "cacheCreationInputTokens": 32544,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7663789999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7663789999999999,
+      "pricedUsd": 0.766379,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.766379 and its own usage prices at $0.766379"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "62f7dddab00f28ac337217b800bf90a5",
+  "recordedAt": "2026-11-22T22:07:33.386Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Battlewise Valor\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":2,\"name\":\"Cavalry Pegasus\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Pegasus\",\"text\":\"Flying\\nWhenever this creature attacks, each attacking Human gains flying until end of turn.\"},{\"id\":3,\"name\":\"Celestial Archon\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Enchantment Creature — Archon\",\"text\":\"Bestow {5}{W}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nFlying, first strike\\nEnchanted creature gets +4/+4 and has flying and first strike.\"},{\"id\":4,\"name\":\"Chained to the Rocks\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant Mountain you control\\nWhen this Aura enters, exile target creature an opponent controls until this Aura leaves the battlefield. (That creature returns under its owner's control.)\"},{\"id\":5,\"name\":\"Chosen by Heliod\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw a card.\\nEnchanted creature gets +0/+2.\"},{\"id\":6,\"name\":\"Dauntless Onslaught\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Up to two target creatures each get +2/+2 until end of turn.\"},{\"id\":7,\"name\":\"Decorated Griffin\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\n{1}{W}: Prevent the next 1 combat damage that would be dealt to you this turn.\"},{\"id\":8,\"name\":\"Divine Verdict\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"id\":9,\"name\":\"Elspeth, Sun's Champion\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Elspeth\",\"text\":\"+1: Create three 1/1 white Soldier creature tokens.\\n−3: Destroy all creatures with power 4 or greater.\\n−7: You get an emblem with \\\"Creatures you control get +2/+2 and have flying.\\\"\"},{\"id\":10,\"name\":\"Ephara's Warden\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}: Tap target creature with power 3 or less.\"},{\"id\":11,\"name\":\"Evangel of Heliod\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, create a number of 1/1 white Soldier creature tokens equal to your devotion to white. (Each {W} in the mana costs of permanents you control counts toward your devotion to white.)\"},{\"id\":12,\"name\":\"Fabled Hero\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Double strike\\nHeroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on it.\"},{\"id\":13,\"name\":\"Favored Hoplite\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature and prevent all damage that would be dealt to it this turn.\"},{\"id\":14,\"name\":\"Gift of Immortality\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen enchanted creature dies, return that card to the battlefield under its owner's control. Return this card to the battlefield attached to that creature at the beginning of the next end step.\"},{\"id\":15,\"name\":\"Glare of Heresy\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile target white permanent.\"},{\"id\":16,\"name\":\"Gods Willing\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains protection from the color of your choice until end of turn. (It can't be blocked, targeted, dealt damage, enchanted, or equipped by anything of that color.)\\nScry 1.\"},{\"id\":17,\"name\":\"Heliod, God of the Sun\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Legendary Enchantment Creature — God\",\"text\":\"Indestructible\\nAs long as your devotion to white is less than five, Heliod isn't a creature. (Each {W} in the mana costs of permanents you control counts toward your devotion to white.)\\nOther creatures you control have vigilance.\\n{2}{W}{W}: Create a 2/1 white Cleric enchantment creature token.\"},{\"id\":18,\"name\":\"Heliod's Emissary\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment Creature — Elk\",\"text\":\"Bestow {6}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nWhenever this creature or enchanted creature attacks, tap target creature an opponent controls.\\nEnchanted creature gets +3/+3.\"},{\"id\":19,\"name\":\"Hopeful Eidolon\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment Creature — Spirit\",\"text\":\"Bestow {3}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\\nEnchanted creature gets +1/+1 and has lifelink.\"},{\"id\":20,\"name\":\"Hundred-Handed One\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Vigilance\\n{3}{W}{W}{W}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\\nAs long as this creature is monstrous, it has reach and can block an additional ninety-nine creatures each combat.\"},{\"id\":21,\"name\":\"Lagonna-Band Elder\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Centaur Advisor\",\"text\":\"When this creature enters, if you control an enchantment, you gain 3 life.\"},{\"id\":22,\"name\":\"Last Breath\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature with power 2 or less. Its controller gains 4 life.\"},{\"id\":23,\"name\":\"Leonin Snarecaster\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Cat Soldier\",\"text\":\"When this creature enters, you may tap target creature.\"},{\"id\":24,\"name\":\"Observant Alseid\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment Creature — Nymph\",\"text\":\"Bestow {4}{W} (If you cast this card for its bestow cost, it's an Aura spell with enchant creature. It becomes a creature again if it's not attached.)\\nVigilance\\nEnchanted creature gets +2/+2 and has vigilance.\"},{\"id\":25,\"name\":\"Ordeal of Heliod\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature attacks, put a +1/+1 counter on it. Then if it has three or more +1/+1 counters on it, sacrifice this Aura.\\nWhen you sacrifice this Aura, you gain 10 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1344,
+      "cacheCreationInputTokens": 32867,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7786890000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7786890000000001,
+      "pricedUsd": 0.778689,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.778689 and its own usage prices at $0.778689"
+    }
+  }
+}

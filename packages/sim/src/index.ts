@@ -113,6 +113,7 @@ export type { SearchBotConfig } from './search-bot';
 export { DEFAULT_SEARCH_CONFIG, decideSearch, quiesce, searchBot } from './search-bot';
 export type { RolloutAgentView, RolloutBotConfig, RolloutKnowledge, RolloutRequest } from './rollout-bot';
 export {
+  COMBAT_ROLLOUT_CONFIG,
   DEFAULT_ROLLOUT_CONFIG,
   decideRollout,
   rolloutBot,

@@ -1,0 +1,161 @@
+{
+  "key": "708735709b4dfd5d63b90300270e0e16",
+  "recordedAt": "2026-11-22T21:50:06.088Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Chandra's Phoenix\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying\\nHaste (This creature can attack and {T} as soon as it comes under your control.)\\nWhenever an opponent is dealt damage by a red instant or sorcery spell you control or by a red planeswalker you control, return this card from your graveyard to your hand.\"},{\"id\":2,\"name\":\"Circle of Flame\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature without flying attacks you or a planeswalker you control, this enchantment deals 1 damage to that creature.\"},{\"id\":3,\"name\":\"Combust\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"This spell can't be countered.\\nCombust deals 5 damage to target white or blue creature. The damage can't be prevented.\"},{\"id\":4,\"name\":\"Crimson Mage\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{R}: Target creature you control gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":5,\"name\":\"Fiery Hellhound\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":6,\"name\":\"Fireball\",\"manaCost\":\"{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell costs {1} more to cast for each target beyond the first.\\nFireball deals X damage divided evenly, rounded down, among any number of targets.\"},{\"id\":7,\"name\":\"Firebreathing\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\n{R}: Enchanted creature gets +1/+0 until end of turn.\"},{\"id\":8,\"name\":\"Flameblast Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\nWhenever this creature attacks, you may pay {X}{R}. If you do, it deals X damage to any target.\"},{\"id\":9,\"name\":\"Fling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nFling deals damage equal to the sacrificed creature's power to any target.\"},{\"id\":10,\"name\":\"Furyborn Hellkite\",\"manaCost\":\"{4}{R}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Bloodthirst 6 (If an opponent was dealt damage this turn, this creature enters with six +1/+1 counters on it.)\\nFlying\"},{\"id\":11,\"name\":\"Goblin Arsonist\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"When this creature dies, you may have it deal 1 damage to any target.\"},{\"id\":12,\"name\":\"Goblin Bangchuckers\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{T}: Flip a coin. If you win the flip, this creature deals 2 damage to any target. If you lose the flip, this creature deals 2 damage to itself.\"},{\"id\":13,\"name\":\"Goblin Chieftain\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Goblin\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\\nOther Goblin creatures you control get +1/+1 and have haste.\"},{\"id\":14,\"name\":\"Goblin Fireslinger\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{T}: This creature deals 1 damage to target player or planeswalker.\"},{\"id\":15,\"name\":\"Goblin Grenade\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a Goblin.\\nGoblin Grenade deals 5 damage to any target.\"},{\"id\":16,\"name\":\"Goblin Piker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"\"},{\"id\":17,\"name\":\"Goblin Tunneler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{T}: Target creature with power 2 or less can't be blocked this turn.\"},{\"id\":18,\"name\":\"Goblin War Paint\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has haste.\"},{\"id\":19,\"name\":\"Gorehorn Minotaurs\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Bloodthirst 2 (If an opponent was dealt damage this turn, this creature enters with two +1/+1 counters on it.)\"},{\"id\":20,\"name\":\"Grim Lavamancer\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{R}, {T}, Exile two cards from your graveyard: This creature deals 2 damage to any target.\"},{\"id\":21,\"name\":\"Incinerate\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Incinerate deals 3 damage to any target. A creature dealt damage this way can't be regenerated this turn.\"},{\"id\":22,\"name\":\"Inferno Titan\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\\nWhenever this creature enters or attacks, it deals 3 damage divided as you choose among one, two, or three targets.\"},{\"id\":23,\"name\":\"Lava Axe\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Lava Axe deals 5 damage to target player or planeswalker.\"},{\"id\":24,\"name\":\"Lightning Elemental\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Haste (This creature can attack and {T} as soon as it comes under your control.)\"},{\"id\":25,\"name\":\"Manabarbs\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a player taps a land for mana, this enchantment deals 1 damage to that player.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"draw\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["draw"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1320,
+      "cacheCreationInputTokens": 32387,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767889,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767889,
+      "pricedUsd": 0.767889,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767889 and its own usage prices at $0.767889"
+    }
+  }
+}

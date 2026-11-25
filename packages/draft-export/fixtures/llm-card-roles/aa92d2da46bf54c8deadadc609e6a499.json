@@ -1,0 +1,161 @@
+{
+  "key": "aa92d2da46bf54c8deadadc609e6a499",
+  "recordedAt": "2026-11-22T22:18:03.107Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Goblin Piledriver\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Protection from blue (This creature can't be blocked, targeted, dealt damage, or enchanted by anything blue.)\\nWhenever this creature attacks, it gets +2/+0 until end of turn for each other attacking Goblin.\"},{\"id\":2,\"name\":\"Infectious Bloodlust\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+1, has haste, and attacks each combat if able.\\nWhen enchanted creature dies, you may search your library for a card named Infectious Bloodlust, reveal it, put it into your hand, then shuffle.\"},{\"id\":3,\"name\":\"Lightning Javelin\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Lightning Javelin deals 3 damage to any target. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":4,\"name\":\"Mage-Ring Bully\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nThis creature attacks each combat if able.\"},{\"id\":5,\"name\":\"Magmatic Insight\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, discard a land card.\\nDraw two cards.\"},{\"id\":6,\"name\":\"Molten Vortex\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment\",\"text\":\"{R}, Discard a land card: This enchantment deals 2 damage to any target.\"},{\"id\":7,\"name\":\"Pia and Kiran Nalaar\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Creature — Human Artificer\",\"text\":\"When Pia and Kiran Nalaar enters, create two 1/1 colorless Thopter artifact creature tokens with flying.\\n{2}{R}, Sacrifice an artifact: Pia and Kiran Nalaar deals 2 damage to any target.\"},{\"id\":8,\"name\":\"Prickleboar\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Boar\",\"text\":\"During your turn, this creature gets +2/+0 and has first strike. (It deals combat damage before creatures without first strike.)\"},{\"id\":9,\"name\":\"Ravaging Blaze\",\"manaCost\":\"{X}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Ravaging Blaze deals X damage to target creature.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, Ravaging Blaze also deals X damage to that creature's controller.\"},{\"id\":10,\"name\":\"Scab-Clan Berserker\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Haste\\nRenown 1 (When this creature deals combat damage to a player, if it isn't renowned, put a +1/+1 counter on it and it becomes renowned.)\\nWhenever an opponent casts a noncreature spell, if this creature is renowned, this creature deals 2 damage to that player.\"},{\"id\":11,\"name\":\"Seismic Elemental\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, creatures without flying can't block this turn.\"},{\"id\":12,\"name\":\"Skyraker Giant\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":13,\"name\":\"Smash to Smithereens\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact. Smash to Smithereens deals 3 damage to that artifact's controller.\"},{\"id\":14,\"name\":\"Subterranean Scout\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Scout\",\"text\":\"When this creature enters, target creature with power 2 or less can't be blocked this turn.\"},{\"id\":15,\"name\":\"Thopter Engineer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"When this creature enters, create a 1/1 colorless Thopter artifact creature token with flying.\\nArtifact creatures you control have haste. (They can attack and {T} as soon as they come under your control.)\"},{\"id\":16,\"name\":\"Titan's Strength\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+1 until end of turn. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":17,\"name\":\"Volcanic Rambler\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{2}{R}: This creature deals 1 damage to target player or planeswalker.\"},{\"id\":18,\"name\":\"Aerial Volley\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Aerial Volley deals 3 damage divided as you choose among one, two, or three target creatures with flying.\"},{\"id\":19,\"name\":\"Animist's Awakening\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top X cards of your library. Put all land cards from among them onto the battlefield tapped and the rest on the bottom of your library in a random order.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, untap those lands.\"},{\"id\":20,\"name\":\"Caustic Caterpillar\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"{1}{G}, Sacrifice this creature: Destroy target artifact or enchantment.\"},{\"id\":21,\"name\":\"Conclave Naturalists\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Dryad\",\"text\":\"When this creature enters, you may destroy target artifact or enchantment.\"},{\"id\":22,\"name\":\"Dwynen, Gilt-Leaf Daen\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Creature — Elf Warrior\",\"text\":\"Reach (This creature can block creatures with flying.)\\nOther Elf creatures you control get +1/+1.\\nWhenever Dwynen attacks, you gain 1 life for each attacking Elf you control.\"},{\"id\":23,\"name\":\"Dwynen's Elite\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"When this creature enters, if you control another Elf, create a 1/1 green Elf Warrior creature token.\"},{\"id\":24,\"name\":\"Elemental Bond\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control with power 3 or greater enters, draw a card.\"},{\"id\":25,\"name\":\"Elvish Visionary\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature enters, draw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1594,
+      "cacheCreationInputTokens": 32623,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.786309,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.786309,
+      "pricedUsd": 0.786309,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786309 and its own usage prices at $0.786309"
+    }
+  }
+}

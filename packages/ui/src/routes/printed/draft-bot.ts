@@ -5,14 +5,17 @@ import {
   evaluatePrintedCard,
   evaluateStructuralPrintedCard,
   printedPickValue,
+  printedRolesPolicy,
   PRINTED_EVALUATION_POLICY,
   structuralPrintedPickValue,
   STRUCTURAL_PRINTED_EVALUATION_POLICY,
+  withPrintedCardRoles,
 } from '@mtg/draft-export';
 import type {
   PrintedLimitedDraftOptions,
   PreparedPrintedLimitedFormat,
   EvaluationCard,
+  PrintedCardRoles,
 } from '@mtg/draft-export';
 import type { PrintedCardCatalogEntry } from '@mtg/printed-card';
 import {
@@ -32,36 +35,64 @@ export const PRINTED_BASELINE_BOT: Pick<PrintedLimitedDraftOptions, 'botPolicy' 
     ),
 };
 
-/** Observed picks and the offered card are the complete scoring input. */
-export const PRINTED_EVALUATED_BOT: Pick<PrintedLimitedDraftOptions, 'botPolicy' | 'score'> = {
-  botPolicy: PRINTED_EVALUATION_POLICY,
-  score: ({ card, picked }) =>
-    printedPickValue(
-      evaluatePrintedCard(card.payload.printing, card.physicalId),
-      picked.map((copy) => evaluatePrintedCard(copy.payload.printing, copy.physicalId)),
-    ),
-};
+type Evaluate = (printing: PrintedCardCatalogEntry, id: string) => EvaluationCard;
+type PickValue = (card: EvaluationCard, picked: readonly EvaluationCard[]) => number;
 
-/** General strongest-play policy derived from printed structure and the observed pool. */
-export const PRINTED_GENERAL_BOT: Pick<PrintedLimitedDraftOptions, 'botPolicy' | 'score'> = {
-  botPolicy: STRUCTURAL_PRINTED_EVALUATION_POLICY,
-  score: ({ card, picked }) =>
-    structuralPrintedPickValue(
-      evaluateStructuralPrintedCard(card.payload.printing, card.physicalId),
-      picked.map((copy) => evaluateStructuralPrintedCard(copy.payload.printing, copy.physicalId)),
-    ),
-};
+/** One evaluated policy: the card reading and the pick rule a saved policy id stands for. */
+interface EvaluatedPolicy {
+  readonly botPolicy: string;
+  readonly evaluate: Evaluate;
+  readonly pickValue: PickValue;
+}
+
+function evaluatedBot({ botPolicy, evaluate, pickValue }: EvaluatedPolicy): PrintedBot {
+  return {
+    botPolicy,
+    score: ({ card, picked }) =>
+      pickValue(
+        evaluate(card.payload.printing, card.physicalId),
+        picked.map((copy) => evaluate(copy.payload.printing, copy.physicalId)),
+      ),
+  };
+}
 
 type PrintedBot = Pick<PrintedLimitedDraftOptions, 'botPolicy' | 'score'>;
 
-function rankedBot(ratings: PrintedDraftRatings): PrintedBot {
+const EVALUATED: EvaluatedPolicy = {
+  botPolicy: PRINTED_EVALUATION_POLICY,
+  evaluate: evaluatePrintedCard,
+  pickValue: printedPickValue,
+};
+const GENERAL: EvaluatedPolicy = {
+  botPolicy: STRUCTURAL_PRINTED_EVALUATION_POLICY,
+  evaluate: evaluateStructuralPrintedCard,
+  pickValue: structuralPrintedPickValue,
+};
+
+/** Observed picks and the offered card are the complete scoring input. */
+export const PRINTED_EVALUATED_BOT: PrintedBot = evaluatedBot(EVALUATED);
+
+/** General strongest-play policy derived from printed structure and the observed pool. */
+export const PRINTED_GENERAL_BOT: PrintedBot = evaluatedBot(GENERAL);
+
+function rankedPolicy(ratings: PrintedDraftRatings): EvaluatedPolicy {
   return {
     botPolicy: printedDraftRatingsPolicy(ratings),
-    score: ({ card, picked }) =>
-      rankedPrintedPickValue(
-        evaluateRankedPrintedCard(ratings, card.payload.printing, card.physicalId),
-        picked.map((copy) => evaluateRankedPrintedCard(ratings, copy.payload.printing, copy.physicalId)),
-      ),
+    evaluate: (printing, id) => evaluateRankedPrintedCard(ratings, printing, id),
+    pickValue: rankedPrintedPickValue,
+  };
+}
+
+/**
+ * Issue 305: the same policy with model-labeled roles layered on. Its id names the
+ * roles file, so the roleless base stays a separate, replayable policy and the
+ * control #21's paired comparison measures against.
+ */
+function withRoles(base: EvaluatedPolicy, roles: PrintedCardRoles): EvaluatedPolicy {
+  return {
+    botPolicy: printedRolesPolicy(base.botPolicy, roles),
+    evaluate: (printing, id) => withPrintedCardRoles(roles, printing, base.evaluate(printing, id)),
+    pickValue: base.pickValue,
   };
 }
 
@@ -72,12 +103,40 @@ function rankedPrintedPickValue(card: EvaluationCard, picked: readonly Evaluatio
   return structuralPrintedPickValue(card, picked) + earlyRankWeight * card.quality;
 }
 
-export function printedBotForPolicy(policy: string | undefined, ratings?: PrintedDraftRatings): PrintedBot {
-  if (policy === undefined || policy === PRINTED_BASELINE_BOT.botPolicy) return PRINTED_BASELINE_BOT;
-  if (policy === PRINTED_GENERAL_BOT.botPolicy) return PRINTED_GENERAL_BOT;
-  if (policy === PRINTED_EVALUATED_BOT.botPolicy) return PRINTED_EVALUATED_BOT;
-  if (ratings !== undefined && policy === printedDraftRatingsPolicy(ratings)) return rankedBot(ratings);
+/** `undefined` is the baseline bot, which evaluates nothing. */
+function policyFor(
+  policy: string | undefined,
+  ratings?: PrintedDraftRatings,
+  roles?: PrintedCardRoles,
+): EvaluatedPolicy | undefined {
+  if (policy === undefined || policy === PRINTED_BASELINE_BOT.botPolicy) return undefined;
+  if (policy === EVALUATED.botPolicy) return EVALUATED;
+  for (const base of [GENERAL, ...(ratings === undefined ? [] : [rankedPolicy(ratings)])]) {
+    if (policy === base.botPolicy) return base;
+    if (roles !== undefined && policy === printedRolesPolicy(base.botPolicy, roles))
+      return withRoles(base, roles);
+  }
   throw new Error(`Saved draft bot policy is unavailable: ${policy}`);
+}
+
+export function printedBotForPolicy(
+  policy: string | undefined,
+  ratings?: PrintedDraftRatings,
+  roles?: PrintedCardRoles,
+): PrintedBot {
+  const resolved = policyFor(policy, ratings, roles);
+  if (resolved === undefined) return PRINTED_BASELINE_BOT;
+  if (resolved === EVALUATED) return PRINTED_EVALUATED_BOT;
+  if (resolved === GENERAL) return PRINTED_GENERAL_BOT;
+  return evaluatedBot(resolved);
+}
+
+/**
+ * The role-aware bot, opt-in only: `botForNewPrintedDraft` does not choose it
+ * until #21's paired, seat-swapped comparison shows the roles help.
+ */
+export function roleAwarePrintedBot(roles: PrintedCardRoles, ratings?: PrintedDraftRatings): PrintedBot {
+  return evaluatedBot(withRoles(ratings === undefined ? GENERAL : rankedPolicy(ratings), roles));
 }
 
 export function botForNewPrintedDraft(
@@ -90,25 +149,31 @@ export function botForNewPrintedDraft(
     ? PRINTED_EVALUATED_BOT
     : ratings === undefined
       ? PRINTED_GENERAL_BOT
-      : rankedBot(ratings);
+      : evaluatedBot(rankedPolicy(ratings));
 }
+
+const ROLES_SUFFIX = /\+roles\/\d+$/u;
 
 /** Short user-facing identity for the policy recorded in a draft transcript. */
 export function printedBotLabel(policy: string | undefined): string {
-  if (isPrintedDraftRatingsPolicy(policy)) return 'Ranked deck-aware';
-  const bot = printedBotForPolicy(policy);
+  const roles = policy !== undefined && ROLES_SUFFIX.test(policy) ? ' with card roles' : '';
+  const base = policy?.replace(ROLES_SUFFIX, '');
+  if (isPrintedDraftRatingsPolicy(base)) return `Ranked deck-aware${roles}`;
+  const bot = printedBotForPolicy(base);
   if (bot.botPolicy === PRINTED_EVALUATED_BOT.botPolicy) return 'Deck-aware';
-  if (bot.botPolicy === PRINTED_GENERAL_BOT.botPolicy) return 'General structural';
+  if (bot.botPolicy === PRINTED_GENERAL_BOT.botPolicy) return `General structural${roles}`;
   return 'Baseline';
 }
 
 /** Short user-facing statement of where this policy gets set-specific judgment. */
 export function printedBotCalibrationNote(policy: string | undefined): string {
-  if (isPrintedDraftRatingsPolicy(policy)) return 'use staged Forge set rankings with deck-aware picks';
-  const bot = printedBotForPolicy(policy);
+  const roles = policy !== undefined && ROLES_SUFFIX.test(policy) ? ' and model-labeled card roles' : '';
+  const base = policy?.replace(ROLES_SUFFIX, '');
+  if (isPrintedDraftRatingsPolicy(base)) return `use staged Forge set rankings${roles} with deck-aware picks`;
+  const bot = printedBotForPolicy(base);
   if (bot.botPolicy === PRINTED_EVALUATED_BOT.botPolicy)
     return 'use authored set evaluations with deck-aware picks';
-  return 'are not format-calibrated';
+  return roles === '' ? 'are not format-calibrated' : `use${roles} with deck-aware picks`;
 }
 
 const EVALUATED_CATALOGS: readonly string[] = [
@@ -121,22 +186,12 @@ const EVALUATED_CATALOGS: readonly string[] = [
 export function createPrintedReplayBot(
   policy: string | undefined,
   ratings?: PrintedDraftRatings,
+  roles?: PrintedCardRoles,
 ): Pick<PrintedLimitedDraftOptions, 'botPolicy' | 'score'> &
   Partial<Pick<PrintedLimitedDraftOptions, 'choose'>> {
-  const bot = printedBotForPolicy(policy, ratings);
-  if (bot === PRINTED_BASELINE_BOT) return bot;
-  const ranked = ratings !== undefined && bot.botPolicy === printedDraftRatingsPolicy(ratings);
-  const evaluate = (printing: PrintedCardCatalogEntry, id: string) => {
-    if (bot.botPolicy === PRINTED_EVALUATED_BOT.botPolicy) return evaluatePrintedCard(printing, id);
-    const structural = evaluateStructuralPrintedCard(printing, id);
-    return ranked ? evaluateRankedPrintedCard(ratings, printing, id) : structural;
-  };
-  const pickValue =
-    bot.botPolicy === PRINTED_EVALUATED_BOT.botPolicy
-      ? printedPickValue
-      : ranked
-        ? rankedPrintedPickValue
-        : structuralPrintedPickValue;
+  const resolved = policyFor(policy, ratings, roles);
+  if (resolved === undefined) return PRINTED_BASELINE_BOT;
+  const { botPolicy, evaluate, pickValue } = resolved;
   const cards = new WeakMap<
     PrintedCardCatalogEntry,
     { readonly card: EvaluationCard; readonly token: number }
@@ -220,7 +275,7 @@ export function createPrintedReplayBot(
     return index;
   };
   return {
-    botPolicy: bot.botPolicy,
+    botPolicy,
     score,
     choose,
   };

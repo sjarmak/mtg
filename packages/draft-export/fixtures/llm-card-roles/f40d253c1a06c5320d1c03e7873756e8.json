@@ -1,0 +1,161 @@
+{
+  "key": "f40d253c1a06c5320d1c03e7873756e8",
+  "recordedAt": "2026-11-22T21:59:24.021Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Archwing Dragon\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\\nAt the beginning of the end step, return this creature to its owner's hand.\"},{\"id\":2,\"name\":\"Banners Raised\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+0 until end of turn.\"},{\"id\":3,\"name\":\"Battle Hymn\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Add {R} for each creature you control.\"},{\"id\":4,\"name\":\"Bonfire of the Damned\",\"manaCost\":\"{X}{X}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Bonfire of the Damned deals X damage to target player or planeswalker and each creature that player or that planeswalker's controller controls.\\nMiracle {X}{R} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":5,\"name\":\"Burn at the Stake\",\"manaCost\":\"{2}{R}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, tap any number of untapped creatures you control.\\nBurn at the Stake deals damage to any target equal to three times the number of creatures tapped this way.\"},{\"id\":6,\"name\":\"Dangerous Wager\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Discard your hand, then draw two cards.\"},{\"id\":7,\"name\":\"Demolish\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or land.\"},{\"id\":8,\"name\":\"Dual Casting\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{R}, {T}: Copy target instant or sorcery spell you control. You may choose new targets for the copy.\\\"\"},{\"id\":9,\"name\":\"Falkenrath Exterminator\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Vampire Archer\",\"text\":\"Whenever this creature deals combat damage to a player, put a +1/+1 counter on it.\\n{2}{R}: This creature deals damage to target creature equal to the number of +1/+1 counters on this creature.\"},{\"id\":10,\"name\":\"Fervent Cathar\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Haste\\nWhen this creature enters, target creature can't block this turn.\"},{\"id\":11,\"name\":\"Gang of Devils\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"When this creature dies, it deals 3 damage divided as you choose among one, two, or three targets.\"},{\"id\":12,\"name\":\"Guise of Fire\",\"manaCost\":\"{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/-1 and attacks each combat if able.\"},{\"id\":13,\"name\":\"Hanweir Lancer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have first strike.\"},{\"id\":14,\"name\":\"Havengul Vampire\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Whenever this creature deals combat damage to a player, put a +1/+1 counter on it.\\nWhenever another creature dies, put a +1/+1 counter on this creature.\"},{\"id\":15,\"name\":\"Heirs of Stromkirk\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhenever this creature deals combat damage to a player, put a +1/+1 counter on it.\"},{\"id\":16,\"name\":\"Hound of Griselbrand\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Elemental Dog\",\"text\":\"Double strike\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":17,\"name\":\"Kessig Malcontents\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"When this creature enters, it deals damage to target player or planeswalker equal to the number of Humans you control.\"},{\"id\":18,\"name\":\"Kruin Striker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever another creature you control enters, this creature gets +1/+0 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)\"},{\"id\":19,\"name\":\"Lightning Mauler\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have haste.\"},{\"id\":20,\"name\":\"Lightning Prowess\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has haste and \\\"{T}: This creature deals 1 damage to any target.\\\"\"},{\"id\":21,\"name\":\"Mad Prophet\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Haste\\n{T}, Discard a card: Draw a card.\"},{\"id\":22,\"name\":\"Malicious Intent\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"{T}: Target creature can't block this turn.\\\"\"},{\"id\":23,\"name\":\"Malignus\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental Spirit\",\"text\":\"Malignus's power and toughness are each equal to half the highest life total among your opponents, rounded up.\\nDamage that would be dealt by this creature can't be prevented.\"},{\"id\":24,\"name\":\"Pillar of Flame\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Pillar of Flame deals 2 damage to any target. If a creature dealt damage this way would die this turn, exile it instead.\"},{\"id\":25,\"name\":\"Raging Poltergeist\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1252,
+      "cacheCreationInputTokens": 32485,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7664489999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7664489999999999,
+      "pricedUsd": 0.766449,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.766449 and its own usage prices at $0.766449"
+    }
+  }
+}

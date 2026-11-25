@@ -22,7 +22,7 @@ const formats = [
     scripts: 254,
     tokens: 12,
     constructedDecks: 5,
-    admissionDirectory: 'play-admission-v15',
+    admissionDirectory: 'play-admission',
   },
   {
     id: 'm11',
@@ -32,7 +32,7 @@ const formats = [
     scripts: 234,
     tokens: 6,
     constructedDecks: 1,
-    admissionDirectory: 'play-admission-v15',
+    admissionDirectory: 'play-admission',
   },
   {
     id: 'm13',
@@ -42,7 +42,7 @@ const formats = [
     scripts: 234,
     tokens: 10,
     constructedDecks: 5,
-    admissionDirectory: 'play-admission-v15',
+    admissionDirectory: 'play-admission',
   },
 ] as const;
 

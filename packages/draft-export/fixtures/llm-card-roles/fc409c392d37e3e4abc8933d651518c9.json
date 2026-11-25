@@ -1,0 +1,161 @@
+{
+  "key": "fc409c392d37e3e4abc8933d651518c9",
+  "recordedAt": "2026-11-22T22:19:23.910Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Adanto Vanguard\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"As long as this creature is attacking, it gets +2/+0.\\nPay 4 life: This creature gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it.)\"},{\"id\":2,\"name\":\"Ashes of the Abhorrent\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Players can't cast spells from graveyards or activate abilities of cards in graveyards.\\nWhenever a creature dies, you gain 1 life.\"},{\"id\":3,\"name\":\"Axis of Mortality\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, you may have two target players exchange life totals.\"},{\"id\":4,\"name\":\"Bellowing Aegisaur\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, put a +1/+1 counter on each other creature you control.\"},{\"id\":5,\"name\":\"Bishop of Rebirth\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Vampire Cleric\",\"text\":\"Vigilance\\nWhenever this creature attacks, you may return target creature card with mana value 3 or less from your graveyard to the battlefield.\"},{\"id\":6,\"name\":\"Bishop's Soldier\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":7,\"name\":\"Bright Reprisal\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking creature.\\nDraw a card.\"},{\"id\":8,\"name\":\"Demystify\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment.\"},{\"id\":9,\"name\":\"Duskborne Skymarcher\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Vampire Cleric\",\"text\":\"Flying\\n{W}, {T}: Target attacking Vampire gets +1/+1 until end of turn.\"},{\"id\":10,\"name\":\"Emissary of Sunrise\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"First strike\\nWhen this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":11,\"name\":\"Encampment Keeper\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"First strike\\n{7}{W}, {T}, Sacrifice this creature: Creatures you control get +2/+2 until end of turn.\"},{\"id\":12,\"name\":\"Glorifier of Dusk\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"Pay 2 life: This creature gains flying until end of turn.\\nPay 2 life: This creature gains vigilance until end of turn.\"},{\"id\":13,\"name\":\"Goring Ceratops\",\"manaCost\":\"{5}{W}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Double strike\\nWhenever this creature attacks, other creatures you control gain double strike until end of turn.\"},{\"id\":14,\"name\":\"Imperial Aerosaur\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Flying\\nWhen this creature enters, another target creature you control gets +1/+1 and gains flying until end of turn.\"},{\"id\":15,\"name\":\"Imperial Lancer\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"This creature has double strike as long as you control a Dinosaur.\"},{\"id\":16,\"name\":\"Inspiring Cleric\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Vampire Cleric\",\"text\":\"When this creature enters, you gain 4 life.\"},{\"id\":17,\"name\":\"Ixalan's Binding\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, exile target nonland permanent an opponent controls until this enchantment leaves the battlefield.\\nYour opponents can't cast spells with the same name as the exiled card.\"},{\"id\":18,\"name\":\"Kinjalli's Caller\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Dinosaur spells you cast cost {1} less to cast.\"},{\"id\":19,\"name\":\"Kinjalli's Sunwing\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Flying\\nCreatures your opponents control enter tapped.\"},{\"id\":20,\"name\":\"Legion Conquistador\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"When this creature enters, you may search your library for any number of cards named Legion Conquistador, reveal them, put them into your hand, then shuffle.\"},{\"id\":21,\"name\":\"Legion's Judgment\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature with power 4 or greater.\"},{\"id\":22,\"name\":\"Legion's Landing\",\"manaCost\":null,\"typeLine\":\"Legendary Enchantment // Legendary Land\",\"text\":null,\"faces\":[{\"name\":\"Legion's Landing\",\"manaCost\":\"{W}\",\"typeLine\":\"Legendary Enchantment\",\"text\":\"When Legion's Landing enters, create a 1/1 white Vampire creature token with lifelink.\\nWhen you attack with three or more creatures, transform Legion's Landing.\"},{\"name\":\"Adanto, the First Fort\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"(Transforms from Legion's Landing.)\\n{T}: Add {W}.\\n{2}{W}, {T}: Create a 1/1 white Vampire creature token with lifelink.\"}]},{\"id\":23,\"name\":\"Looming Altisaur\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"\"},{\"id\":24,\"name\":\"Mavren Fein, Dusk Apostle\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Legendary Creature — Vampire Cleric\",\"text\":\"Whenever one or more nontoken Vampires you control attack, create a 1/1 white Vampire creature token with lifelink.\"},{\"id\":25,\"name\":\"Paladin of the Bloodstained\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Vampire Knight\",\"text\":\"When this creature enters, create a 1/1 white Vampire creature token with lifelink.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\",\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 403,
+      "cacheCreationInputTokens": 32530,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7248990000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7248990000000001,
+      "pricedUsd": 0.724899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.724899 and its own usage prices at $0.724899"
+    }
+  }
+}

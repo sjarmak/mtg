@@ -1,0 +1,6 @@
+{
+  "code": 0,
+  "stdout": "JSON report written to /path/to/mtg/.amp/in/rebind/m12/m12/scenario-probes/vitest.json\n",
+  "stderr": "",
+  "error": null
+}

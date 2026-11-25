@@ -1,0 +1,161 @@
+{
+  "key": "70beafe8316c183459d306b34f713862",
+  "recordedAt": "2026-11-22T22:27:53.345Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Nightguard Patrol\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"First strike, vigilance\"},{\"id\":2,\"name\":\"Oathsworn Giant\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Giant Soldier\",\"text\":\"Vigilance\\nOther creatures you control get +0/+2 and have vigilance.\"},{\"id\":3,\"name\":\"Sandsower\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Tap three untapped creatures you control: Tap target creature.\"},{\"id\":4,\"name\":\"Screeching Griffin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\n{R}: Target creature can't block this creature this turn.\"},{\"id\":5,\"name\":\"Seed Spark\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment. If {G} was spent to cast this spell, create two 1/1 green Saproling creature tokens.\"},{\"id\":6,\"name\":\"Suppression Field\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Activated abilities cost {2} more to activate unless they're mana abilities.\"},{\"id\":7,\"name\":\"Three Dreams\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to three Aura cards with different names, reveal them, put them into your hand, then shuffle.\"},{\"id\":8,\"name\":\"Twilight Drover\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Whenever a creature token leaves the battlefield, put a +1/+1 counter on this creature.\\n{2}{W}, Remove a +1/+1 counter from this creature: Create two 1/1 white Spirit creature tokens with flying.\"},{\"id\":9,\"name\":\"Veteran Armorer\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Other creatures you control get +0/+1.\"},{\"id\":10,\"name\":\"Votary of the Conclave\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"{2}{G}: Regenerate this creature.\"},{\"id\":11,\"name\":\"Wojek Apothecary\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Radiance — {T}: Prevent the next 1 damage that would be dealt to target creature and each other creature that shares a color with it this turn.\"},{\"id\":12,\"name\":\"Wojek Siren\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Target creature and each other creature that shares a color with it get +1/+1 until end of turn.\"},{\"id\":13,\"name\":\"Belltower Sphinx\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever a source deals damage to this creature, that source's controller mills that many cards.\"},{\"id\":14,\"name\":\"Cerulean Sphinx\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\n{U}: This creature's owner shuffles it into their library.\"},{\"id\":15,\"name\":\"Compulsive Research\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws three cards. Then that player discards two cards unless they discard a land card.\"},{\"id\":16,\"name\":\"Convolute\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {4}.\"},{\"id\":17,\"name\":\"Copy Enchantment\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"You may have this enchantment enter as a copy of any enchantment on the battlefield.\"},{\"id\":18,\"name\":\"Dizzy Spell\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -3/-0 until end of turn.\\nTransmute {1}{U}{U} ({1}{U}{U}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":19,\"name\":\"Drake Familiar\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nWhen this creature enters, sacrifice it unless you return an enchantment to its owner's hand.\"},{\"id\":20,\"name\":\"Dream Leash\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant permanent\\nYou can't choose an untapped permanent as this spell's target as you cast it.\\nYou control enchanted permanent.\"},{\"id\":21,\"name\":\"Drift of Phantasms\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\nFlying\\nTransmute {1}{U}{U} ({1}{U}{U}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":22,\"name\":\"Ethereal Usher\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{U}, {T}: Target creature can't be blocked this turn.\\nTransmute {1}{U}{U} ({1}{U}{U}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":23,\"name\":\"Eye of the Storm\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a player casts an instant or sorcery card, exile it. Then that player copies each instant or sorcery card exiled with this enchantment. For each copy, the player may cast the copy without paying its mana cost.\"},{\"id\":24,\"name\":\"Flight of Fancy\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw two cards.\\nEnchanted creature has flying.\"},{\"id\":25,\"name\":\"Flow of Ideas\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw a card for each Island you control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1314,
+      "cacheCreationInputTokens": 32383,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767509,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767509,
+      "pricedUsd": 0.767509,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767509 and its own usage prices at $0.767509"
+    }
+  }
+}

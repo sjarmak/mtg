@@ -1,0 +1,161 @@
+{
+  "key": "be53828aacdec0c622a9b04d729e97d0",
+  "recordedAt": "2026-11-22T21:58:47.718Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Spirit Away\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\\nEnchanted creature gets +2/+2 and has flying.\"},{\"id\":2,\"name\":\"Stern Mentor\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, each of those creatures has \\\"{T}: Target player mills two cards.\\\"\"},{\"id\":3,\"name\":\"Stolen Goods\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent exiles cards from the top of their library until they exile a nonland card. Until end of turn, you may cast that card without paying its mana cost.\"},{\"id\":4,\"name\":\"Tamiyo, the Moon Sage\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Legendary Planeswalker — Tamiyo\",\"text\":\"+1: Tap target permanent. It doesn't untap during its controller's next untap step.\\n−2: Draw a card for each tapped creature target player controls.\\n−8: You get an emblem with \\\"You have no maximum hand size\\\" and \\\"Whenever a card is put into your graveyard from anywhere, you may return it to your hand.\\\"\"},{\"id\":5,\"name\":\"Tandem Lookout\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as Tandem Lookout is paired with another creature, each of those creatures has \\\"Whenever this creature deals damage to an opponent, draw a card.\\\"\"},{\"id\":6,\"name\":\"Temporal Mastery\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Take an extra turn after this one. Exile Temporal Mastery.\\nMiracle {1}{U} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":7,\"name\":\"Vanishment\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Instant\",\"text\":\"Put target nonland permanent on top of its owner's library.\\nMiracle {U} (You may cast this card for its miracle cost when you draw it if it's the first card you drew this turn.)\"},{\"id\":8,\"name\":\"Wingcrafter\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Soulbond (You may pair this creature with another unpaired creature when either enters. They remain paired for as long as you control both of them.)\\nAs long as this creature is paired with another creature, both creatures have flying.\"},{\"id\":9,\"name\":\"Appetite for Brains\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a card from it with mana value 4 or greater and exile that card.\"},{\"id\":10,\"name\":\"Barter in Blood\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player sacrifices two creatures of their choice.\"},{\"id\":11,\"name\":\"Blood Artist\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Whenever this creature or another creature dies, target player loses 1 life and you gain 1 life.\"},{\"id\":12,\"name\":\"Bloodflow Connoisseur\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Sacrifice a creature: Put a +1/+1 counter on this creature.\"},{\"id\":13,\"name\":\"Bone Splinters\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nDestroy target creature.\"},{\"id\":14,\"name\":\"Butcher Ghoul\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Undying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":15,\"name\":\"Corpse Traders\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{2}{B}, Sacrifice a creature: Target opponent reveals their hand. You choose a card from it. That player discards that card. Activate only as a sorcery.\"},{\"id\":16,\"name\":\"Crypt Creeper\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Sacrifice this creature: Exile target card from a graveyard.\"},{\"id\":17,\"name\":\"Dark Impostor\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire Assassin\",\"text\":\"{4}{B}{B}: Exile target creature and put a +1/+1 counter on this creature.\\nThis creature has all activated abilities of all creature cards exiled with it.\"},{\"id\":18,\"name\":\"Death Wind\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -X/-X until end of turn.\"},{\"id\":19,\"name\":\"Demonic Rising\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your end step, if you control exactly one creature, create a 5/5 black Demon creature token with flying.\"},{\"id\":20,\"name\":\"Demonic Taskmaster\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nAt the beginning of your upkeep, sacrifice a creature other than this creature.\"},{\"id\":21,\"name\":\"Demonlord of Ashmouth\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nWhen this creature enters, exile it unless you sacrifice another creature.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":22,\"name\":\"Descent into Madness\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, put a despair counter on this enchantment, then each player exiles X permanents they control and/or cards from their hand, where X is the number of despair counters on this enchantment.\"},{\"id\":23,\"name\":\"Dread Slaver\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Zombie Horror\",\"text\":\"Whenever a creature dealt damage by this creature this turn dies, return it to the battlefield under your control. That creature is a black Zombie in addition to its other colors and types.\"},{\"id\":24,\"name\":\"Driver of the Dead\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"When this creature dies, return target creature card with mana value 2 or less from your graveyard to the battlefield.\"},{\"id\":25,\"name\":\"Essence Harvest\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player loses X life and you gain X life, where X is the greatest power among creatures you control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\",\"draw\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 431,
+      "cacheCreationInputTokens": 32682,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.729339,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.729339,
+      "pricedUsd": 0.729339,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.729339 and its own usage prices at $0.729339"
+    }
+  }
+}

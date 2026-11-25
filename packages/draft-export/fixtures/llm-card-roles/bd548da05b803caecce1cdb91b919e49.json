@@ -1,0 +1,161 @@
+{
+  "key": "bd548da05b803caecce1cdb91b919e49",
+  "recordedAt": "2026-11-22T21:35:35.033Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Mirran Spy\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drone\",\"text\":\"Flying\\nWhenever you cast an artifact spell, you may untap target creature.\"},{\"id\":2,\"name\":\"Mitotic Manipulation\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top seven cards of your library. You may put one of those cards onto the battlefield if it has the same name as a permanent. Put the rest on the bottom of your library in any order.\"},{\"id\":3,\"name\":\"Neurok Commando\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Shroud (This creature can't be the target of spells or abilities.)\\nWhenever this creature deals combat damage to a player, you may draw a card.\"},{\"id\":4,\"name\":\"Oculus\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Phyrexian Homunculus\",\"text\":\"When this creature dies, you may draw a card.\"},{\"id\":5,\"name\":\"Quicksilver Geyser\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return up to two target nonland permanents to their owners' hands.\"},{\"id\":6,\"name\":\"Serum Raker\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Phyrexian Drake\",\"text\":\"Flying\\nWhen this creature dies, each player discards a card.\"},{\"id\":7,\"name\":\"Spire Serpent\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Defender\\nMetalcraft — As long as you control three or more artifacts, this creature gets +2/+2 and can attack as though it didn't have defender.\"},{\"id\":8,\"name\":\"Steel Sabotage\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Counter target artifact spell.\\n• Return target artifact to its owner's hand.\"},{\"id\":9,\"name\":\"Treasure Mage\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may search your library for an artifact card with mana value 6 or greater, reveal it, put it into your hand, then shuffle.\"},{\"id\":10,\"name\":\"Turn the Tide\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Creatures your opponents control get -2/-0 until end of turn.\"},{\"id\":11,\"name\":\"Vedalken Anatomist\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Phyrexian Vedalken Wizard\",\"text\":\"{2}{U}, {T}: Put a -1/-1 counter on target creature. You may tap or untap that creature.\"},{\"id\":12,\"name\":\"Vedalken Infuser\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"At the beginning of your upkeep, you may put a charge counter on target artifact.\"},{\"id\":13,\"name\":\"Vivisection\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nDraw three cards.\"},{\"id\":14,\"name\":\"Black Sun's Zenith\",\"manaCost\":\"{X}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put X -1/-1 counters on each creature. Shuffle Black Sun's Zenith into its owner's library.\"},{\"id\":15,\"name\":\"Caustic Hound\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Phyrexian Dog\",\"text\":\"When this creature dies, each player loses 4 life.\"},{\"id\":16,\"name\":\"Flensermite\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Phyrexian Gremlin\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":17,\"name\":\"Flesh-Eater Imp\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Phyrexian Imp\",\"text\":\"Flying\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nSacrifice a creature: This creature gets +1/+1 until end of turn.\"},{\"id\":18,\"name\":\"Go for the Throat\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonartifact creature.\"},{\"id\":19,\"name\":\"Gruesome Encore\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature card from an opponent's graveyard onto the battlefield under your control. It gains haste. Exile it at the beginning of the next end step. If that creature would leave the battlefield, exile it instead of putting it anywhere else.\"},{\"id\":20,\"name\":\"Horrifying Revelation\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards a card, then mills a card.\"},{\"id\":21,\"name\":\"Massacre Wurm\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Wurm\",\"text\":\"When this creature enters, creatures your opponents control get -2/-2 until end of turn.\\nWhenever a creature an opponent controls dies, that player loses 2 life.\"},{\"id\":22,\"name\":\"Morbid Plunder\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to two target creature cards from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Nested Ghoul\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Zombie Warrior\",\"text\":\"Whenever a source deals damage to this creature, create a 2/2 black Phyrexian Zombie creature token.\"},{\"id\":24,\"name\":\"Phyresis\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has infect. (It deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":25,\"name\":\"Phyrexian Crusader\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Zombie Knight\",\"text\":\"First strike, protection from red and from white\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 422,
+      "cacheCreationInputTokens": 32434,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7239289999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7239289999999999,
+      "pricedUsd": 0.723929,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723929 and its own usage prices at $0.723929"
+    }
+  }
+}

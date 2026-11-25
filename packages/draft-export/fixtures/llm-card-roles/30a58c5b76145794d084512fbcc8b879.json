@@ -1,0 +1,161 @@
+{
+  "key": "30a58c5b76145794d084512fbcc8b879",
+  "recordedAt": "2026-11-22T22:04:18.315Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Miming Slime\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create an X/X green Ooze creature token, where X is the greatest power among creatures you control.\"},{\"id\":2,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":3,\"name\":\"Ooze Flux\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}{G}, Remove one or more +1/+1 counters from among creatures you control: Create an X/X green Ooze creature token, where X is the number of +1/+1 counters removed this way.\"},{\"id\":4,\"name\":\"Predator's Rapport\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Choose target creature you control. You gain life equal to that creature's power plus its toughness.\"},{\"id\":5,\"name\":\"Rust Scarab\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Whenever this creature becomes blocked, you may destroy target artifact or enchantment defending player controls.\"},{\"id\":6,\"name\":\"Scab-Clan Charger\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Centaur Warrior\",\"text\":\"Bloodrush — {1}{G}, Discard this card: Target attacking creature gets +2/+4 until end of turn.\"},{\"id\":7,\"name\":\"Serene Remembrance\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Shuffle Serene Remembrance and up to three target cards from a single graveyard into their owners' libraries.\"},{\"id\":8,\"name\":\"Skarrg Goliath\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nBloodrush — {5}{G}{G}, Discard this card: Target attacking creature gets +9/+9 and gains trample until end of turn.\"},{\"id\":9,\"name\":\"Slaughterhorn\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Bloodrush — {G}, Discard this card: Target attacking creature gets +3/+2 until end of turn.\"},{\"id\":10,\"name\":\"Spire Tracer\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"This creature can't be blocked except by creatures with flying or reach.\"},{\"id\":11,\"name\":\"Sylvan Primordial\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Avatar\",\"text\":\"Reach\\nWhen this creature enters, for each opponent, destroy target noncreature permanent that player controls. For each permanent destroyed this way, search your library for a Forest card and put that card onto the battlefield tapped. Then shuffle.\"},{\"id\":12,\"name\":\"Tower Defense\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +0/+5 and gain reach until end of turn.\"},{\"id\":13,\"name\":\"Verdant Haven\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhen this Aura enters, you gain 2 life.\\nWhenever enchanted land is tapped for mana, its controller adds an additional one mana of any color.\"},{\"id\":14,\"name\":\"Wasteland Viper\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Snake\",\"text\":\"Deathtouch\\nBloodrush — {G}, Discard this card: Target attacking creature gets +1/+2 and gains deathtouch until end of turn.\"},{\"id\":15,\"name\":\"Wildwood Rebirth\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature card from your graveyard to your hand.\"},{\"id\":16,\"name\":\"Alms Beast\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Creatures blocking or blocked by this creature have lifelink.\"},{\"id\":17,\"name\":\"Assemble the Legion\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, put a muster counter on this enchantment. Then create a 1/1 red and white Soldier creature token with haste for each muster counter on this enchantment.\"},{\"id\":18,\"name\":\"Aurelia, the Warleader\",\"manaCost\":\"{2}{R}{R}{W}{W}\",\"typeLine\":\"Legendary Creature — Angel\",\"text\":\"Flying, vigilance, haste\\nWhenever Aurelia attacks for the first time each turn, untap all creatures you control. After this phase, there is an additional combat phase.\"},{\"id\":19,\"name\":\"Aurelia's Fury\",\"manaCost\":\"{X}{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Aurelia's Fury deals X damage divided as you choose among any number of targets. Tap each creature dealt damage this way. Players dealt damage this way can't cast noncreature spells this turn.\"},{\"id\":20,\"name\":\"Bane Alley Broker\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{T}: Draw a card, then exile a card from your hand face down.\\nYou may look at cards exiled with this creature.\\n{U}{B}, {T}: Return a card exiled with this creature to its owner's hand.\"},{\"id\":21,\"name\":\"Biovisionary\",\"manaCost\":\"{1}{G}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"At the beginning of the end step, if you control four or more creatures named Biovisionary, you win the game.\"},{\"id\":22,\"name\":\"Borborygmos Enraged\",\"manaCost\":\"{4}{R}{R}{G}{G}\",\"typeLine\":\"Legendary Creature — Cyclops\",\"text\":\"Trample\\nWhenever Borborygmos Enraged deals combat damage to a player, reveal the top three cards of your library. Put all land cards revealed this way into your hand and the rest into your graveyard.\\nDiscard a land card: Borborygmos Enraged deals 3 damage to any target.\"},{\"id\":23,\"name\":\"Boros Charm\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Boros Charm deals 4 damage to target player or planeswalker.\\n• Permanents you control gain indestructible until end of turn.\\n• Target creature gains double strike until end of turn.\"},{\"id\":24,\"name\":\"Call of the Nightwing\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 1/1 blue and black Horror creature token with flying.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":25,\"name\":\"Cartel Aristocrat\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"Sacrifice another creature: This creature gains protection from the color of your choice until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\",\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1600,
+      "cacheCreationInputTokens": 32612,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.786389,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.786389,
+      "pricedUsd": 0.786389,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786389 and its own usage prices at $0.786389"
+    }
+  }
+}

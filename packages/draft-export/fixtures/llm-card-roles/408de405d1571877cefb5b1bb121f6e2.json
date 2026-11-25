@@ -1,0 +1,161 @@
+{
+  "key": "408de405d1571877cefb5b1bb121f6e2",
+  "recordedAt": "2026-11-22T22:24:28.357Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Acrobatic Maneuver\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target creature you control, then return that card to the battlefield under its owner's control.\\nDraw a card.\"},{\"id\":2,\"name\":\"Aerial Responder\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Dwarf Soldier\",\"text\":\"Flying, vigilance, lifelink\"},{\"id\":3,\"name\":\"Aetherstorm Roc\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhenever this creature or another creature you control enters, you get {E} (an energy counter).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it and tap up to one target creature defending player controls.\"},{\"id\":4,\"name\":\"Angel of Invention\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, vigilance, lifelink\\nFabricate 2 (When this creature enters, put two +1/+1 counters on it or create two 1/1 colorless Servo artifact creature tokens.)\\nOther creatures you control get +1/+1.\"},{\"id\":5,\"name\":\"Authority of the Consuls\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures your opponents control enter tapped.\\nWhenever a creature an opponent controls enters, you gain 1 life.\"},{\"id\":6,\"name\":\"Aviary Mechanic\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Dwarf Artificer\",\"text\":\"When this creature enters, you may return another permanent you control to its owner's hand.\"},{\"id\":7,\"name\":\"Built to Last\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. If it's an artifact creature, it gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it.)\"},{\"id\":8,\"name\":\"Captured by the Consulate\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature you don't control\\nEnchanted creature can't attack.\\nWhenever an opponent casts a spell, if it has a single target, change the target to enchanted creature if able.\"},{\"id\":9,\"name\":\"Cataclysmic Gearhulk\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Vigilance\\nWhen this creature enters, each player chooses an artifact, a creature, an enchantment, and a planeswalker from among the nonland permanents they control, then sacrifices the rest.\"},{\"id\":10,\"name\":\"Consulate Surveillance\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, you get {E}{E}{E}{E} (four energy counters).\\nPay {E}{E}: Prevent all damage that would be dealt to you this turn by a source of your choice.\"},{\"id\":11,\"name\":\"Consul's Shieldguard\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Dwarf Soldier\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}. If you do, another target attacking creature gains indestructible until end of turn.\"},{\"id\":12,\"name\":\"Eddytrail Hawk\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}. If you do, another target attacking creature gains flying until end of turn.\"},{\"id\":13,\"name\":\"Fairgrounds Warden\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dwarf Soldier\",\"text\":\"When this creature enters, exile target creature an opponent controls until this creature leaves the battlefield.\"},{\"id\":14,\"name\":\"Fragmentize\",\"manaCost\":\"{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or enchantment with mana value 4 or less.\"},{\"id\":15,\"name\":\"Fumigate\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures. You gain 1 life for each creature destroyed this way.\"},{\"id\":16,\"name\":\"Gearshift Ace\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Dwarf Pilot\",\"text\":\"First strike\\nWhenever this creature crews a Vehicle, that Vehicle gains first strike until end of turn.\"},{\"id\":17,\"name\":\"Glint-Sleeve Artisan\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dwarf Artificer\",\"text\":\"Fabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":18,\"name\":\"Herald of the Fair\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human\",\"text\":\"When this creature enters, target creature you control gets +1/+1 until end of turn.\"},{\"id\":19,\"name\":\"Impeccable Timing\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Impeccable Timing deals 3 damage to target attacking or blocking creature.\"},{\"id\":20,\"name\":\"Inspired Charge\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +2/+1 until end of turn.\"},{\"id\":21,\"name\":\"Master Trinketeer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Dwarf Artificer\",\"text\":\"Servos and Thopters you control get +1/+1.\\n{3}{W}: Create a 1/1 colorless Servo artifact creature token.\"},{\"id\":22,\"name\":\"Ninth Bridge Patrol\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Dwarf Soldier\",\"text\":\"Whenever another creature you control leaves the battlefield, put a +1/+1 counter on this creature.\"},{\"id\":23,\"name\":\"Pressure Point\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature.\\nDraw a card.\"},{\"id\":24,\"name\":\"Propeller Pioneer\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Flying\\nFabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":25,\"name\":\"Refurbish\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target artifact card from your graveyard to the battlefield.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1485,
+      "cacheCreationInputTokens": 32530,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.778999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.778999,
+      "pricedUsd": 0.778999,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.778999 and its own usage prices at $0.778999"
+    }
+  }
+}

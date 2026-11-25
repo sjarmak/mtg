@@ -1,7 +1,13 @@
 /** ISD-capable printed Limited construction evaluation over frozen pools and Forge games. */
 import { isDeepStrictEqual } from 'node:util';
 import { botEvidenceSha256, type BotEvidenceEpisode, type JsonValue } from '@mtg/bot-evidence';
-import type { PreparedPrintedLimitedFormat, PrintedBoosterPayload } from '@mtg/draft-export';
+import {
+  printedRolesPolicy,
+  validatePrintedCardRoles,
+  type PreparedPrintedLimitedFormat,
+  type PrintedBoosterPayload,
+  type PrintedCardRoles,
+} from '@mtg/draft-export';
 import type { DeckRef, ObservedBackend } from '@mtg/engine';
 import {
   runForgeObservedPolicyGame,
@@ -67,32 +73,95 @@ type PrintedDeck = LimitedDeck<PrintedBoosterPayload>;
 type RuntimeIdentity = StageStrengthCampaignPlan['runtime'];
 type ParsedPlan = ReturnType<typeof StageStrengthCampaignPlanSchema.parse>;
 
-function candidateConfig(ratings: PrintedDraftRatings) {
+/**
+ * Which reading each arm uses. The default is the original structural versus
+ * Forge-ranked comparison; the two roles comparisons (#305, measured under #21)
+ * add model-labeled card roles to one base and keep the roleless base as the
+ * paired control.
+ */
+export type PrintedLimitedComparison = 'structural-vs-ranked' | 'structural-vs-roles' | 'ranked-vs-roles';
+
+/** The reading one arm uses, as recorded in its policy identity and evidence. */
+export interface PrintedLimitedArm {
+  readonly policyId: string;
+  readonly config: JsonValue;
+  readonly dataSha256: string | null;
+  readonly ranked: boolean;
+  readonly roles: boolean;
+}
+
+/** Builds the arms of `comparison` from per-stage structural and ranked arms. */
+export function printedLimitedArms(
+  structural: PrintedLimitedArm,
+  ranked: PrintedLimitedArm,
+  comparison: PrintedLimitedComparison,
+  roles: PrintedCardRoles | undefined,
+): Record<StageStrengthArm, PrintedLimitedArm> {
+  if (comparison === 'structural-vs-ranked') return { baseline: structural, candidate: ranked };
+  if (roles === undefined) throw new Error('A card roles comparison needs the format roles file');
+  const base = comparison === 'structural-vs-roles' ? structural : ranked;
+  const rolesSha256 = botEvidenceSha256(roles);
   return {
-    version: 'printed-limited-construction/v1',
-    evaluation: 'forge-ranked',
-    ratingsFingerprint: ratings.source.fingerprint,
-  } as const;
+    baseline: base,
+    candidate: {
+      policyId: printedRolesPolicy(base.policyId, roles),
+      config: { ...(base.config as Record<string, JsonValue>), rolesSha256 },
+      dataSha256:
+        base.dataSha256 === null ? rolesSha256 : botEvidenceSha256({ base: base.dataSha256, rolesSha256 }),
+      ranked: base.ranked,
+      roles: true,
+    },
+  };
+}
+
+function constructionArms(
+  ratings: PrintedDraftRatings,
+  comparison: PrintedLimitedComparison,
+  roles: PrintedCardRoles | undefined,
+): Record<StageStrengthArm, PrintedLimitedArm> {
+  return printedLimitedArms(
+    {
+      policyId: 'printed-limited-structural/v1',
+      config: BaselineConfig,
+      dataSha256: null,
+      ranked: false,
+      roles: false,
+    },
+    {
+      policyId: 'printed-limited-forge-ranked/v1',
+      config: {
+        version: 'printed-limited-construction/v1',
+        evaluation: 'forge-ranked',
+        ratingsFingerprint: ratings.source.fingerprint,
+      },
+      dataSha256: ratings.source.fingerprint,
+      ranked: true,
+      roles: false,
+    },
+    comparison,
+    roles,
+  );
+}
+
+/** The plan identity of each arm. */
+export function printedLimitedArmPolicies(
+  arms: Record<StageStrengthArm, PrintedLimitedArm>,
+): StageStrengthCampaignPlan['policies'] {
+  const identity = ({ policyId, config, dataSha256 }: PrintedLimitedArm) => ({
+    policyId,
+    configSha256: botEvidenceSha256(config),
+    modelSha256: null,
+    dataSha256,
+  });
+  return { baseline: identity(arms.baseline), candidate: identity(arms.candidate) };
 }
 
 export function printedLimitedConstructionPolicies(
   ratings: PrintedDraftRatings,
+  comparison: PrintedLimitedComparison = 'structural-vs-ranked',
+  roles?: PrintedCardRoles,
 ): StageStrengthCampaignPlan['policies'] {
-  const candidate = candidateConfig(ratings);
-  return {
-    baseline: {
-      policyId: 'printed-limited-structural/v1',
-      configSha256: botEvidenceSha256(BaselineConfig),
-      modelSha256: null,
-      dataSha256: null,
-    },
-    candidate: {
-      policyId: 'printed-limited-forge-ranked/v1',
-      configSha256: botEvidenceSha256(candidate),
-      modelSha256: null,
-      dataSha256: ratings.source.fingerprint,
-    },
-  };
+  return printedLimitedArmPolicies(constructionArms(ratings, comparison, roles));
 }
 
 export function printedLimitedSubjectIdentity(prepared: PreparedPrintedLimitedFormat) {
@@ -126,6 +195,8 @@ export interface PrintedConstructionSubject {
   readonly prepared: PreparedPrintedLimitedFormat;
   readonly catalogs: readonly { readonly code: string; readonly catalog: PrintedCardCatalog }[];
   readonly ratings: PrintedDraftRatings;
+  /** The format's card roles file; required only by the roles comparisons. */
+  readonly roles?: PrintedCardRoles;
   readonly backend: PrintedConstructionBackend;
 }
 
@@ -137,6 +208,8 @@ export interface PrintedLimitedConstructionCampaignOptions {
   readonly opponents: ReadonlyMap<string, DeckRef>;
   readonly maximumTurns: number;
   readonly maximumDecisions: number;
+  /** Defaults to `structural-vs-ranked`. */
+  readonly comparison?: PrintedLimitedComparison;
   readonly now?: () => number;
   readonly onTrial?: StageStrengthTrialCheckpoint;
 }
@@ -193,6 +266,7 @@ function snapshotOptions(
           ...subject,
           prepared: snapshotPreparedFormat(subject.prepared),
           ratings: structuredClone(subject.ratings),
+          ...(subject.roles === undefined ? {} : { roles: structuredClone(subject.roles) }),
           backend: bindPrintedConstructionBackend(
             {
               admitted: true,
@@ -207,6 +281,7 @@ function snapshotOptions(
     opponents: new Map([...options.opponents].map(([id, deck]) => [id, structuredClone(deck)])),
     maximumTurns: options.maximumTurns,
     maximumDecisions: options.maximumDecisions,
+    comparison: options.comparison ?? 'structural-vs-ranked',
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.onTrial === undefined ? {} : { onTrial: options.onTrial }),
   };
@@ -216,6 +291,7 @@ async function validateSubject(
   identity: ParsedPlan['subjects'][number],
   subject: PrintedConstructionSubject,
   plan: ParsedPlan,
+  comparison: PrintedLimitedComparison | undefined,
 ): Promise<void> {
   const admission = subject.backend.admission.subject;
   const authenticated = await validatePrintedDraftRatings(
@@ -226,7 +302,11 @@ async function validateSubject(
   if (!isDeepStrictEqual(printedLimitedSubjectIdentity(subject.prepared), identity)) {
     throw new Error(`printed subject ${identity.id} differs from the campaign plan`);
   }
-  if (!isDeepStrictEqual(printedLimitedConstructionPolicies(authenticated), plan.policies)) {
+  const roles =
+    subject.roles === undefined ? undefined : validatePrintedCardRoles(subject.roles, subject.catalogs);
+  if (
+    !isDeepStrictEqual(printedLimitedConstructionPolicies(authenticated, comparison, roles), plan.policies)
+  ) {
     throw new Error(`printed policies for ${identity.id} differ from the campaign plan`);
   }
   if (!isDeepStrictEqual(printedConstructionForgeRuntime(admission), plan.downstream.runtime)) {
@@ -286,7 +366,7 @@ async function validateInputs(options: PrintedLimitedConstructionCampaignOptions
   for (const subjectIdentity of plan.subjects) {
     const subject = options.subjects.get(subjectIdentity.id);
     if (subject === undefined) throw new Error(`campaign has no subject ${subjectIdentity.id}`);
-    await validateSubject(subjectIdentity, subject, plan);
+    await validateSubject(subjectIdentity, subject, plan, options.comparison);
   }
   await validateForgeStageDeckOutcomeOptions(forgeOutcomeOptions(plan, options));
   return plan;
@@ -326,14 +406,10 @@ function deckOutput(deck: PrintedDeck): z.infer<typeof DeckOutputSchema> {
   });
 }
 
-function policyConfig(arm: StageStrengthArm, ratings: PrintedDraftRatings): JsonValue {
-  return json(arm === 'baseline' ? BaselineConfig : candidateConfig(ratings));
-}
-
 function constructionEpisode(
   planId: string,
   context: StageStrengthExecutionContext,
-  subject: PrintedConstructionSubject,
+  arm: PrintedLimitedArm,
   output: z.infer<typeof DeckOutputSchema>,
   observation: JsonValue,
 ): BotEvidenceEpisode {
@@ -351,7 +427,7 @@ function constructionEpisode(
         cardsSha256: context.subject.cardsSha256,
       },
       features: context.features,
-      behavior: { ...context.policy, config: policyConfig(context.arm, subject.ratings) },
+      behavior: { ...context.policy, config: json(arm.config) },
       lineage: { setId: context.subject.id, poolId: context.row.seed },
       splitGroup: { kind: 'pool', id: context.row.seed },
     },
@@ -391,14 +467,13 @@ function stageExecutor(
     const startedAt = (options.now ?? Date.now)();
     const subject = options.subjects.get(context.subject.id)!;
     const initial = initialDeck(subject, context.row.seed);
-    const built = suggestPrintedDeck(initial, context.arm === 'candidate' ? subject.ratings : undefined);
-    const episode = constructionEpisode(
-      plan.id,
-      context,
-      subject,
-      deckOutput(built),
-      poolObservation(initial),
+    const arm = constructionArms(subject.ratings, options.comparison!, subject.roles)[context.arm];
+    const built = suggestPrintedDeck(
+      initial,
+      arm.ranked ? subject.ratings : undefined,
+      arm.roles ? subject.roles : undefined,
     );
+    const episode = constructionEpisode(plan.id, context, arm, deckOutput(built), poolObservation(initial));
     return {
       episode,
       cost: { elapsedMs: Math.max(0, (options.now ?? Date.now)() - startedAt), spentUsd: 0 },
@@ -435,7 +510,7 @@ export async function evaluatePrintedLimitedDeckOutcome(
   return evaluateForgeStageDeckOutcome(forgeOutcomeOptions(planInput, options), context, deck, runGame);
 }
 
-/** Compare structural and Forge-ranked construction while holding pools and gameplay fixed. */
+/** Compare two construction readings while holding pools and gameplay fixed. */
 export async function runPrintedLimitedConstructionCampaign(
   options: PrintedLimitedConstructionCampaignOptions,
   runGame: PrintedConstructionGameRunner = runForgeObservedPolicyGame,

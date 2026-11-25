@@ -1,4 +1,7 @@
-/** Execute the preregistered ISD Forge-ranked versus structural full-pod draft holdout. */
+/**
+ * Execute a preregistered ISD full-pod draft holdout: Forge-ranked versus
+ * structural by default, or one of the #305 card roles comparisons.
+ */
 import { createHash } from 'node:crypto';
 import {
   closeSync,
@@ -14,7 +17,11 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { botEvidenceSha256 } from '@mtg/bot-evidence';
-import { preparePrintedLimitedFormat } from '@mtg/draft-export';
+import {
+  preparePrintedLimitedFormat,
+  validatePrintedCardRoles,
+  type PrintedCardRoles,
+} from '@mtg/draft-export';
 import type { DeckRef, ObservedBackend } from '@mtg/engine';
 import { compileInstalledForgeBridge } from '@mtg/forge-export';
 import { prepareLimitedDeck, toDeckRef } from '@mtg/limited';
@@ -34,11 +41,13 @@ import {
   forgeGameplayPolicyIdentity,
   printedConstructionForgeRuntime,
   printedLimitedSubjectIdentity,
+  type PrintedLimitedComparison,
 } from './printed-limited-construction-campaign';
 import { printedLimitedDraftPolicies } from './printed-limited-draft-campaign';
 import { buildInstalledPrintedDraftRatings } from './printed-draft-ratings';
 import { discoverForgeHome } from './forge-home';
 import { loadPrintedAdmissionSource, parsePrintedFormatRegistry } from './printed-format-registry';
+import { PRINTED_CARD_ROLES_FILE } from './stage-printed-formats';
 import {
   finalizeStageStrengthCampaignArtifacts,
   openStageStrengthCampaignArtifacts,
@@ -48,11 +57,43 @@ const FORMAT_ID = 'isd';
 const MAXIMUM_TURNS = 200;
 const MAXIMUM_DECISIONS = 5_000;
 
-function parseOutput(args: readonly string[]): string {
-  if (args.length !== 2 || args[0] !== '--out' || (args[1] ?? '').trim() === '') {
-    throw new Error('usage: tsx packages/ui/tools/isd-limited-draft-campaign.ts --out <new-directory>');
+const COMPARISONS: readonly PrintedLimitedComparison[] = [
+  'structural-vs-ranked',
+  'structural-vs-roles',
+  'ranked-vs-roles',
+];
+
+/** `--out <new-directory> [--comparison <name>]`, shared by the ISD campaign drivers. */
+export function parseIsdCampaignArguments(
+  script: string,
+  args: readonly string[],
+): { readonly output: string; readonly comparison: PrintedLimitedComparison } {
+  const usage = `usage: tsx ${script} --out <new-directory> [--comparison ${COMPARISONS.join('|')}]`;
+  let output: string | undefined;
+  let comparison: PrintedLimitedComparison = 'structural-vs-ranked';
+  for (let index = 0; index < args.length; index += 2) {
+    const value = args[index + 1] ?? '';
+    if (args[index] === '--out' && output === undefined && value.trim() !== '') output = resolve(value);
+    else if (args[index] === '--comparison' && COMPARISONS.includes(value as PrintedLimitedComparison))
+      comparison = value as PrintedLimitedComparison;
+    else throw new Error(usage);
   }
-  return resolve(args[1]!);
+  if (output === undefined) throw new Error(usage);
+  return { output, comparison };
+}
+
+/** The card roles a roles comparison needs, validated against the format's catalogs. */
+export function loadIsdCardRoles(
+  comparison: PrintedLimitedComparison,
+  directory: string,
+  catalogs: Parameters<typeof validatePrintedCardRoles>[1],
+): PrintedCardRoles | undefined {
+  return comparison === 'structural-vs-ranked'
+    ? undefined
+    : validatePrintedCardRoles(
+        JSON.parse(readFileSync(join(directory, PRINTED_CARD_ROLES_FILE), 'utf8')),
+        catalogs,
+      );
 }
 
 function sha256(text: string): Promise<string> {
@@ -95,7 +136,11 @@ async function shutdown(backend: ObservedBackend | null): Promise<void> {
   await backend?.shutdown?.();
 }
 
-export async function runIsdLimitedDraftCampaign(repoRoot: string, outputDirectory: string): Promise<void> {
+export async function runIsdLimitedDraftCampaign(
+  repoRoot: string,
+  outputDirectory: string,
+  comparison: PrintedLimitedComparison = 'structural-vs-ranked',
+): Promise<void> {
   const forgeHome = discoverForgeHome(repoRoot);
   if (forgeHome === undefined) throw new Error('Pinned Forge distribution was not found.');
   const registry = parsePrintedFormatRegistry(
@@ -119,6 +164,7 @@ export async function runIsdLimitedDraftCampaign(repoRoot: string, outputDirecto
     code,
     catalog: parsePrintedCardCatalog(JSON.parse(readFileSync(join(source.directory, file), 'utf8'))),
   }));
+  const roles = loadIsdCardRoles(comparison, source.directory, catalogs);
   const prepared = await preparePrintedLimitedFormat(
     admissionSource.format,
     catalogs.map(({ catalog }) => catalog),
@@ -181,7 +227,8 @@ export async function runIsdLimitedDraftCampaign(repoRoot: string, outputDirecto
     const plan = buildIsdLimitedDraftPlan({
       subject: printedLimitedSubjectIdentity(prepared),
       draftRuntime,
-      draftPolicies: printedLimitedDraftPolicies(ratings),
+      draftPolicies: printedLimitedDraftPolicies(ratings, comparison, roles),
+      comparison,
       gameplayRuntime: printedConstructionForgeRuntime(admitted.subject),
       gameplayFeatures: forgeGameplayFeatureIdentity(gameplayPolicy),
       gameplayPolicy: forgeGameplayPolicyIdentity(gameplayPolicy),
@@ -194,6 +241,7 @@ export async function runIsdLimitedDraftCampaign(repoRoot: string, outputDirecto
       installedAdapterSha256: admitted.subject.adapterSha256,
       admissionSubject: admitted.subject,
       ratings,
+      ...(roles === undefined ? {} : { roles }),
       opponents: Object.fromEntries(opponents),
       limits: { maximumTurns: MAXIMUM_TURNS, maximumDecisions: MAXIMUM_DECISIONS },
     };
@@ -212,11 +260,13 @@ export async function runIsdLimitedDraftCampaign(repoRoot: string, outputDirecto
             prepared,
             catalogs,
             ratings,
+            ...(roles === undefined ? {} : { roles }),
             backend: bindPrintedConstructionBackend(admitted, opponentPolicy),
           },
         ],
       ]),
       opponents,
+      comparison,
       maximumTurns: MAXIMUM_TURNS,
       maximumDecisions: MAXIMUM_DECISIONS,
       onTrial: recorder.checkpoint,
@@ -239,5 +289,9 @@ const invoked =
   process.argv[1] === undefined ? false : resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (invoked) {
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-  await runIsdLimitedDraftCampaign(repoRoot, parseOutput(process.argv.slice(2)));
+  const { output, comparison } = parseIsdCampaignArguments(
+    'packages/ui/tools/isd-limited-draft-campaign.ts',
+    process.argv.slice(2),
+  );
+  await runIsdLimitedDraftCampaign(repoRoot, output, comparison);
 }

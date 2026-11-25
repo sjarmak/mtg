@@ -1,0 +1,161 @@
+{
+  "key": "a3835085f9fc08ce845536c7994b8b4c",
+  "recordedAt": "2026-11-22T21:41:53.693Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Welkin Tern\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nThis creature can block only creatures with flying.\"},{\"id\":2,\"name\":\"Whiplash Trap\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Instant — Trap\",\"text\":\"If an opponent had two or more creatures enter the battlefield under their control this turn, you may pay {U} rather than pay this spell's mana cost.\\nReturn two target creatures to their owners' hands.\"},{\"id\":3,\"name\":\"Windrider Eel\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Fish\",\"text\":\"Flying\\nLandfall — Whenever a land you control enters, this creature gets +2/+2 until end of turn.\"},{\"id\":4,\"name\":\"Bala Ged Thief\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Rogue Ally\",\"text\":\"Whenever this creature or another Ally you control enters, target player reveals a number of cards from their hand equal to the number of Allies you control. You choose one of them. That player discards that card.\"},{\"id\":5,\"name\":\"Blood Seeker\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Whenever a creature an opponent controls enters, you may have that player lose 1 life.\"},{\"id\":6,\"name\":\"Blood Tribute\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Kicker—Tap an untapped Vampire you control. (You may tap a Vampire you control in addition to any other costs as you cast this spell.)\\nTarget opponent loses half their life, rounded up. If this spell was kicked, you gain life equal to the life lost this way.\"},{\"id\":7,\"name\":\"Bloodchief Ascension\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each end step, if an opponent lost 2 or more life this turn, you may put a quest counter on this enchantment. (Damage causes loss of life.)\\nWhenever a card is put into an opponent's graveyard from anywhere, if this enchantment has three or more quest counters on it, you may have that player lose 2 life. If you do, you gain 2 life.\"},{\"id\":8,\"name\":\"Bloodghast\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Vampire Spirit\",\"text\":\"This creature can't block.\\nThis creature has haste as long as an opponent has 10 or less life.\\nLandfall — Whenever a land you control enters, you may return this card from your graveyard to the battlefield.\"},{\"id\":9,\"name\":\"Bog Tatters\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Wraith\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\"},{\"id\":10,\"name\":\"Crypt Ripper\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"Haste\\n{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":11,\"name\":\"Desecrated Earth\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Its controller discards a card.\"},{\"id\":12,\"name\":\"Disfigure\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -2/-2 until end of turn.\"},{\"id\":13,\"name\":\"Feast of Blood\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Cast this spell only if you control two or more Vampires.\\nDestroy target creature. You gain 4 life.\"},{\"id\":14,\"name\":\"Gatekeeper of Malakir\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Vampire Warrior\",\"text\":\"Kicker {B} (You may pay an additional {B} as you cast this spell.)\\nWhen this creature enters, if it was kicked, target player sacrifices a creature of their choice.\"},{\"id\":15,\"name\":\"Giant Scorpion\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Scorpion\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":16,\"name\":\"Grim Discovery\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one or both —\\n• Return target creature card from your graveyard to your hand.\\n• Return target land card from your graveyard to your hand.\"},{\"id\":17,\"name\":\"Guul Draz Specter\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Specter\",\"text\":\"Flying\\nThis creature gets +3/+3 as long as an opponent has no cards in hand.\\nWhenever this creature deals combat damage to a player, that player discards a card.\"},{\"id\":18,\"name\":\"Guul Draz Vampire\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Vampire Rogue\",\"text\":\"As long as an opponent has 10 or less life, this creature gets +2/+1 and has intimidate. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":19,\"name\":\"Hagra Crocodile\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"This creature can't block.\\nLandfall — Whenever a land you control enters, this creature gets +2/+2 until end of turn.\"},{\"id\":20,\"name\":\"Hagra Diabolist\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Ogre Shaman Ally\",\"text\":\"Whenever this creature or another Ally you control enters, you may have target player lose life equal to the number of Allies you control.\"},{\"id\":21,\"name\":\"Halo Hunter\",\"manaCost\":\"{2}{B}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhen this creature enters, destroy target Angel.\"},{\"id\":22,\"name\":\"Heartstabber Mosquito\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Kicker {2}{B} (You may pay an additional {2}{B} as you cast this spell.)\\nFlying\\nWhen this creature enters, if it was kicked, destroy target creature.\"},{\"id\":23,\"name\":\"Hideous End\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target nonblack creature. Its controller loses 2 life.\"},{\"id\":24,\"name\":\"Kalitas, Bloodchief of Ghet\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Legendary Creature — Vampire Warrior\",\"text\":\"{B}{B}{B}, {T}: Destroy target creature. If that creature dies this way, create a black Vampire creature token. Its power is equal to that creature's power and its toughness is equal to that creature's toughness.\"},{\"id\":25,\"name\":\"Malakir Bloodwitch\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"Flying, protection from white\\nWhen this creature enters, each opponent loses life equal to the number of Vampires you control. You gain life equal to the life lost this way.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1182,
+      "cacheCreationInputTokens": 32690,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.767049,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.767049,
+      "pricedUsd": 0.767049,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767049 and its own usage prices at $0.767049"
+    }
+  }
+}

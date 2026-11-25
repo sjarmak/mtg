@@ -1,0 +1,161 @@
+{
+  "key": "a984971c485a992abde776956f2e18e9",
+  "recordedAt": "2026-11-22T22:02:22.869Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Chromatic Lantern\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Lands you control have \\\"{T}: Add one mana of any color.\\\"\\n{T}: Add one mana of any color.\"},{\"id\":2,\"name\":\"Civic Saber\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 for each of its colors.\\nEquip {1}\"},{\"id\":3,\"name\":\"Codex Shredder\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Target player mills a card. (They put the top card of their library into their graveyard.)\\n{5}, {T}, Sacrifice this artifact: Return target card from your graveyard to your hand.\"},{\"id\":4,\"name\":\"Golgari Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {B} or {G}.\\n{B}{G}: This artifact becomes a 2/2 black and green Insect artifact creature with deathtouch until end of turn.\"},{\"id\":5,\"name\":\"Izzet Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {U} or {R}.\\n{U}{R}: Until end of turn, this artifact becomes a 2/1 blue and red Elemental artifact creature.\\nWhenever this artifact deals combat damage to a player, you may draw a card. If you do, discard a card.\"},{\"id\":6,\"name\":\"Pithing Needle\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose a card name.\\nActivated abilities of sources with the chosen name can't be activated unless they're mana abilities.\"},{\"id\":7,\"name\":\"Rakdos Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {B} or {R}.\\n{B}{R}: This artifact becomes a 3/1 black and red Devil artifact creature with first strike until end of turn.\"},{\"id\":8,\"name\":\"Selesnya Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {G} or {W}.\\n{G}{W}: This artifact becomes a 3/3 green and white Wolf artifact creature until end of turn.\"},{\"id\":9,\"name\":\"Street Sweeper\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Whenever this creature attacks, destroy all Auras attached to target land.\"},{\"id\":10,\"name\":\"Tablet of the Guilds\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"As this artifact enters, choose two colors.\\nWhenever you cast a spell, if it's at least one of the chosen colors, you gain 1 life for each of the chosen colors it is.\"},{\"id\":11,\"name\":\"Volatile Rig\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Trample\\nThis creature attacks each combat if able.\\nWhenever this creature is dealt damage, flip a coin. If you lose the flip, sacrifice this creature.\\nWhen this creature dies, flip a coin. If you lose the flip, it deals 4 damage to each creature and each player.\"},{\"id\":12,\"name\":\"Azorius Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {U}.\"},{\"id\":13,\"name\":\"Blood Crypt\",\"manaCost\":\"\",\"typeLine\":\"Land — Swamp Mountain\",\"text\":\"({T}: Add {B} or {R}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":14,\"name\":\"Golgari Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {G}.\"},{\"id\":15,\"name\":\"Grove of the Guardian\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{3}{G}{W}, {T}, Tap two untapped creatures you control, Sacrifice this land: Create an 8/8 green and white Elemental creature token with vigilance.\"},{\"id\":16,\"name\":\"Hallowed Fountain\",\"manaCost\":\"\",\"typeLine\":\"Land — Plains Island\",\"text\":\"({T}: Add {W} or {U}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":17,\"name\":\"Izzet Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {R}.\"},{\"id\":18,\"name\":\"Overgrown Tomb\",\"manaCost\":\"\",\"typeLine\":\"Land — Swamp Forest\",\"text\":\"({T}: Add {B} or {G}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":19,\"name\":\"Rakdos Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {R}.\"},{\"id\":20,\"name\":\"Rogue's Passage\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{4}, {T}: Target creature can't be blocked this turn.\"},{\"id\":21,\"name\":\"Selesnya Guildgate\",\"manaCost\":\"\",\"typeLine\":\"Land — Gate\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {W}.\"},{\"id\":22,\"name\":\"Steam Vents\",\"manaCost\":\"\",\"typeLine\":\"Land — Island Mountain\",\"text\":\"({T}: Add {U} or {R}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":23,\"name\":\"Temple Garden\",\"manaCost\":\"\",\"typeLine\":\"Land — Forest Plains\",\"text\":\"({T}: Add {G} or {W}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":24,\"name\":\"Transguild Promenade\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, sacrifice it unless you pay {1}.\\n{T}: Add one mana of any color.\"},{\"id\":25,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"fixing\"]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1086,
+      "cacheCreationInputTokens": 32405,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7565490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7565490000000001,
+      "pricedUsd": 0.756549,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.756549 and its own usage prices at $0.756549"
+    }
+  }
+}

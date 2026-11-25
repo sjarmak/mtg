@@ -1,0 +1,161 @@
+{
+  "key": "055dabe0db0c00e3e4a39cbb431e3b45",
+  "recordedAt": "2026-11-22T21:29:49.937Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ranger's Guile\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +1/+1 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":2,\"name\":\"Somberwald Spider\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\\nMorbid — This creature enters with two +1/+1 counters on it if a creature died this turn.\"},{\"id\":3,\"name\":\"Spider Spawning\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a 1/2 green Spider creature token with reach for each creature card in your graveyard.\\nFlashback {6}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":4,\"name\":\"Spidery Grasp\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature. It gets +2/+4 and gains reach until end of turn. (It can block creatures with flying.)\"},{\"id\":5,\"name\":\"Splinterfright\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Trample\\nSplinterfright's power and toughness are each equal to the number of creature cards in your graveyard.\\nAt the beginning of your upkeep, mill two cards. (Put the top two cards of your library into your graveyard.)\"},{\"id\":6,\"name\":\"Travel Preparations\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on each of up to two target creatures.\\nFlashback {1}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":7,\"name\":\"Tree of Redemption\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Plant\",\"text\":\"Defender\\n{T}: Exchange your life total with this creature's toughness.\"},{\"id\":8,\"name\":\"Ulvenwald Mystics\",\"manaCost\":null,\"typeLine\":\"Creature — Human Shaman Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Ulvenwald Mystics\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Human Shaman Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Ulvenwald Primordials\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"{G}: Regenerate this creature.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":9,\"name\":\"Villagers of Estwald\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Villagers of Estwald\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"At the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Howlpack of Estwald\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"At the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":10,\"name\":\"Woodland Sleuth\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Morbid — When this creature enters, if a creature died this turn, return a creature card at random from your graveyard to your hand.\"},{\"id\":11,\"name\":\"Wreath of Geists\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +X/+X, where X is the number of creature cards in your graveyard.\"},{\"id\":12,\"name\":\"Evil Twin\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield, except it has \\\"{U}{B}, {T}: Destroy target creature with the same name as this creature.\\\"\"},{\"id\":13,\"name\":\"Geist of Saint Traft\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Legendary Creature — Spirit Cleric\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nWhenever Geist of Saint Traft attacks, create a 4/4 white Angel creature token with flying that's tapped and attacking. Exile that token at end of combat.\"},{\"id\":14,\"name\":\"Grimgrin, Corpse-Born\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Legendary Creature — Zombie Warrior\",\"text\":\"Grimgrin enters tapped and doesn't untap during your untap step.\\nSacrifice another creature: Untap Grimgrin and put a +1/+1 counter on it.\\nWhenever Grimgrin attacks, destroy target creature defending player controls, then put a +1/+1 counter on Grimgrin.\"},{\"id\":15,\"name\":\"Olivia Voldaren\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Legendary Creature — Vampire\",\"text\":\"Flying\\n{1}{R}: Olivia Voldaren deals 1 damage to another target creature. That creature becomes a Vampire in addition to its other types. Put a +1/+1 counter on Olivia Voldaren.\\n{3}{B}{B}: Gain control of target Vampire for as long as you control Olivia Voldaren.\"},{\"id\":16,\"name\":\"Blazing Torch\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature can't be blocked by Vampires or Zombies.\\nEquipped creature has \\\"{T}, Sacrifice Blazing Torch: Blazing Torch deals 2 damage to any target.\\\"\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":17,\"name\":\"Butcher's Cleaver\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +3/+0.\\nAs long as equipped creature is a Human, it has lifelink.\\nEquip {3}\"},{\"id\":18,\"name\":\"Cellar Door\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: Target player puts the bottom card of their library into their graveyard. If it's a creature card, you create a 2/2 black Zombie creature token.\"},{\"id\":19,\"name\":\"Cobbled Wings\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has flying.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":20,\"name\":\"Creepy Doll\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Indestructible\\nWhenever this creature deals combat damage to a creature, flip a coin. If you win the flip, destroy that creature.\"},{\"id\":21,\"name\":\"Demonmail Hauberk\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +4/+2.\\nEquip—Sacrifice a creature.\"},{\"id\":22,\"name\":\"Galvanic Juggernaut\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Juggernaut\",\"text\":\"This creature attacks each combat if able.\\nThis creature doesn't untap during your untap step.\\nWhenever another creature dies, untap this creature.\"},{\"id\":23,\"name\":\"Geistcatcher's Rig\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature enters, you may have it deal 4 damage to target creature with flying.\"},{\"id\":24,\"name\":\"Ghoulcaller's Bell\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Each player mills a card.\"},{\"id\":25,\"name\":\"Graveyard Shovel\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{2}, {T}: Target player exiles a card from their graveyard. If it's a creature card, you gain 2 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1072,
+      "cacheCreationInputTokens": 33068,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7691089999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7691089999999999,
+      "pricedUsd": 0.769109,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.769109 and its own usage prices at $0.769109"
+    }
+  }
+}

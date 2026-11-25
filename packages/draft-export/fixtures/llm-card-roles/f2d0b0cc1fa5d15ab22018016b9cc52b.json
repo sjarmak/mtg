@@ -1,0 +1,161 @@
+{
+  "key": "f2d0b0cc1fa5d15ab22018016b9cc52b",
+  "recordedAt": "2026-11-22T22:29:12.775Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Galvanic Arc\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, it deals 3 damage to any target.\\nEnchanted creature has first strike.\"},{\"id\":2,\"name\":\"Goblin Fire Fiend\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Haste\\nThis creature must be blocked if able.\\n{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":3,\"name\":\"Goblin Spelunkers\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Mountainwalk (This creature can't be blocked as long as defending player controls a Mountain.)\"},{\"id\":4,\"name\":\"Greater Forgeling\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{1}{R}: This creature gets +3/-3 until end of turn.\"},{\"id\":5,\"name\":\"Hammerfist Giant\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"{T}: This creature deals 4 damage to each creature without flying and each player.\"},{\"id\":6,\"name\":\"Hunted Dragon\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, haste\\nWhen this creature enters, target opponent creates three 2/2 white Knight creature tokens with first strike.\"},{\"id\":7,\"name\":\"Incite Hysteria\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Radiance — Until end of turn, target creature and each other creature that shares a color with it gain \\\"This creature can't block.\\\"\"},{\"id\":8,\"name\":\"Indentured Oaf\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Prevent all damage that this creature would deal to red creatures.\"},{\"id\":9,\"name\":\"Instill Furor\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"At the beginning of your end step, sacrifice this creature unless it attacked this turn.\\\"\"},{\"id\":10,\"name\":\"Mindmoil\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a spell, put the cards in your hand on the bottom of your library in any order, then draw that many cards.\"},{\"id\":11,\"name\":\"Molten Sentry\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"As this creature enters, flip a coin. If the coin comes up heads, this creature enters as a 5/2 creature with haste. If it comes up tails, this creature enters as a 2/5 creature with defender.\"},{\"id\":12,\"name\":\"Ordruun Commando\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Minotaur Soldier\",\"text\":\"{W}: Prevent the next 1 damage that would be dealt to this creature this turn.\"},{\"id\":13,\"name\":\"Rain of Embers\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Rain of Embers deals 1 damage to each creature and each player.\"},{\"id\":14,\"name\":\"Reroute\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Change the target of target activated ability with a single target. (Mana abilities can't be targeted.)\\nDraw a card.\"},{\"id\":15,\"name\":\"Sabertooth Alley Cat\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Cat\",\"text\":\"This creature attacks each combat if able.\\n{1}{R}: Creatures without defender can't block this creature this turn.\"},{\"id\":16,\"name\":\"Seismic Spike\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Add {R}{R}.\"},{\"id\":17,\"name\":\"Sell-Sword Brute\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Mercenary\",\"text\":\"When this creature dies, it deals 2 damage to you.\"},{\"id\":18,\"name\":\"Smash\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact.\\nDraw a card.\"},{\"id\":19,\"name\":\"Sparkmage Apprentice\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, it deals 1 damage to any target.\"},{\"id\":20,\"name\":\"Stoneshaker Shaman\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"At the beginning of each player's end step, that player sacrifices an untapped land of their choice.\"},{\"id\":21,\"name\":\"Surge of Zeal\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Radiance — Target creature and each other creature that shares a color with it gain haste until end of turn.\"},{\"id\":22,\"name\":\"Torpid Moloch\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"Defender (This creature can't attack.)\\nSacrifice three lands: This creature loses defender until end of turn.\"},{\"id\":23,\"name\":\"Viashino Fangtail\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Lizard Warrior\",\"text\":\"{T}: This creature deals 1 damage to any target.\"},{\"id\":24,\"name\":\"Viashino Slasher\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Lizard Warrior\",\"text\":\"{R}: This creature gets +1/-1 until end of turn.\"},{\"id\":25,\"name\":\"Warp World\",\"manaCost\":\"{5}{R}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player shuffles all permanents they own into their library, then reveals that many cards from the top of their library. Each player puts all artifact, creature, and land cards revealed this way onto the battlefield, then does the same for enchantment cards, then puts all cards revealed this way that weren't put onto the battlefield on the bottom of their library.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1420,
+      "cacheCreationInputTokens": 32305,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7712490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7712490000000001,
+      "pricedUsd": 0.771249,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.771249 and its own usage prices at $0.771249"
+    }
+  }
+}

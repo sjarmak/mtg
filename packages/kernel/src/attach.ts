@@ -325,15 +325,40 @@ export function attachAuraTo(trace: Trace, auraOid: ObjectId, host: ObjectId): T
   });
 }
 
+const ATTACHED_SOURCES = new WeakMap<GameState, ReadonlyMap<ObjectId, readonly ObjectId[]>>();
+
+/**
+ * The battlefield permanents attached to `host`, in battlefield order.
+ *
+ * Combat asks about every creature's attachments, and each question used to
+ * walk the whole battlefield, so an attack declaration on a board of thousands
+ * paid the creatures times the board (#309). The index is a pure function of an
+ * immutable state, so it is built once per state.
+ */
+function attachedSources(state: GameState, host: ObjectId): readonly ObjectId[] {
+  let index = ATTACHED_SOURCES.get(state);
+  if (index === undefined) {
+    const built = new Map<ObjectId, ObjectId[]>();
+    for (const oid of state.battlefield) {
+      const attachedTo = state.objects[oid]?.attachedTo;
+      if (attachedTo === undefined) continue;
+      const sources = built.get(attachedTo);
+      if (sources === undefined) built.set(attachedTo, [oid]);
+      else sources.push(oid);
+    }
+    index = built;
+    ATTACHED_SOURCES.set(state, index);
+  }
+  return index.get(host) ?? [];
+}
+
 /** True when a battlefield Aura attached to `host` prints this restriction. */
 export function hasAuraModification(
   state: GameState,
   host: ObjectId,
   kind: AuraModification['kind'],
 ): boolean {
-  return state.battlefield.some((oid) => {
-    const source = state.objects[oid];
-    if (source === undefined || source.attachedTo !== host) return false;
+  return attachedSources(state, host).some((oid) => {
     const card = copiableValuesOf(state, oid);
     return isAuraCard(card) && card.aura.modifications.some((modification) => modification.kind === kind);
   });
@@ -341,9 +366,7 @@ export function hasAuraModification(
 
 /** Whether the attached Aura grants Urban Burgeoning's extra untap action. */
 export function hasAuraOtherPlayerUntap(state: GameState, host: ObjectId): boolean {
-  return state.battlefield.some((oid) => {
-    const source = state.objects[oid];
-    if (source === undefined || source.attachedTo !== host) return false;
+  return attachedSources(state, host).some((oid) => {
     const card = copiableValuesOf(state, oid);
     return isAuraCard(card) && card.aura.untapsDuringEachOtherPlayersUntapStep === true;
   });
@@ -355,9 +378,7 @@ export function hasAttachmentModification(
   host: ObjectId,
   kind: AuraModification['kind'] | AttachModification['kind'],
 ): boolean {
-  return state.battlefield.some((oid) => {
-    const source = state.objects[oid];
-    if (source === undefined || source.attachedTo !== host) return false;
+  return attachedSources(state, host).some((oid) => {
     const card = copiableValuesOf(state, oid);
     if (isAuraCard(card)) {
       return card.aura.modifications.some((modification) => modification.kind === kind);

@@ -1,0 +1,161 @@
+{
+  "key": "14b4f05993d0a55e536bf6b67eac2ae2",
+  "recordedAt": "2026-11-22T21:53:14.892Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Path of Bravery\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"As long as your life total is greater than or equal to your starting life total, creatures you control get +1/+1.\\nWhenever one or more creatures you control attack, you gain life equal to the number of attacking creatures.\"},{\"id\":2,\"name\":\"Pay No Heed\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all damage a source of your choice would deal this turn.\"},{\"id\":3,\"name\":\"Pillarfield Ox\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Ox\",\"text\":\"\"},{\"id\":4,\"name\":\"Planar Cleansing\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all nonland permanents.\"},{\"id\":5,\"name\":\"Sentinel Sliver\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control have vigilance. (Attacking doesn't cause them to tap.)\"},{\"id\":6,\"name\":\"Seraph of the Sword\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nPrevent all combat damage that would be dealt to this creature.\"},{\"id\":7,\"name\":\"Serra Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":8,\"name\":\"Show of Valor\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+4 until end of turn.\"},{\"id\":9,\"name\":\"Siege Mastodon\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"\"},{\"id\":10,\"name\":\"Silence\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Your opponents can't cast spells this turn.\"},{\"id\":11,\"name\":\"Solemn Offering\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact or enchantment. You gain 4 life.\"},{\"id\":12,\"name\":\"Soulmender\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}: You gain 1 life.\"},{\"id\":13,\"name\":\"Steelform Sliver\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Sliver\",\"text\":\"Sliver creatures you control get +0/+1.\"},{\"id\":14,\"name\":\"Stonehorn Chanter\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Rhino Cleric\",\"text\":\"{5}{W}: This creature gains vigilance and lifelink until end of turn. (Attacking doesn't cause it to tap. Damage dealt by it also causes you to gain that much life.)\"},{\"id\":15,\"name\":\"Suntail Hawk\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\"},{\"id\":16,\"name\":\"Wall of Swords\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender (This creature can't attack.)\\nFlying\"},{\"id\":17,\"name\":\"Air Servant\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\n{2}{U}: Tap target creature with flying.\"},{\"id\":18,\"name\":\"Archaeomancer\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, return target instant or sorcery card from your graveyard to your hand.\"},{\"id\":19,\"name\":\"Armored Cancrix\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Crab\",\"text\":\"\"},{\"id\":20,\"name\":\"Cancel\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell.\"},{\"id\":21,\"name\":\"Claustrophobia\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, tap enchanted creature.\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":22,\"name\":\"Clone\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield.\"},{\"id\":23,\"name\":\"Colossal Whale\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Whale\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nWhenever this creature attacks, you may exile target creature defending player controls until this creature leaves the battlefield. (That creature returns under its owner's control.)\"},{\"id\":24,\"name\":\"Coral Merfolk\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk\",\"text\":\"\"},{\"id\":25,\"name\":\"Dismiss into Dream\",\"manaCost\":\"{6}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Each creature your opponents control is an Illusion in addition to its other types and has \\\"When this creature becomes the target of a spell or ability, sacrifice it.\\\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1140,
+      "cacheCreationInputTokens": 32003,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.751209,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.751209,
+      "pricedUsd": 0.751209,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.751209 and its own usage prices at $0.751209"
+    }
+  }
+}

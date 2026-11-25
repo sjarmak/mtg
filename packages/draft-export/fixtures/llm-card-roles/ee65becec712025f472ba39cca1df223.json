@@ -1,0 +1,161 @@
+{
+  "key": "ee65becec712025f472ba39cca1df223",
+  "recordedAt": "2026-11-22T22:25:49.978Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Reckless Fireweaver\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever an artifact you control enters, this creature deals 1 damage to each opponent.\"},{\"id\":2,\"name\":\"Renegade Tactics\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature can't block this turn.\\nDraw a card.\"},{\"id\":3,\"name\":\"Ruinous Gremlin\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"{2}{R}, Sacrifice this creature: Destroy target artifact.\"},{\"id\":4,\"name\":\"Salivating Gremlins\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"Whenever an artifact you control enters, this creature gets +2/+0 and gains trample until end of turn.\"},{\"id\":5,\"name\":\"Skyship Stalker\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Cat Dragon\",\"text\":\"Flying\\n{R}: This creature gets +1/+0 until end of turn.\\n{R}: This creature gains first strike until end of turn.\\n{R}: This creature gains haste until end of turn.\"},{\"id\":6,\"name\":\"Spark of Creativity\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose target creature. Exile the top card of your library. You may have Spark of Creativity deal damage to that creature equal to the exiled card's mana value. If you don't, you may play that card until end of turn.\"},{\"id\":7,\"name\":\"Speedway Fanatic\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Pilot\",\"text\":\"Haste\\nWhenever this creature crews a Vehicle, that Vehicle gains haste until end of turn.\"},{\"id\":8,\"name\":\"Spireside Infiltrator\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Whenever this creature becomes tapped, it deals 1 damage to each opponent.\"},{\"id\":9,\"name\":\"Spontaneous Artist\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"When this creature enters, you get {E} (an energy counter).\\nPay {E}: Target creature gains haste until end of turn.\"},{\"id\":10,\"name\":\"Start Your Engines\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Vehicles you control become artifact creatures until end of turn. Creatures you control get +2/+0 until end of turn.\"},{\"id\":11,\"name\":\"Territorial Gorger\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"Trample\\nWhenever you get one or more {E} (energy counters), this creature gets +2/+2 until end of turn.\"},{\"id\":12,\"name\":\"Terror of the Fairgrounds\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"\"},{\"id\":13,\"name\":\"Thriving Grubs\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Gremlin\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":14,\"name\":\"Wayward Giant\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Giant\",\"text\":\"Menace\"},{\"id\":15,\"name\":\"Welding Sparks\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Welding Sparks deals X damage to target creature, where X is 3 plus the number of artifacts you control.\"},{\"id\":16,\"name\":\"Appetite for the Unnatural\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment. You gain 2 life.\"},{\"id\":17,\"name\":\"Arborback Stomper\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Trample\\nWhen this creature enters, you gain 5 life.\"},{\"id\":18,\"name\":\"Architect of the Untamed\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Artificer Druid\",\"text\":\"Landfall — Whenever a land you control enters, you get {E} (an energy counter).\\nPay eight {E}: Create a 6/6 colorless Beast artifact creature token.\"},{\"id\":19,\"name\":\"Armorcraft Judge\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Artificer\",\"text\":\"When this creature enters, draw a card for each creature you control with a +1/+1 counter on it.\"},{\"id\":20,\"name\":\"Attune with Aether\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, reveal it, put it into your hand, then shuffle. You get {E}{E} (two energy counters).\"},{\"id\":21,\"name\":\"Blossoming Defense\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +2/+2 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)\"},{\"id\":22,\"name\":\"Bristling Hydra\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Hydra\",\"text\":\"When this creature enters, you get {E}{E}{E} (three energy counters).\\nPay {E}{E}{E}: Put a +1/+1 counter on this creature. It gains hexproof until end of turn.\"},{\"id\":23,\"name\":\"Commencement of Festivities\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Prevent all combat damage that would be dealt to players this turn.\"},{\"id\":24,\"name\":\"Cowl Prowler\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"},{\"id\":25,\"name\":\"Creeping Mold\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target artifact, enchantment, or land.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 964,
+      "cacheCreationInputTokens": 32283,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.748009,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.748009,
+      "pricedUsd": 0.748009,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.748009 and its own usage prices at $0.748009"
+    }
+  }
+}

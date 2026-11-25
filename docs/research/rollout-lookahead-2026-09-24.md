@@ -98,3 +98,63 @@ continuation.
 
 No engine or DSL source, Forge integration, sweep roster, or balance baseline
 changed.
+
+## Combat-only rollout, 2026-11-23
+
+**Question.** Does the fair rollout help when it refines only attack and block
+declarations, and plays greedy exactly everywhere else?
+
+**Why combat.** A privileged headroom diagnostic replayed sampled greedy
+decisions with alternatives from the true state, greedy in both seats, on The
+flagship set's 229-card pool with the balance gate's ten decks. Some
+alternative did strictly better at 1.5% of every-eighth real choice over 30
+games (0.6% at a pass of priority), and at 13 of 172 attack declarations (7.6%)
+and 11 of 86 block declarations (12.8%) over 20 games. It reads the hidden cards
+and takes the best of several futures, so the rates are a ceiling; the useful
+fact is that combat carries roughly ten times the room a priority stop does. A
+census over 60 greedy games on each of the three balance pools put priority,
+attacks, blocks and mulligans at about 95% of the decisions with more than one
+option.
+
+**Policy.** `COMBAT_ROLLOUT_CONFIG` in `packages/sim/src/rollout-bot.ts`: the
+default rollout configuration with `decisionKinds` set to `declareAttackers`
+and `declareBlockers`. The same seeded determinization, candidate cap, two
+rollouts per candidate and three-turn horizon apply. `decisionKinds` is
+optional and absent from `DEFAULT_ROLLOUT_CONFIG`, so the policy measured
+above is unchanged.
+
+**Result.** 400 games per population, seats alternated, each candidate arm
+beside a greedy mirror on the same seeds. Draws count as non-wins.
+
+| Population | Policy | Candidate-reference-draw | Win share | Wilson 95% | Departures/game | ms/game |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| fixture decks | combat rollout | 181-203-16 | 45.25% | 40.4%-50.1% | 3.520 | 1,484.5 |
+| fixture decks | greedy mirror | 200-195-5 | 50.00% | 45.1%-54.9% | 0 | 80.3 |
+| the flagship set, 229 cards | combat rollout | 195-203-2 | 48.75% | 43.9%-53.6% | 2.545 | 2,473.7 |
+| the flagship set, 229 cards | greedy mirror | 206-194-0 | 51.50% | 46.6%-56.4% | 0 | 125.1 |
+
+The fixture population is `playHeadToHead`'s schedule at seed
+`native-action-q/holdout-head-to-head/v1`, the stream of the table above; the
+mirror reproduced that table's 200-195-5 exactly. the flagship set population
+plays each pairing of the gate's ten decks in both seats, and samples the
+opponent's concealed cards from the set's cards plus the five basic lands. Its
+slowest candidate game took 37 seconds, against greedy's 0.8.
+
+**Answer: no.** Neither population shows a gain, and both point estimates sit
+below their mirror. Restricting the rollout to combat costs less than the full
+rollout's 42.5% on the fixture stream, but a three-turn greedy continuation
+scored by `evaluateState` does not recover the room the privileged diagnostic
+found. The configuration is kept as a recorded negative arm. An outcome-scored
+variant (play to the end of the game and score the result) is the untried
+next step.
+
+**A real defect found on the way.** When the kernel stages an attack
+declaration one creature at a time (`combat.attacksSettled`), greedy rebuilt the
+whole declaration and was refused with "o17 is already attacking and cannot be
+taken back". It is the attack half of the staged-block defect fixed on
+2026-09-15. Greedy now answers mid-sequence with the offered option nearest its
+plan (`decideAttacks` in `packages/sim/src/greedy-bot.ts`), and
+`packages/sim/test/greedy-staged-blocks.test.ts` replays a game that failed
+without it. Greedy against itself answered no attack mid-sequence in 4,494
+attack declarations across the three balance pools, so the balance gate's
+games are unaffected.

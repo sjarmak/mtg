@@ -113,7 +113,7 @@ generalized bridge protocol 2. The commands that built it:
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ths/probes/ths-scenario-probes-v1-config.json --out out/ths/scenario-probes-v1 --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/ths/scenario-probes-v1 --inventory out/ths/decision-inventory-v2/inventory.json --out out/ths/script-qualifications-v1
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ths/probes/ths-match-probes-v1-config.json --out out/ths/match-probes-v1 --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ths/ths-limited-format-v1.json --catalog packages/data/data/ths/ths-printed-catalog-v1.json --qualifications out/ths/script-qualifications-v1 --match-probes out/ths/match-probes-v1 --out packages/data/data/ths/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ths/ths-limited-format-v1.json --catalog packages/data/data/ths/ths-printed-catalog-v1.json --qualifications out/ths/script-qualifications-v1 --match-probes out/ths/match-probes-v1 --out packages/data/data/ths/play-admission
 ```
 
 The two `printed-probe-cli.ts` runs boot Forge and take the host Forge lock
@@ -210,7 +210,7 @@ change, use output `play-admission-v9/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `ths` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v8`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher (`packages/ui/tools/play.ts`) reads every supported entry at boot and
 `startBackendService` admits all of them behind one Forge identity.
 

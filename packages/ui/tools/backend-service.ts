@@ -9,7 +9,8 @@ import { LEGACY_CUBE_FORMAT } from '../src/routes/legacy-cube/model';
 import { discoverForgeHome } from './forge-home';
 import { isolatedObservedBackend } from './isolated-observed-backend';
 import { admitPrintedBackends } from './admitted-printed-backend';
-import type { PrintedBackendAdmissionInput } from './admitted-printed-backend';
+import { recordUnreviewedChoices } from './unreviewed-choices';
+import type { PrintedBackendAdmissionInput, RefusedPrintedBackend } from './admitted-printed-backend';
 import { formatObservedBackend } from './format-observed-backend';
 import { bundleInstalledForgeAdapter } from './installed-adapter-bundle';
 import { createPlayAdmissionRoot } from './play-admission-root';
@@ -23,7 +24,19 @@ export interface BackendService {
    * is the state the health probe reports as no observed arm.
    */
   readonly observed: ObservedFormats | null;
+  /**
+   * Every requested printed format this service did not admit, with the
+   * sentence a player reads in place of the Play button. The registry says a
+   * format is supported when an admission is installed; only this verdict says
+   * whether the runtime that started can honor it (#16, #89).
+   */
+  readonly withheld: readonly WithheldPrintedFormat[];
   readonly close: () => Promise<void>;
+}
+
+export interface WithheldPrintedFormat {
+  readonly formatId: string;
+  readonly reason: string;
 }
 
 export interface ObservedFormats {
@@ -49,19 +62,42 @@ function assertPort(port: number, minimum: number): void {
 
 type PrintedAdmissionResult = Awaited<ReturnType<typeof admitPrintedBackends>>[number];
 
-function describeAdmission(admission: PrintedAdmissionResult): string {
+function describeAdmission(admission: PrintedAdmissionResult, formatId: string): string {
   return admission.admitted
     ? `\nPrinted format ${admission.subject.formatId}: verified runtime admission loaded.`
-    : `\nPrinted format admission refused: ${JSON.stringify(admission.reasons)}`;
+    : `\nPrinted format ${formatId} admission refused: ${JSON.stringify(admission.reasons)}`;
+}
+
+export const RUNTIME_UNAVAILABLE_REASON =
+  'Play is off: this lab started without the installed Forge runtime and compiled bridge.';
+export const RUNTIME_MISMATCH_REASON =
+  'Play is off: the installed admission was built against a different Forge build, bridge or adapter than this lab is running.';
+export const MISSING_EVIDENCE_REASON = 'Play is off: no admission evidence is installed for this format.';
+
+/** The player-facing sentence for a refusal; the codes stay in the launcher log. */
+export function withheldReason(refused: RefusedPrintedBackend): string {
+  if (refused.reasons.some((reason) => reason.code === 'runtime-mismatch')) return RUNTIME_MISMATCH_REASON;
+  if (refused.reasons.some((reason) => reason.code === 'missing-evidence')) return MISSING_EVIDENCE_REASON;
+  const codes = [...new Set(refused.reasons.map((reason) => reason.code))].join(', ');
+  return `Play is off: the installed admission does not verify (${codes}).`;
 }
 
 export interface StartBackendServiceOptions {
   readonly repoRoot: string;
   readonly port: number;
-  /** Trusted local inputs only; the service verifies each before adding its route. */
-  readonly printedAdmissions?: readonly PrintedBackendAdmissionInput[];
+  /**
+   * Trusted local inputs only; the service verifies each before adding its route.
+   * `formatId` is the registry's id, so a refusal can say which format it withheld.
+   */
+  readonly printedAdmissions?: readonly (PrintedBackendAdmissionInput & { readonly formatId: string })[];
   /** Where a finished gateway session is recorded; absent, nothing is. */
   readonly recorder?: GameplayRecorder | undefined;
+  /**
+   * Where the computer's answers to unreviewed choices are logged (#66). Present, a
+   * Commander or Momir game lets Forge's AI answer a choice the bridge has no reviewed
+   * screen for, and logs it here; absent, such a choice ends the game.
+   */
+  readonly unreviewedChoiceLog?: string | undefined;
 }
 
 export async function startBackendService(options: StartBackendServiceOptions): Promise<BackendService> {
@@ -112,6 +148,9 @@ async function buildReadyBackendService(
       : '';
   let gateway: RunningBackendGateway;
   let observed: ObservedFormats | null = null;
+  let withheld: readonly WithheldPrintedFormat[] = admissionRuntimeReady
+    ? []
+    : requested.map((admission) => ({ formatId: admission.formatId, reason: RUNTIME_UNAVAILABLE_REASON }));
   try {
     forge = forgeFactory();
     const legacy = forge === null ? null : isolatedObservedBackend(forge, forgeFactory);
@@ -131,7 +170,12 @@ async function buildReadyBackendService(
         bridge: { kind: 'compiled' as const, path: compiled.classDirectory },
         adapterBundlePath,
       };
-      admissions = await admitPrintedBackends({ runtime, outputParent, admissions: requested });
+      admissions = await admitPrintedBackends({
+        runtime,
+        outputParent,
+        admissions: requested,
+        ...(options.unreviewedChoiceLog === undefined ? {} : { unreviewedChoices: 'computer' as const }),
+      });
       const admittedOwners = admissions.flatMap((admission) =>
         admission.admitted ? [admission.backend] : [],
       );
@@ -146,14 +190,26 @@ async function buildReadyBackendService(
     const admitted = admissions.flatMap((admission) => (admission.admitted ? [admission] : []));
     const entries = [
       ...(legacy === null ? [] : [{ format: LEGACY_CUBE_FORMAT, backend: legacy }]),
-      ...admitted.map((admission) => ({ format: admission.subject.formatId, backend: admission.backend })),
+      ...admitted.map((admission) => ({
+        format: admission.subject.formatId,
+        backend:
+          options.unreviewedChoiceLog === undefined
+            ? admission.backend
+            : recordUnreviewedChoices(admission.backend, options.unreviewedChoiceLog),
+      })),
     ];
     // Rejects a duplicate format route and a backend identity mismatch.
     const composite = entries.length === 0 ? null : formatObservedBackend(entries);
     const installed = composite === null ? [] : [composite];
     observed =
       composite === null ? null : { backend: composite, formats: entries.map((entry) => entry.format) };
-    admissionMessage += admissions.map(describeAdmission).join('');
+    // `admitPrintedBackends` answers in the order it was asked.
+    admissionMessage += admissions
+      .map((admission, index) => describeAdmission(admission, requested[index]!.formatId))
+      .join('');
+    withheld = admissions.flatMap((admission, index) =>
+      admission.admitted ? [] : [{ formatId: requested[index]!.formatId, reason: withheldReason(admission) }],
+    );
     await starting.close();
     gateway = await serveBackendGateway({
       port: starting.port,
@@ -186,6 +242,7 @@ async function buildReadyBackendService(
   return {
     gateway,
     observed,
+    withheld,
     message:
       (forge === null
         ? 'Legacy Cube backend: Forge 2.0.14 is not installed; matches will refuse explicitly. Run `npm run forge:install`, or set FORGE_HOME to an existing install.'

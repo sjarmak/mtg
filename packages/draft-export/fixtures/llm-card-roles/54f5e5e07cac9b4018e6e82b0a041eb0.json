@@ -1,0 +1,161 @@
+{
+  "key": "54f5e5e07cac9b4018e6e82b0a041eb0",
+  "recordedAt": "2026-11-22T21:24:41.193Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Kindled Fury\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":2,\"name\":\"Magmaroth\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"At the beginning of your upkeep, put a -1/-1 counter on this creature.\\nWhenever you cast a noncreature spell, remove a -1/-1 counter from this creature.\"},{\"id\":3,\"name\":\"Manticore Eternal\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Zombie Manticore\",\"text\":\"Afflict 3 (Whenever this creature becomes blocked, defending player loses 3 life.)\\nThis creature attacks each combat if able.\"},{\"id\":4,\"name\":\"Neheb, the Eternal\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Legendary Creature — Zombie Minotaur Warrior\",\"text\":\"Afflict 3 (Whenever this creature becomes blocked, defending player loses 3 life.)\\nAt the beginning of each of your postcombat main phases, add {R} for each 1 life your opponents have lost this turn.\"},{\"id\":5,\"name\":\"Open Fire\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Instant\",\"text\":\"Open Fire deals 3 damage to any target.\"},{\"id\":6,\"name\":\"Puncturing Blow\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Puncturing Blow deals 5 damage to target creature. If that creature would die this turn, exile it instead.\"},{\"id\":7,\"name\":\"Sand Strangler\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"When this creature enters, if you control a Desert or there is a Desert card in your graveyard, you may have this creature deal 3 damage to target creature.\"},{\"id\":8,\"name\":\"Thorned Moloch\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nThis creature has first strike as long as it's attacking.\"},{\"id\":9,\"name\":\"Wildfire Eternal\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Zombie Jackal Cleric\",\"text\":\"Afflict 4 (Whenever this creature becomes blocked, defending player loses 4 life.)\\nWhenever this creature attacks and isn't blocked, you may cast an instant or sorcery spell from your hand without paying its mana cost.\"},{\"id\":10,\"name\":\"Ambuscade\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gets +1/+0 until end of turn. It deals damage equal to its power to target creature an opponent controls.\"},{\"id\":11,\"name\":\"Beneath the Sands\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":12,\"name\":\"Bitterbow Sharpshooters\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Jackal Archer\",\"text\":\"Reach, vigilance\"},{\"id\":13,\"name\":\"Devotee of Strength\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Wizard\",\"text\":\"{4}{G}: Target creature gets +2/+2 until end of turn.\"},{\"id\":14,\"name\":\"Dune Diviner\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Cleric\",\"text\":\"{1}, Tap an untapped Desert you control: You gain 1 life.\"},{\"id\":15,\"name\":\"Feral Prowler\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"When this creature dies, draw a card.\"},{\"id\":16,\"name\":\"Frilled Sandwalla\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"{1}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\"},{\"id\":17,\"name\":\"Gift of Strength\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 and gains reach until end of turn.\"},{\"id\":18,\"name\":\"Harrier Naga\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Warrior\",\"text\":\"\"},{\"id\":19,\"name\":\"Hope Tender\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"{1}, {T}: Untap target land.\\n{1}, {T}, Exert this creature: Untap two target lands. (An exerted creature won't untap during your next untap step.)\"},{\"id\":20,\"name\":\"Hour of Promise\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to two land cards, put them onto the battlefield tapped, then shuffle. Then if you control three or more Deserts, create two 2/2 black Zombie creature tokens.\"},{\"id\":21,\"name\":\"Life Goes On\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"You gain 4 life. If a creature died this turn, you gain 8 life instead.\"},{\"id\":22,\"name\":\"Majestic Myriarch\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Chimera\",\"text\":\"Majestic Myriarch's power and toughness are each equal to twice the number of creatures you control.\\nAt the beginning of each combat, this creature gains flying until end of turn if you control a creature with flying. The same is true for first strike, double strike, deathtouch, haste, hexproof, indestructible, lifelink, menace, reach, trample, and vigilance.\"},{\"id\":23,\"name\":\"Nissa's Defeat\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target Forest, green enchantment, or green planeswalker. If that permanent was a Nissa planeswalker, draw a card.\"},{\"id\":24,\"name\":\"Oasis Ritualist\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Snake Druid\",\"text\":\"{T}: Add one mana of any color.\\n{T}, Exert this creature: Add two mana of any one color. (An exerted creature won't untap during your next untap step.)\"},{\"id\":25,\"name\":\"Overcome\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +2/+2 and gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 931,
+      "cacheCreationInputTokens": 32524,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7511789999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7511789999999999,
+      "pricedUsd": 0.751179,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.751179 and its own usage prices at $0.751179"
+    }
+  }
+}

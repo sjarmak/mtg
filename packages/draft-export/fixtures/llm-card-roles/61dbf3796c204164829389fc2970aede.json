@@ -1,0 +1,161 @@
+{
+  "key": "61dbf3796c204164829389fc2970aede",
+  "recordedAt": "2026-11-22T22:31:40.148Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Siege of Towers\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Replicate {1}{R} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nTarget Mountain becomes a 3/1 creature. It's still a land.\"},{\"id\":2,\"name\":\"Skarrgan Firebird\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Bloodthirst 3 (If an opponent was dealt damage this turn, this creature enters with three +1/+1 counters on it.)\\nFlying\\n{R}{R}{R}: Return this card from your graveyard to your hand. Activate only if an opponent was dealt damage this turn.\"},{\"id\":3,\"name\":\"Tin Street Hooligan\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"When this creature enters, if {G} was spent to cast it, destroy target artifact.\"},{\"id\":4,\"name\":\"Battering Wurm\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\nCreatures with power less than this creature's power can't block it.\"},{\"id\":5,\"name\":\"Beastmaster's Magemark\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nCreatures you control that are enchanted get +1/+1.\\nWhenever a creature you control that's enchanted becomes blocked, it gets +1/+1 until end of turn for each creature blocking it.\"},{\"id\":6,\"name\":\"Bioplasm\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Ooze\",\"text\":\"Whenever this creature attacks, exile the top card of your library. If it's a creature card, this creature gets +X/+Y until end of turn, where X is the exiled creature card's power and Y is its toughness.\"},{\"id\":7,\"name\":\"Crash Landing\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature with flying loses flying until end of turn. Crash Landing deals damage to that creature equal to the number of Forests you control.\"},{\"id\":8,\"name\":\"Dryad Sophisticate\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Dryad\",\"text\":\"Nonbasic landwalk (This creature can't be blocked as long as defending player controls a nonbasic land.)\"},{\"id\":9,\"name\":\"Earth Surge\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Each land gets +2/+2 as long as it's a creature.\"},{\"id\":10,\"name\":\"Gatherer of Graces\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"This creature gets +1/+1 for each Aura attached to it.\\nSacrifice an Aura: Regenerate this creature.\"},{\"id\":11,\"name\":\"Ghor-Clan Savage\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Centaur Berserker\",\"text\":\"Bloodthirst 3 (If an opponent was dealt damage this turn, this creature enters with three +1/+1 counters on it.)\"},{\"id\":12,\"name\":\"Gristleback\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Boar Beast\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\nSacrifice this creature: You gain life equal to this creature's power.\"},{\"id\":13,\"name\":\"Gruul Nodorog\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"{R}: This creature gains menace until end of turn. (It can't be blocked except by two or more creatures.)\"},{\"id\":14,\"name\":\"Gruul Scrapper\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"When this creature enters, if {R} was spent to cast it, it gains haste until end of turn.\"},{\"id\":15,\"name\":\"Leyline of Lifeforce\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"If this card is in your opening hand, you may begin the game with it on the battlefield.\\nCreature spells can't be countered.\"},{\"id\":16,\"name\":\"Petrified Wood-Kin\",\"manaCost\":\"{6}{G}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"This spell can't be countered.\\nBloodthirst X (This creature enters with X +1/+1 counters on it, where X is the damage dealt to your opponents this turn.)\\nProtection from instants\"},{\"id\":17,\"name\":\"Predatory Focus\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"You may have creatures you control assign their combat damage this turn as though they weren't blocked.\"},{\"id\":18,\"name\":\"Primeval Light\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all enchantments target player controls.\"},{\"id\":19,\"name\":\"Silhana Ledgewalker\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Rogue\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nThis creature can't be blocked except by creatures with flying.\"},{\"id\":20,\"name\":\"Silhana Starfletcher\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Druid Archer\",\"text\":\"Reach (This creature can block creatures with flying.)\\nAs this creature enters, choose a color.\\n{T}: Add one mana of the chosen color.\"},{\"id\":21,\"name\":\"Skarrgan Pit-Skulk\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\nCreatures with power less than this creature's power can't block it.\"},{\"id\":22,\"name\":\"Starved Rusalka\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"{G}, Sacrifice a creature: You gain 1 life.\"},{\"id\":23,\"name\":\"Wildsize\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 and gains trample until end of turn.\\nDraw a card.\"},{\"id\":24,\"name\":\"Wurmweaver Coil\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant green creature\\nEnchanted creature gets +6/+6.\\n{G}{G}{G}, Sacrifice this Aura: Create a 6/6 green Wurm creature token.\"},{\"id\":25,\"name\":\"Agent of Masks\",\"manaCost\":\"{3}{W}{B}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"At the beginning of your upkeep, each opponent loses 1 life. You gain life equal to the life lost this way.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1399,
+      "cacheCreationInputTokens": 32642,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7769389999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7769389999999999,
+      "pricedUsd": 0.776939,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776939 and its own usage prices at $0.776939"
+    }
+  }
+}

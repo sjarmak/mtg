@@ -1,0 +1,161 @@
+{
+  "key": "a7e6d6e9b40fa3e68bda901d9fbe1fb5",
+  "recordedAt": "2026-11-22T21:36:17.115Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Psychosis Crawler\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"Psychosis Crawler's power and toughness are each equal to the number of cards in your hand.\\nWhenever you draw a card, each opponent loses 1 life.\"},{\"id\":2,\"name\":\"Razorfield Rhino\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Rhino\",\"text\":\"Metalcraft — This creature gets +2/+2 as long as you control three or more artifacts.\"},{\"id\":3,\"name\":\"Rusted Slasher\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"Sacrifice an artifact: Regenerate this creature.\"},{\"id\":4,\"name\":\"Shimmer Myr\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"Flash\\nYou may cast artifact spells as though they had flash.\"},{\"id\":5,\"name\":\"Shriekhorn\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{T}, Remove a charge counter from this artifact: Target player mills two cards.\"},{\"id\":6,\"name\":\"Signal Pest\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact Creature — Pest\",\"text\":\"Battle cry (Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)\\nThis creature can't be blocked except by creatures with flying or reach.\"},{\"id\":7,\"name\":\"Silverskin Armor\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 and is an artifact in addition to its other types.\\nEquip {2}\"},{\"id\":8,\"name\":\"Skinwing\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +2/+2 and has flying.\\nEquip {6}\"},{\"id\":9,\"name\":\"Sphere of the Suns\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters tapped and with three charge counters on it.\\n{T}, Remove a charge counter from this artifact: Add one mana of any color.\"},{\"id\":10,\"name\":\"Spin Engine\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{R}: Target creature can't block this creature this turn.\"},{\"id\":11,\"name\":\"Spine of Ish Sah\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters, destroy target permanent.\\nWhen this artifact is put into a graveyard from the battlefield, return it to its owner's hand.\"},{\"id\":12,\"name\":\"Strandwalker\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +2/+4 and has reach.\\nEquip {4}\"},{\"id\":13,\"name\":\"Sword of Feast and Famine\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has protection from black and from green.\\nWhenever equipped creature deals combat damage to a player, that player discards a card and you untap all lands you control.\\nEquip {2}\"},{\"id\":14,\"name\":\"Tangle Hulk\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Phyrexian Beast\",\"text\":\"{2}{G}: Regenerate this creature.\"},{\"id\":15,\"name\":\"Thopter Assembly\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Thopter\",\"text\":\"Flying\\nAt the beginning of your upkeep, if you control no Thopters other than this creature, return this creature to its owner's hand and create five 1/1 colorless Thopter artifact creature tokens with flying.\"},{\"id\":16,\"name\":\"Titan Forge\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: Put a charge counter on this artifact.\\n{T}, Remove three charge counters from this artifact: Create a 9/9 colorless Golem artifact creature token.\"},{\"id\":17,\"name\":\"Training Drone\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Drone\",\"text\":\"This creature can't attack or block unless it's equipped.\"},{\"id\":18,\"name\":\"Viridian Claw\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 and has first strike.\\nEquip {1}\"},{\"id\":19,\"name\":\"Contested War Zone\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"Whenever a creature deals combat damage to you, that creature's controller gains control of this land.\\n{T}: Add {C}.\\n{1}, {T}: Attacking creatures get +1/+0 until end of turn.\"},{\"id\":20,\"name\":\"Inkmoth Nexus\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{1}: This land becomes a 1/1 Phyrexian Blinkmoth artifact creature with flying and infect until end of turn. It's still a land. (It deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":21,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"},{\"id\":22,\"name\":\"Island\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Island\",\"text\":\"({T}: Add {U}.)\"},{\"id\":23,\"name\":\"Swamp\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Swamp\",\"text\":\"({T}: Add {B}.)\"},{\"id\":24,\"name\":\"Mountain\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Mountain\",\"text\":\"({T}: Add {R}.)\"},{\"id\":25,\"name\":\"Forest\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Forest\",\"text\":\"({T}: Add {G}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1000,
+      "cacheCreationInputTokens": 32359,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7513289999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7513289999999999,
+      "pricedUsd": 0.751329,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.751329 and its own usage prices at $0.751329"
+    }
+  }
+}

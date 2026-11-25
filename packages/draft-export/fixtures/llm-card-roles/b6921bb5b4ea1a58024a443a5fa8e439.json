@@ -1,0 +1,161 @@
+{
+  "key": "b6921bb5b4ea1a58024a443a5fa8e439",
+  "recordedAt": "2026-11-22T22:13:38.888Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Abzan Battle Priest\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Outlast {W} ({W}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has lifelink.\"},{\"id\":2,\"name\":\"Abzan Falconer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Outlast {W} ({W}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has flying.\"},{\"id\":3,\"name\":\"Ainok Bond-Kin\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Dog Soldier\",\"text\":\"Outlast {1}{W} ({1}{W}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has first strike.\"},{\"id\":4,\"name\":\"Alabaster Kirin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Kirin\",\"text\":\"Flying, vigilance\"},{\"id\":5,\"name\":\"Brave the Sands\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control have vigilance.\\nEach creature you control can block an additional creature each combat.\"},{\"id\":6,\"name\":\"Dazzling Ramparts\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\n{1}{W}, {T}: Tap target creature.\"},{\"id\":7,\"name\":\"Defiant Strike\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 until end of turn.\\nDraw a card.\"},{\"id\":8,\"name\":\"End Hostilities\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures and all permanents attached to creatures.\"},{\"id\":9,\"name\":\"Erase\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target enchantment.\"},{\"id\":10,\"name\":\"Feat of Resistance\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Put a +1/+1 counter on target creature you control. It gains protection from the color of your choice until end of turn. (It can't be blocked, targeted, dealt damage, enchanted, or equipped by anything of that color.)\"},{\"id\":11,\"name\":\"Firehoof Cavalry\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"{3}{R}: This creature gets +2/+0 and gains trample until end of turn.\"},{\"id\":12,\"name\":\"Herald of Anafenza\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Outlast {2}{W} ({2}{W}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nWhenever you activate this creature's outlast ability, create a 1/1 white Warrior creature token.\"},{\"id\":13,\"name\":\"High Sentinels of Arashin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Bird Soldier\",\"text\":\"Flying\\nThis creature gets +1/+1 for each other creature you control with a +1/+1 counter on it.\\n{3}{W}: Put a +1/+1 counter on target creature.\"},{\"id\":14,\"name\":\"Jeskai Student\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\"},{\"id\":15,\"name\":\"Kill Shot\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking creature.\"},{\"id\":16,\"name\":\"Mardu Hateblade\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"{B}: This creature gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":17,\"name\":\"Mardu Hordechief\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Raid — When this creature enters, if you attacked this turn, create a 1/1 white Warrior creature token.\"},{\"id\":18,\"name\":\"Master of Pearls\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Morph {3}{W}{W} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, creatures you control get +2/+2 until end of turn.\"},{\"id\":19,\"name\":\"Rush of Battle\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control get +2/+1 until end of turn. Warrior creatures you control gain lifelink until end of turn. (Damage dealt by those Warriors also causes their controller to gain that much life.)\"},{\"id\":20,\"name\":\"Sage-Eye Harrier\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Bird Warrior\",\"text\":\"Flying\\nMorph {3}{W} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":21,\"name\":\"Salt Road Patrol\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Outlast {1}{W} ({1}{W}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\"},{\"id\":22,\"name\":\"Seeker of the Way\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nWhenever you cast a noncreature spell, this creature gains lifelink until end of turn.\"},{\"id\":23,\"name\":\"Siegecraft\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+4.\"},{\"id\":24,\"name\":\"Smite the Monstrous\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power 4 or greater.\"},{\"id\":25,\"name\":\"Suspension Field\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, you may exile target creature with toughness 3 or greater until this enchantment leaves the battlefield. (That creature returns under its owner's control.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 950,
+      "cacheCreationInputTokens": 32542,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7524890000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7524890000000001,
+      "pricedUsd": 0.752489,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.752489 and its own usage prices at $0.752489"
+    }
+  }
+}

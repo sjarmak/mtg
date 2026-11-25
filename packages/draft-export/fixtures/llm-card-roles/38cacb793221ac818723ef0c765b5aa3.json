@@ -1,0 +1,161 @@
+{
+  "key": "38cacb793221ac818723ef0c765b5aa3",
+  "recordedAt": "2026-11-22T22:24:42.252Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Revoke Privileges\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack, block, or crew Vehicles.\"},{\"id\":2,\"name\":\"Servo Exhibition\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 1/1 colorless Servo artifact creature tokens.\"},{\"id\":3,\"name\":\"Skyswirl Harrier\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\"},{\"id\":4,\"name\":\"Skywhaler's Shot\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power 3 or greater. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":5,\"name\":\"Tasseled Dromedary\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Camel\",\"text\":\"\"},{\"id\":6,\"name\":\"Thriving Ibex\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Goat\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":7,\"name\":\"Toolcraft Exemplar\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Dwarf Artificer\",\"text\":\"At the beginning of combat on your turn, if you control an artifact, this creature gets +2/+1 until end of turn. If you control three or more artifacts, it also gains first strike until end of turn.\"},{\"id\":8,\"name\":\"Trusty Companion\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Hyena\",\"text\":\"Vigilance\\nThis creature can't attack alone.\"},{\"id\":9,\"name\":\"Visionary Augmenter\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Dwarf Artificer\",\"text\":\"Fabricate 2 (When this creature enters, put two +1/+1 counters on it or create two 1/1 colorless Servo artifact creature tokens.)\"},{\"id\":10,\"name\":\"Wispweaver Angel\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, you may exile another target creature you control, then return that card to the battlefield under its owner's control.\"},{\"id\":11,\"name\":\"Aether Meltdown\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nEnchant creature or Vehicle\\nWhen this Aura enters, you get {E}{E} (two energy counters).\\nEnchanted creature gets -4/-0.\"},{\"id\":12,\"name\":\"Aether Theorist\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Vedalken Rogue\",\"text\":\"When this creature enters, you get {E}{E}{E} (three energy counters).\\n{T}, Pay {E}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":13,\"name\":\"Aether Tradewinds\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target permanent you control and target permanent you don't control to their owners' hands.\"},{\"id\":14,\"name\":\"Aethersquall Ancient\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Flying\\nAt the beginning of your upkeep, you get {E}{E}{E} (three energy counters).\\nPay eight {E}: Return all other creatures to their owners' hands. Activate only as a sorcery.\"},{\"id\":15,\"name\":\"Ceremonious Rejection\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target colorless spell.\"},{\"id\":16,\"name\":\"Confiscation Coup\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose target artifact or creature. You get {E}{E}{E}{E} (four energy counters), then you may pay an amount of {E} equal to that permanent's mana value. If you do, gain control of it.\"},{\"id\":17,\"name\":\"Curio Vendor\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Vedalken\",\"text\":\"\"},{\"id\":18,\"name\":\"Disappearing Act\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, return a permanent you control to its owner's hand.\\nCounter target spell.\"},{\"id\":19,\"name\":\"Dramatic Reversal\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Untap all nonland permanents you control.\"},{\"id\":20,\"name\":\"Era of Innovation\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an artifact or Artificer you control enters, you may pay {1}. If you do, you get {E}{E} (two energy counters).\\nPay six {E}, Sacrifice this enchantment: Draw three cards.\"},{\"id\":21,\"name\":\"Experimental Aviator\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Flying\\nWhen this creature enters, create two 1/1 colorless Thopter artifact creature tokens with flying.\"},{\"id\":22,\"name\":\"Failed Inspection\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. Draw a card, then discard a card.\"},{\"id\":23,\"name\":\"Gearseeker Serpent\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.)\\n{5}{U}: This creature can't be blocked this turn.\"},{\"id\":24,\"name\":\"Glimmer of Genius\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Scry 2, then draw two cards. You get {E}{E} (two energy counters).\"},{\"id\":25,\"name\":\"Glint-Nest Crane\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nWhen this creature enters, look at the top four cards of your library. You may reveal an artifact card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1101,
+      "cacheCreationInputTokens": 32406,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7573189999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7573189999999999,
+      "pricedUsd": 0.757319,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.757319 and its own usage prices at $0.757319"
+    }
+  }
+}

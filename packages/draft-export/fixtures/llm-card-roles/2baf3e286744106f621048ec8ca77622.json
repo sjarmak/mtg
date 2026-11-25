@@ -1,0 +1,161 @@
+{
+  "key": "2baf3e286744106f621048ec8ca77622",
+  "recordedAt": "2026-11-22T22:35:18.577Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Hide // Seek\",\"manaCost\":\"{R}{W} // {W}{B}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Hide\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Put target artifact or enchantment on the bottom of its owner's library.\"},{\"name\":\"Seek\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Search target opponent's library for a card and exile it. You gain life equal to its mana value. Then that player shuffles.\"}]},{\"id\":2,\"name\":\"Hit // Run\",\"manaCost\":\"{1}{B}{R} // {3}{R}{G}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Hit\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices an artifact or creature of their choice. Hit deals damage to that player equal to that permanent's mana value.\"},{\"name\":\"Run\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Instant\",\"text\":\"Attacking creatures you control get +1/+0 until end of turn for each other attacking creature.\"}]},{\"id\":3,\"name\":\"Odds // Ends\",\"manaCost\":\"{U}{R} // {3}{R}{W}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Odds\",\"manaCost\":\"{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Flip a coin. If it comes up heads, counter target instant or sorcery spell. If it comes up tails, copy that spell and you may choose new targets for the copy.\"},{\"name\":\"Ends\",\"manaCost\":\"{3}{R}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices two attacking creatures of their choice.\"}]},{\"id\":4,\"name\":\"Pure // Simple\",\"manaCost\":\"{1}{R}{G} // {1}{G}{W}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Pure\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target multicolored permanent.\"},{\"name\":\"Simple\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all Auras and Equipment.\"}]},{\"id\":5,\"name\":\"Research // Development\",\"manaCost\":\"{G}{U} // {3}{U}{R}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Research\",\"manaCost\":\"{G}{U}\",\"typeLine\":\"Instant\",\"text\":\"Shuffle up to four cards you own from outside the game into your library.\"},{\"name\":\"Development\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Create a 3/1 red Elemental creature token unless any opponent has you draw a card. Repeat this process two more times.\"}]},{\"id\":6,\"name\":\"Rise // Fall\",\"manaCost\":\"{U}{B} // {B}{R}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Rise\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from a graveyard and target creature on the battlefield to their owners' hands.\"},{\"name\":\"Fall\",\"manaCost\":\"{B}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player reveals two cards at random from their hand, then discards each nonland card revealed this way.\"}]},{\"id\":7,\"name\":\"Supply // Demand\",\"manaCost\":\"{X}{G}{W} // {1}{W}{U}\",\"typeLine\":\"Sorcery // Sorcery\",\"text\":null,\"faces\":[{\"name\":\"Supply\",\"manaCost\":\"{X}{G}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create X 1/1 green Saproling creature tokens.\"},{\"name\":\"Demand\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a multicolored card, reveal it, put it into your hand, then shuffle.\"}]},{\"id\":8,\"name\":\"Trial // Error\",\"manaCost\":\"{W}{U} // {U}{B}\",\"typeLine\":\"Instant // Instant\",\"text\":null,\"faces\":[{\"name\":\"Trial\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return all creatures blocking or blocked by target creature to their owner's hand.\"},{\"name\":\"Error\",\"manaCost\":\"{U}{B}\",\"typeLine\":\"Instant\",\"text\":\"Counter target multicolored spell.\"}]},{\"id\":9,\"name\":\"Azorius Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {W}{U}.\"},{\"id\":10,\"name\":\"Bronze Bombshell\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When a player other than this creature's owner controls it, that player sacrifices it. If the player does, this creature deals 7 damage to the player.\"},{\"id\":11,\"name\":\"Evolution Vat\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: Tap target creature and put a +1/+1 counter on it. Until end of turn, that creature gains \\\"{2}{G}{U}: Double the number of +1/+1 counters on this creature.\\\"\"},{\"id\":12,\"name\":\"Magewright's Stone\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Untap target creature that has an activated ability with {T} in its cost.\"},{\"id\":13,\"name\":\"Muse Vessel\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{3}, {T}: Target player exiles a card from their hand. Activate only as a sorcery.\\n{1}: Choose a card exiled with this artifact. You may play that card this turn.\"},{\"id\":14,\"name\":\"Rakdos Riteknife\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 for each blood counter on this Equipment and has \\\"{T}, Sacrifice a creature: Put a blood counter on Rakdos Riteknife.\\\"\\n{B}{R}, Sacrifice this Equipment: Target player sacrifices a permanent of their choice for each blood counter on this Equipment.\\nEquip {2}\"},{\"id\":15,\"name\":\"Rakdos Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {B}{R}.\"},{\"id\":16,\"name\":\"Simic Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {G}{U}.\"},{\"id\":17,\"name\":\"Skullmead Cauldron\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: You gain 1 life.\\n{T}, Discard a card: You gain 3 life.\"},{\"id\":18,\"name\":\"Transguild Courier\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Transguild Courier is all colors.\"},{\"id\":19,\"name\":\"Walking Archive\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Defender (This creature can't attack.)\\nThis creature enters with a +1/+1 counter on it.\\nAt the beginning of each player's upkeep, that player draws a card for each +1/+1 counter on this creature.\\n{2}{W}{U}: Put a +1/+1 counter on this creature.\"},{\"id\":20,\"name\":\"Azorius Chancery\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, return a land you control to its owner's hand.\\n{T}: Add {W}{U}.\"},{\"id\":21,\"name\":\"Blood Crypt\",\"manaCost\":\"\",\"typeLine\":\"Land — Swamp Mountain\",\"text\":\"({T}: Add {B} or {R}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":22,\"name\":\"Breeding Pool\",\"manaCost\":\"\",\"typeLine\":\"Land — Forest Island\",\"text\":\"({T}: Add {G} or {U}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":23,\"name\":\"Ghost Quarter\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}, Sacrifice this land: Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield, then shuffle.\"},{\"id\":24,\"name\":\"Hallowed Fountain\",\"manaCost\":\"\",\"typeLine\":\"Land — Plains Island\",\"text\":\"({T}: Add {W} or {U}.)\\nAs this land enters, you may pay 2 life. If you don't, it enters tapped.\"},{\"id\":25,\"name\":\"Novijen, Heart of Progress\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{G}{U}, {T}: Put a +1/+1 counter on each creature that entered this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[\"interaction\",\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2170,
+      "cacheCreationInputTokens": 33302,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.828689,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.828689,
+      "pricedUsd": 0.828689,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.828689 and its own usage prices at $0.828689"
+    }
+  }
+}

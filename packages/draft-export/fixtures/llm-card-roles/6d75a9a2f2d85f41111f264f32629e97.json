@@ -1,0 +1,161 @@
+{
+  "key": "6d75a9a2f2d85f41111f264f32629e97",
+  "recordedAt": "2026-11-22T22:05:44.291Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Boros Mastiff\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature gains lifelink until end of turn. (Damage dealt by a creature with lifelink also causes its controller to gain that much life.)\"},{\"id\":2,\"name\":\"Haazda Snare Squad\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever this creature attacks, you may pay {W}. If you do, tap target creature an opponent controls.\"},{\"id\":3,\"name\":\"Lyev Decree\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Detain up to two target creatures your opponents control. (Until your next turn, those creatures can't attack or block and their activated abilities can't be activated.)\"},{\"id\":4,\"name\":\"Maze Sentinel\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Vigilance\\nMulticolored creatures you control have vigilance.\"},{\"id\":5,\"name\":\"Renounce the Guilds\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Each player sacrifices a multicolored permanent of their choice.\"},{\"id\":6,\"name\":\"Riot Control\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"You gain 1 life for each creature your opponents control. Prevent all damage that would be dealt to you this turn.\"},{\"id\":7,\"name\":\"Scion of Vitu-Ghazi\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, if you cast it from your hand, create a 1/1 white Bird creature token with flying, then populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":8,\"name\":\"Steeple Roc\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying, first strike\"},{\"id\":9,\"name\":\"Sunspire Gatekeepers\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, if you control two or more Gates, create a 2/2 white Knight creature token with vigilance.\"},{\"id\":10,\"name\":\"Wake the Reflections\",\"manaCost\":\"{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":11,\"name\":\"Aetherling\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"{U}: Exile this creature. Return it to the battlefield under its owner's control at the beginning of the next end step.\\n{U}: This creature can't be blocked this turn.\\n{1}: This creature gets +1/-1 until end of turn.\\n{1}: This creature gets -1/+1 until end of turn.\"},{\"id\":12,\"name\":\"Hidden Strings\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"You may tap or untap target permanent, then you may tap or untap another target permanent.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":13,\"name\":\"Maze Glider\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nMulticolored creatures you control have flying.\"},{\"id\":14,\"name\":\"Mindstatic\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {6}.\"},{\"id\":15,\"name\":\"Murmuring Phantasm\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender\"},{\"id\":16,\"name\":\"Opal Lake Gatekeepers\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Vedalken Soldier\",\"text\":\"When this creature enters, if you control two or more Gates, you may draw a card.\"},{\"id\":17,\"name\":\"Runner's Bane\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature with power 3 or less\\nWhen this Aura enters, tap enchanted creature.\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":18,\"name\":\"Trait Doctoring\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Change the text of target permanent by replacing all instances of one color word with another or one basic land type with another until end of turn.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":19,\"name\":\"Uncovered Clues\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top four cards of your library. You may reveal up to two instant and/or sorcery cards from among them and put the revealed cards into your hand. Put the rest on the bottom of your library in any order.\"},{\"id\":20,\"name\":\"Wind Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\"},{\"id\":21,\"name\":\"Bane Alley Blackguard\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"\"},{\"id\":22,\"name\":\"Blood Scrivener\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Wizard\",\"text\":\"If you would draw a card while you have no cards in hand, instead you draw two cards and you lose 1 life.\"},{\"id\":23,\"name\":\"Crypt Incursion\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile all creature cards from target player's graveyard. You gain 3 life for each card exiled this way.\"},{\"id\":24,\"name\":\"Fatal Fumes\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -4/-2 until end of turn.\"},{\"id\":25,\"name\":\"Hired Torturer\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Defender\\n{3}{B}, {T}: Target opponent loses 2 life, then reveals a card at random from their hand.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1206,
+      "cacheCreationInputTokens": 32387,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.762189,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.762189,
+      "pricedUsd": 0.762189,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.762189 and its own usage prices at $0.762189"
+    }
+  }
+}

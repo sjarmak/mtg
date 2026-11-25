@@ -1,4 +1,7 @@
-/** Execute the preregistered ISD Forge-ranked versus structural construction holdout. */
+/**
+ * Execute a preregistered ISD construction holdout: Forge-ranked versus
+ * structural by default, or one of the issue 305 card roles comparisons.
+ */
 import { createHash } from 'node:crypto';
 import {
   closeSync,
@@ -35,7 +38,9 @@ import {
   printedConstructionForgeRuntime,
   printedLimitedConstructionPolicies,
   printedLimitedSubjectIdentity,
+  type PrintedLimitedComparison,
 } from './printed-limited-construction-campaign';
+import { loadIsdCardRoles, parseIsdCampaignArguments } from './isd-limited-draft-campaign';
 import { buildInstalledPrintedDraftRatings } from './printed-draft-ratings';
 import { discoverForgeHome } from './forge-home';
 import { loadPrintedAdmissionSource, parsePrintedFormatRegistry } from './printed-format-registry';
@@ -47,15 +52,6 @@ import {
 const FORMAT_ID = 'isd';
 const MAXIMUM_TURNS = 200;
 const MAXIMUM_DECISIONS = 5_000;
-
-function parseOutput(args: readonly string[]): string {
-  if (args.length !== 2 || args[0] !== '--out' || (args[1] ?? '').trim() === '') {
-    throw new Error(
-      'usage: tsx packages/ui/tools/isd-limited-construction-campaign.ts --out <new-directory>',
-    );
-  }
-  return resolve(args[1]!);
-}
 
 function sha256(text: string): Promise<string> {
   return Promise.resolve(createHash('sha256').update(text).digest('hex'));
@@ -100,6 +96,7 @@ async function shutdown(backend: ObservedBackend | null): Promise<void> {
 export async function runIsdLimitedConstructionCampaign(
   repoRoot: string,
   outputDirectory: string,
+  comparison: PrintedLimitedComparison = 'structural-vs-ranked',
 ): Promise<void> {
   const forgeHome = discoverForgeHome(repoRoot);
   if (forgeHome === undefined) throw new Error('Pinned Forge distribution was not found.');
@@ -124,6 +121,7 @@ export async function runIsdLimitedConstructionCampaign(
     code,
     catalog: parsePrintedCardCatalog(JSON.parse(readFileSync(join(source.directory, file), 'utf8'))),
   }));
+  const roles = loadIsdCardRoles(comparison, source.directory, catalogs);
   const prepared = await preparePrintedLimitedFormat(
     admissionSource.format,
     catalogs.map(({ catalog }) => catalog),
@@ -186,7 +184,8 @@ export async function runIsdLimitedConstructionCampaign(
     const plan = buildIsdLimitedConstructionPlan({
       subject: printedLimitedSubjectIdentity(prepared),
       builderRuntime,
-      builderPolicies: printedLimitedConstructionPolicies(ratings),
+      builderPolicies: printedLimitedConstructionPolicies(ratings, comparison, roles),
+      comparison,
       gameplayRuntime: printedConstructionForgeRuntime(admitted.subject),
       gameplayFeatures: forgeGameplayFeatureIdentity(gameplayPolicy),
       gameplayPolicy: forgeGameplayPolicyIdentity(gameplayPolicy),
@@ -199,6 +198,7 @@ export async function runIsdLimitedConstructionCampaign(
       installedAdapterSha256: admitted.subject.adapterSha256,
       admissionSubject: admitted.subject,
       ratings,
+      ...(roles === undefined ? {} : { roles }),
       opponents: Object.fromEntries(opponents),
       limits: { maximumTurns: MAXIMUM_TURNS, maximumDecisions: MAXIMUM_DECISIONS },
     };
@@ -217,11 +217,13 @@ export async function runIsdLimitedConstructionCampaign(
             prepared,
             catalogs,
             ratings,
+            ...(roles === undefined ? {} : { roles }),
             backend: bindPrintedConstructionBackend(admitted, opponentPolicy),
           },
         ],
       ]),
       opponents,
+      comparison,
       maximumTurns: MAXIMUM_TURNS,
       maximumDecisions: MAXIMUM_DECISIONS,
       onTrial: recorder.checkpoint,
@@ -244,5 +246,9 @@ const invoked =
   process.argv[1] === undefined ? false : resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (invoked) {
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-  await runIsdLimitedConstructionCampaign(repoRoot, parseOutput(process.argv.slice(2)));
+  const { output, comparison } = parseIsdCampaignArguments(
+    'packages/ui/tools/isd-limited-construction-campaign.ts',
+    process.argv.slice(2),
+  );
+  await runIsdLimitedConstructionCampaign(repoRoot, output, comparison);
 }

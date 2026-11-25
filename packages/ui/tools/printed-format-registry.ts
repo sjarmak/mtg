@@ -115,6 +115,7 @@ export function loadPrintedAdmissionSource(source: PrintedFormatSource) {
     return readFileSync(path);
   };
   return {
+    formatId: source.id,
     format: JSON.parse(readFileSync(join(source.directory, source.formatFile), 'utf8')) as unknown,
     catalogs: source.catalogs.map(
       (catalog) => JSON.parse(readFileSync(join(source.directory, catalog.file), 'utf8')) as unknown,

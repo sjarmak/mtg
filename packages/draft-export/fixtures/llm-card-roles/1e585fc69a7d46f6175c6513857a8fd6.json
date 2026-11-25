@@ -1,0 +1,161 @@
+{
+  "key": "1e585fc69a7d46f6175c6513857a8fd6",
+  "recordedAt": "2026-11-22T22:03:39.857Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Shadow Alley Denizen\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Vampire Rogue\",\"text\":\"Whenever another black creature you control enters, target creature gains intimidate until end of turn. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":2,\"name\":\"Shadow Slice\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent loses 3 life.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":3,\"name\":\"Slate Street Ruffian\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature becomes blocked, defending player discards a card.\"},{\"id\":4,\"name\":\"Smog Elemental\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flying\\nCreatures with flying your opponents control get -1/-1.\"},{\"id\":5,\"name\":\"Syndicate Enforcer\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\"},{\"id\":6,\"name\":\"Thrull Parasite\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"Extort (Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain that much life.)\\n{T}, Pay 2 life: Remove a counter from target nonland permanent.\"},{\"id\":7,\"name\":\"Undercity Informer\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{1}, Sacrifice a creature: Target player reveals cards from the top of their library until they reveal a land card, then puts those cards into their graveyard.\"},{\"id\":8,\"name\":\"Undercity Plague\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player loses 1 life, discards a card, then sacrifices a permanent of their choice.\\nCipher (Then you may exile this spell card encoded on a creature you control. Whenever that creature deals combat damage to a player, its controller may cast a copy of the encoded card without paying its mana cost.)\"},{\"id\":9,\"name\":\"Wight of Precinct Six\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature gets +1/+1 for each creature card in your opponents' graveyards.\"},{\"id\":10,\"name\":\"Act of Treason\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":11,\"name\":\"Bomber Corps\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, this creature deals 1 damage to any target.\"},{\"id\":12,\"name\":\"Cinder Elemental\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{X}{R}, {T}, Sacrifice this creature: It deals X damage to any target.\"},{\"id\":13,\"name\":\"Crackling Perimeter\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Tap an untapped Gate you control: This enchantment deals 1 damage to each opponent.\"},{\"id\":14,\"name\":\"Ember Beast\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"This creature can't attack or block alone.\"},{\"id\":15,\"name\":\"Firefist Striker\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Battalion — Whenever this creature and at least two other creatures attack, target creature can't block this turn.\"},{\"id\":16,\"name\":\"Five-Alarm Fire\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control deals combat damage, put a blaze counter on this enchantment.\\nRemove five blaze counters from this enchantment: It deals 5 damage to any target.\"},{\"id\":17,\"name\":\"Foundry Street Denizen\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Whenever another red creature you control enters, this creature gets +1/+0 until end of turn.\"},{\"id\":18,\"name\":\"Furious Resistance\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Target blocking creature gets +3/+0 and gains first strike until end of turn.\"},{\"id\":19,\"name\":\"Hellkite Tyrant\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying, trample\\nWhenever this creature deals combat damage to a player, gain control of all artifacts that player controls.\\nAt the beginning of your upkeep, if you control twenty or more artifacts, you win the game.\"},{\"id\":20,\"name\":\"Hellraiser Goblin\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Berserker\",\"text\":\"Creatures you control have haste and attack each combat if able.\"},{\"id\":21,\"name\":\"Homing Lightning\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Homing Lightning deals 4 damage to target creature and each other creature with the same name as that creature.\"},{\"id\":22,\"name\":\"Legion Loyalist\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Soldier\",\"text\":\"Haste\\nBattalion — Whenever this creature and at least two other creatures attack, creatures you control gain first strike and trample until end of turn and can't be blocked by creature tokens this turn.\"},{\"id\":23,\"name\":\"Madcap Skills\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +3/+0 and has menace.\"},{\"id\":24,\"name\":\"Mark for Death\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature an opponent controls blocks this turn if able. Untap that creature. Other creatures that player controls can't block this turn.\"},{\"id\":25,\"name\":\"Massive Raid\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Massive Raid deals damage to any target equal to the number of creatures you control.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1261,
+      "cacheCreationInputTokens": 32506,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7673190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7673190000000001,
+      "pricedUsd": 0.767319,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767319 and its own usage prices at $0.767319"
+    }
+  }
+}

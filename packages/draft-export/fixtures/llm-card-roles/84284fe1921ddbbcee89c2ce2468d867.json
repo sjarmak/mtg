@@ -1,0 +1,161 @@
+{
+  "key": "84284fe1921ddbbcee89c2ce2468d867",
+  "recordedAt": "2026-11-22T22:28:14.052Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Followed Footsteps\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of your upkeep, create a token that's a copy of enchanted creature.\"},{\"id\":2,\"name\":\"Grayscaled Gharial\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\"},{\"id\":3,\"name\":\"Grozoth\",\"manaCost\":\"{6}{U}{U}{U}\",\"typeLine\":\"Creature — Leviathan\",\"text\":\"Defender (This creature can't attack.)\\nWhen this creature enters, you may search your library for any number of cards that have mana value 9, reveal them, put them into your hand, then shuffle.\\n{4}: This creature loses defender until end of turn.\\nTransmute {1}{U}{U} ({1}{U}{U}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":4,\"name\":\"Halcyon Glaze\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a creature spell, this enchantment becomes a 4/4 Illusion creature with flying in addition to its other types until end of turn.\"},{\"id\":5,\"name\":\"Hunted Phantasm\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked.\\nWhen this creature enters, target opponent creates five 1/1 red Goblin creature tokens.\"},{\"id\":6,\"name\":\"Induce Paranoia\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. If {B} was spent to cast this spell, that spell's controller mills X cards, where X is the spell's mana value.\"},{\"id\":7,\"name\":\"Lore Broker\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"{T}: Each player draws a card, then discards a card.\"},{\"id\":8,\"name\":\"Mark of Eviction\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of your upkeep, return enchanted creature and all Auras attached to that creature to their owners' hands.\"},{\"id\":9,\"name\":\"Mnemonic Nexus\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Each player shuffles their graveyard into their library.\"},{\"id\":10,\"name\":\"Muddle the Mixture\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target instant or sorcery spell.\\nTransmute {1}{U}{U} ({1}{U}{U}, Discard this card: Search your library for a card with the same mana value as this card, reveal it, put it into your hand, then shuffle. Transmute only as a sorcery.)\"},{\"id\":11,\"name\":\"Peel from Reality\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target creature you control and target creature you don't control to their owners' hands.\"},{\"id\":12,\"name\":\"Quickchange\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Target creature becomes the color or colors of your choice until end of turn.\\nDraw a card.\"},{\"id\":13,\"name\":\"Remand\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell. If that spell is countered this way, put it into its owner's hand instead of into that player's graveyard.\\nDraw a card.\"},{\"id\":14,\"name\":\"Snapping Drake\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\"},{\"id\":15,\"name\":\"Spawnbroker\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may exchange control of target creature you control and target creature with power less than or equal to that creature's power an opponent controls.\"},{\"id\":16,\"name\":\"Stasis Cell\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\\n{3}{U}: Attach this Aura to target creature.\"},{\"id\":17,\"name\":\"Surveilling Sprite\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\nWhen this creature dies, you may draw a card.\"},{\"id\":18,\"name\":\"Tattered Drake\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Zombie Drake\",\"text\":\"Flying\\n{B}: Regenerate this creature.\"},{\"id\":19,\"name\":\"Telling Time\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Look at the top three cards of your library. Put one of those cards into your hand, one on top of your library, and one on the bottom of your library.\"},{\"id\":20,\"name\":\"Terraformer\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{1}: Choose a basic land type. Each land you control becomes that type until end of turn.\"},{\"id\":21,\"name\":\"Tidewater Minion\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Elemental Minion\",\"text\":\"Defender (This creature can't attack.)\\n{4}: This creature loses defender until end of turn.\\n{T}: Untap target permanent.\"},{\"id\":22,\"name\":\"Tunnel Vision\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose a card name. Target player reveals cards from the top of their library until a card with that name is revealed. If it is, that player puts the rest of the revealed cards into their graveyard and puts the card with the chosen name on top of their library. Otherwise, the player shuffles.\"},{\"id\":23,\"name\":\"Vedalken Dismisser\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"When this creature enters, put target creature on top of its owner's library.\"},{\"id\":24,\"name\":\"Vedalken Entrancer\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Vedalken Wizard\",\"text\":\"{U}, {T}: Target player mills two cards.\"},{\"id\":25,\"name\":\"Wizened Snitches\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Faerie Rogue\",\"text\":\"Flying\\nPlayers play with the top card of their libraries revealed.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1543,
+      "cacheCreationInputTokens": 32480,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.780899,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.780899,
+      "pricedUsd": 0.780899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.780899 and its own usage prices at $0.780899"
+    }
+  }
+}

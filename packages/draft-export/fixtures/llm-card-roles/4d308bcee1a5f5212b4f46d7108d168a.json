@@ -1,0 +1,161 @@
+{
+  "key": "4d308bcee1a5f5212b4f46d7108d168a",
+  "recordedAt": "2026-11-22T21:32:10.279Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Somberwald Dryad\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Dryad\",\"text\":\"Forestwalk (This creature can't be blocked as long as defending player controls a Forest.)\"},{\"id\":2,\"name\":\"Strangleroot Geist\",\"manaCost\":\"{G}{G}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Haste\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":3,\"name\":\"Tracker's Instincts\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top four cards of your library. Put a creature card from among them into your hand and the rest into your graveyard.\\nFlashback {2}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":4,\"name\":\"Ulvenwald Bear\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"Morbid — When this creature enters, if a creature died this turn, put two +1/+1 counters on target creature.\"},{\"id\":5,\"name\":\"Village Survivors\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Human\",\"text\":\"Vigilance\\nFateful hour — As long as you have 5 or less life, other creatures you control have vigilance.\"},{\"id\":6,\"name\":\"Vorapede\",\"manaCost\":\"{2}{G}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Vigilance, trample\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":7,\"name\":\"Wild Hunger\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+1 and gains trample until end of turn.\\nFlashback {3}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":8,\"name\":\"Wolfbitten Captive\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Wolfbitten Captive\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"{1}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.\\nAt the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Krallenhorde Killer\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"{3}{G}: This creature gets +4/+4 until end of turn. Activate only once each turn.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":9,\"name\":\"Young Wolf\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Undying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":10,\"name\":\"Diregraf Captain\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Creature — Zombie Soldier\",\"text\":\"Deathtouch\\nOther Zombie creatures you control get +1/+1.\\nWhenever another Zombie you control dies, target opponent loses 1 life.\"},{\"id\":11,\"name\":\"Drogskol Captain\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Creature — Spirit Soldier\",\"text\":\"Flying\\nOther Spirit creatures you control get +1/+1 and have hexproof. (They can't be the targets of spells or abilities your opponents control.)\"},{\"id\":12,\"name\":\"Drogskol Reaver\",\"manaCost\":\"{5}{W}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nDouble strike (This creature deals both first-strike and regular combat damage.)\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\\nWhenever you gain life, draw a card.\"},{\"id\":13,\"name\":\"Falkenrath Aristocrat\",\"manaCost\":\"{2}{B}{R}\",\"typeLine\":\"Creature — Vampire Noble\",\"text\":\"Flying, haste\\nSacrifice a creature: This creature gains indestructible until end of turn. If the sacrificed creature was a Human, put a +1/+1 counter on this creature.\"},{\"id\":14,\"name\":\"Havengul Lich\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Creature — Zombie Wizard\",\"text\":\"{1}: You may cast target creature card in a graveyard this turn. When you cast it this turn, this creature gains all activated abilities of that card until end of turn.\"},{\"id\":15,\"name\":\"Huntmaster of the Fells\",\"manaCost\":null,\"typeLine\":\"Creature — Human Werewolf // Creature — Werewolf\",\"text\":null,\"faces\":[{\"name\":\"Huntmaster of the Fells\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Creature — Human Werewolf\",\"text\":\"Whenever this creature enters or transforms into Huntmaster of the Fells, create a 2/2 green Wolf creature token and you gain 2 life.\\nAt the beginning of each upkeep, if no spells were cast last turn, transform this creature.\"},{\"name\":\"Ravager of the Fells\",\"manaCost\":\"\",\"typeLine\":\"Creature — Werewolf\",\"text\":\"Trample\\nWhenever this creature transforms into Ravager of the Fells, it deals 2 damage to target opponent or planeswalker and 2 damage to up to one target creature that player or that planeswalker's controller controls.\\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform this creature.\"}]},{\"id\":16,\"name\":\"Immerwolf\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Wolf\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nEach other creature you control that's a Wolf or a Werewolf gets +1/+1.\\nNon-Human Werewolves you control can't transform.\"},{\"id\":17,\"name\":\"Sorin, Lord of Innistrad\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Legendary Planeswalker — Sorin\",\"text\":\"+1: Create a 1/1 black Vampire creature token with lifelink.\\n−2: You get an emblem with \\\"Creatures you control get +1/+0.\\\"\\n−6: Destroy up to three target creatures and/or other planeswalkers. Return each card put into a graveyard this way to the battlefield under your control.\"},{\"id\":18,\"name\":\"Stromkirk Captain\",\"manaCost\":\"{1}{B}{R}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"First strike\\nOther Vampire creatures you control get +1/+1 and have first strike.\"},{\"id\":19,\"name\":\"Altar of the Lost\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters tapped.\\n{T}: Add two mana in any combination of colors. Spend this mana only to cast spells with flashback from a graveyard.\"},{\"id\":20,\"name\":\"Avacyn's Collar\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 and has vigilance.\\nWhenever equipped creature dies, if it was a Human, create a 1/1 white Spirit creature token with flying.\\nEquip {2}\"},{\"id\":21,\"name\":\"Chalice of Life\",\"manaCost\":null,\"typeLine\":\"Artifact // Artifact\",\"text\":null,\"faces\":[{\"name\":\"Chalice of Life\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: You gain 1 life. Then if you have at least 10 life more than your starting life total, transform this artifact.\"},{\"name\":\"Chalice of Death\",\"manaCost\":\"\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Target player loses 5 life.\"}]},{\"id\":22,\"name\":\"Elbrus, the Binding Blade\",\"manaCost\":null,\"typeLine\":\"Legendary Artifact — Equipment // Legendary Creature — Demon\",\"text\":null,\"faces\":[{\"name\":\"Elbrus, the Binding Blade\",\"manaCost\":\"{7}\",\"typeLine\":\"Legendary Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0.\\nWhen equipped creature deals combat damage to a player, unattach Elbrus, then transform it.\\nEquip {1}\"},{\"name\":\"Withengar Unbound\",\"manaCost\":\"\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying, intimidate, trample (A creature with intimidate can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhenever a player loses the game, put thirteen +1/+1 counters on Withengar Unbound.\"}]},{\"id\":23,\"name\":\"Executioner's Hood\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has intimidate. (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":24,\"name\":\"Grafdigger's Cage\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact\",\"text\":\"Creature cards in graveyards and libraries can't enter the battlefield.\\nPlayers can't cast spells from graveyards or libraries.\"},{\"id\":25,\"name\":\"Heavy Mattock\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1.\\nAs long as equipped creature is a Human, it gets an additional +1/+1.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1391,
+      "cacheCreationInputTokens": 33646,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7966190000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7966190000000001,
+      "pricedUsd": 0.796619,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.796619 and its own usage prices at $0.796619"
+    }
+  }
+}

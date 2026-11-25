@@ -1,0 +1,161 @@
+{
+  "key": "7464e6a47c0dd3503ea4b168bcf182e2",
+  "recordedAt": "2026-11-22T21:30:29.386Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Archangel's Light\",\"manaCost\":\"{7}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"You gain 2 life for each card in your graveyard, then shuffle your graveyard into your library.\"},{\"id\":2,\"name\":\"Bar the Door\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +0/+4 until end of turn.\"},{\"id\":3,\"name\":\"Break of Day\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+1 until end of turn.\\nFateful hour — If you have 5 or less life, those creatures gain indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy them.)\"},{\"id\":4,\"name\":\"Burden of Guilt\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\n{1}: Tap enchanted creature.\"},{\"id\":5,\"name\":\"Curse of Exhaustion\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nEnchanted player can't cast more than one spell each turn.\"},{\"id\":6,\"name\":\"Elgaud Inquisitor\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\\nWhen this creature dies, create a 1/1 white Spirit creature token with flying.\"},{\"id\":7,\"name\":\"Faith's Shield\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Target permanent you control gains protection from the color of your choice until end of turn.\\nFateful hour — If you have 5 or less life, instead you and each permanent you control gain protection from the color of your choice until end of turn.\"},{\"id\":8,\"name\":\"Gather the Townsfolk\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 1/1 white Human creature tokens.\\nFateful hour — If you have 5 or less life, create five of those tokens instead.\"},{\"id\":9,\"name\":\"Gavony Ironwright\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Fateful hour — As long as you have 5 or less life, other creatures you control get +1/+4.\"},{\"id\":10,\"name\":\"Hollowhenge Spirit\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nFlying\\nWhen this creature enters, remove target attacking or blocking creature from combat.\"},{\"id\":11,\"name\":\"Increasing Devotion\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create five 1/1 white Human creature tokens. If this spell was cast from a graveyard, create ten of those tokens instead.\\nFlashback {7}{W}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":12,\"name\":\"Lingering Souls\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Create two 1/1 white Spirit creature tokens with flying.\\nFlashback {1}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":13,\"name\":\"Loyal Cathar\",\"manaCost\":null,\"typeLine\":\"Creature — Human Soldier // Creature — Zombie Soldier\",\"text\":null,\"faces\":[{\"name\":\"Loyal Cathar\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance\\nWhen this creature dies, return it to the battlefield transformed under your control at the beginning of the next end step.\"},{\"name\":\"Unhallowed Cathar\",\"manaCost\":\"\",\"typeLine\":\"Creature — Zombie Soldier\",\"text\":\"This creature can't block.\"}]},{\"id\":14,\"name\":\"Midnight Guard\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever another creature enters, untap this creature.\"},{\"id\":15,\"name\":\"Niblis of the Mist\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhen this creature enters, you may tap target creature.\"},{\"id\":16,\"name\":\"Niblis of the Urn\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhenever this creature attacks, you may tap target creature.\"},{\"id\":17,\"name\":\"Ray of Revelation\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target enchantment.\\nFlashback {G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":18,\"name\":\"Requiem Angel\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhenever another non-Spirit creature you control dies, create a 1/1 white Spirit creature token with flying.\"},{\"id\":19,\"name\":\"Sanctuary Cat\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"\"},{\"id\":20,\"name\":\"Séance\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of each upkeep, you may exile target creature card from your graveyard. If you do, create a token that's a copy of that card, except it's a Spirit in addition to its other types. Exile it at the beginning of the next end step.\"},{\"id\":21,\"name\":\"Silverclaw Griffin\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying, first strike\"},{\"id\":22,\"name\":\"Skillful Lunge\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+0 and gains first strike until end of turn.\"},{\"id\":23,\"name\":\"Sudden Disappearance\",\"manaCost\":\"{5}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile all nonland permanents target player controls. Return the exiled cards to the battlefield under their owner's control at the beginning of the next end step.\"},{\"id\":24,\"name\":\"Thalia, Guardian of Thraben\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"First strike\\nNoncreature spells cost {1} more to cast.\"},{\"id\":25,\"name\":\"Thraben Doomsayer\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{T}: Create a 1/1 white Human creature token.\\nFateful hour — As long as you have 5 or less life, other creatures you control get +2/+2.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1263,
+      "cacheCreationInputTokens": 32522,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7677390000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7677390000000001,
+      "pricedUsd": 0.767739,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.767739 and its own usage prices at $0.767739"
+    }
+  }
+}

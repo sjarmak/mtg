@@ -65,8 +65,8 @@ const TRAY_BORDER_PX = 1;
 /**
  * What the tray costs on the block axis before either card is drawn.
  *
- * Exported because `./hand.ts` bounds the tray's height so the host card inside
- * it comes out the width of the bare permanent beside it, and that arithmetic
+ * Exported because `./hand.ts` states the tray's height from the face every bare
+ * permanent on the row is drawn at, and that arithmetic
  * needs the chrome this file draws around it. Two declarations of six pixels
  * would agree until the day one of them is edited, which is the argument
  * `./geometry.ts` opens with.

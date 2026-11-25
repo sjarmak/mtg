@@ -1,0 +1,161 @@
+{
+  "key": "9b2588dc242e7016efcced148ac4e7e9",
+  "recordedAt": "2026-11-22T22:22:33.901Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Aether Swooper\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Vedalken Artificer\",\"text\":\"Flying\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":2,\"name\":\"Aethertide Whale\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Whale\",\"text\":\"Flying\\nWhen this creature enters, you get six {E} (energy counters).\\nPay {E}{E}{E}{E}: Return this creature to its owner's hand.\"},{\"id\":3,\"name\":\"Baral, Chief of Compliance\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Legendary Creature — Human Wizard\",\"text\":\"Instant and sorcery spells you cast cost {1} less to cast.\\nWhenever a spell or ability you control counters a spell, you may draw a card. If you do, discard a card.\"},{\"id\":4,\"name\":\"Baral's Expertise\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Return up to three target artifacts and/or creatures to their owners' hands.\\nYou may cast a spell with mana value 4 or less from your hand without paying its mana cost.\"},{\"id\":5,\"name\":\"Bastion Inventor\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Vedalken Artificer\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nHexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":6,\"name\":\"Disallow\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell, activated ability, or triggered ability. (Mana abilities can't be targeted.)\"},{\"id\":7,\"name\":\"Dispersal Technician\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Vedalken Artificer\",\"text\":\"When this creature enters, you may return target artifact to its owner's hand.\"},{\"id\":8,\"name\":\"Efficient Construction\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast an artifact spell, create a 1/1 colorless Thopter artifact creature token with flying.\"},{\"id\":9,\"name\":\"Hinterland Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nThis creature can't block artifact creatures.\"},{\"id\":10,\"name\":\"Ice Over\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant artifact or creature\\nEnchanted permanent doesn't untap during its controller's untap step.\"},{\"id\":11,\"name\":\"Illusionist's Stratagem\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Exile up to two target creatures you control, then return those cards to the battlefield under their owner's control.\\nDraw a card.\"},{\"id\":12,\"name\":\"Leave in the Dust\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand.\\nDraw a card.\"},{\"id\":13,\"name\":\"Mechanized Production\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant artifact you control\\nAt the beginning of your upkeep, create a token that's a copy of enchanted artifact. Then if you control eight or more artifacts with the same name as one another, you win the game.\"},{\"id\":14,\"name\":\"Metallic Rebuke\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nCounter target spell unless its controller pays {3}.\"},{\"id\":15,\"name\":\"Negate\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target noncreature spell.\"},{\"id\":16,\"name\":\"Quicksmith Spy\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"When this creature enters, target artifact you control gains \\\"{T}: Draw a card\\\" for as long as you control this creature.\"},{\"id\":17,\"name\":\"Reverse Engineer\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nDraw three cards.\"},{\"id\":18,\"name\":\"Salvage Scuttler\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Crab\",\"text\":\"Whenever this creature attacks, return an artifact you control to its owner's hand.\"},{\"id\":19,\"name\":\"Shielded Aether Thief\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Vedalken Rogue\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhenever this creature blocks, you get {E} (an energy counter).\\n{T}, Pay {E}{E}{E}: Draw a card.\"},{\"id\":20,\"name\":\"Shipwreck Moray\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Fish\",\"text\":\"When this creature enters, you get {E}{E}{E}{E} (four energy counters).\\nPay {E}: This creature gets +2/-2 until end of turn.\"},{\"id\":21,\"name\":\"Skyship Plunderer\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, for each kind of counter on target permanent or player, give that permanent or player another counter of that kind.\"},{\"id\":22,\"name\":\"Take into Custody\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Tap target creature. It doesn't untap during its controller's next untap step.\"},{\"id\":23,\"name\":\"Trophy Mage\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may search your library for an artifact card with mana value 3, reveal it, put it into your hand, then shuffle.\"},{\"id\":24,\"name\":\"Whir of Invention\",\"manaCost\":\"{X}{U}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nSearch your library for an artifact card with mana value X or less, put it onto the battlefield, then shuffle.\"},{\"id\":25,\"name\":\"Wind-Kin Raiders\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Improvise (Your artifacts can help cast this spell. Each artifact you tap after you're done activating mana abilities pays for {1}.)\\nFlying\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1364,
+      "cacheCreationInputTokens": 32600,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.774349,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.774349,
+      "pricedUsd": 0.774349,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.774349 and its own usage prices at $0.774349"
+    }
+  }
+}

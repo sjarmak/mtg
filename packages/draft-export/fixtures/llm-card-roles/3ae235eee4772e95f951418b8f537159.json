@@ -1,0 +1,161 @@
+{
+  "key": "3ae235eee4772e95f951418b8f537159",
+  "recordedAt": "2026-11-22T21:35:57.556Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Spiraling Duelist\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Metalcraft — This creature has double strike as long as you control three or more artifacts.\"},{\"id\":2,\"name\":\"Blightwidow\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Phyrexian Spider\",\"text\":\"Reach (This creature can block creatures with flying.)\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":3,\"name\":\"Creeping Corrosion\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all artifacts.\"},{\"id\":4,\"name\":\"Fangren Marauder\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Whenever an artifact is put into a graveyard from the battlefield, you may gain 5 life.\"},{\"id\":5,\"name\":\"Glissa's Courier\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Mountainwalk (This creature can't be blocked as long as defending player controls a Mountain.)\"},{\"id\":6,\"name\":\"Green Sun's Zenith\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a green creature card with mana value X or less, put it onto the battlefield, then shuffle. Shuffle Green Sun's Zenith into its owner's library.\"},{\"id\":7,\"name\":\"Lead the Stampede\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top five cards of your library. You may reveal any number of creature cards from among them and put the revealed cards into your hand. Put the rest on the bottom of your library in any order.\"},{\"id\":8,\"name\":\"Melira's Keepers\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"This creature can't have counters put on it.\"},{\"id\":9,\"name\":\"Mirran Mettle\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn.\\nMetalcraft — That creature gets +4/+4 until end of turn instead if you control three or more artifacts.\"},{\"id\":10,\"name\":\"Phyrexian Hydra\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Hydra\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nIf damage would be dealt to this creature, prevent that damage. Put a -1/-1 counter on this creature for each 1 damage prevented this way.\"},{\"id\":11,\"name\":\"Pistus Strike\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with flying. Its controller gets a poison counter.\"},{\"id\":12,\"name\":\"Plaguemaw Beast\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Beast\",\"text\":\"{T}, Sacrifice a creature: Proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":13,\"name\":\"Praetor's Counsel\",\"manaCost\":\"{5}{G}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all cards from your graveyard to your hand. Exile Praetor's Counsel. You have no maximum hand size for the rest of the game.\"},{\"id\":14,\"name\":\"Quilled Slagwurm\",\"manaCost\":\"{4}{G}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Wurm\",\"text\":\"\"},{\"id\":15,\"name\":\"Rot Wolf\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Phyrexian Wolf\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever a creature dealt damage by Rot Wolf this turn dies, you may draw a card.\"},{\"id\":16,\"name\":\"Tangle Mantis\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Trample\"},{\"id\":17,\"name\":\"Thrun, the Last Troll\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Creature — Troll Shaman\",\"text\":\"This spell can't be countered.\\nHexproof (This creature can't be the target of spells or abilities your opponents control.)\\n{1}{G}: Regenerate Thrun.\"},{\"id\":18,\"name\":\"Unnatural Predation\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+1 and gains trample until end of turn.\"},{\"id\":19,\"name\":\"Viridian Corrupter\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Phyrexian Elf Shaman\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhen this creature enters, destroy target artifact.\"},{\"id\":20,\"name\":\"Viridian Emissary\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Phyrexian Elf Scout\",\"text\":\"When this creature dies, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":21,\"name\":\"Glissa, the Traitor\",\"manaCost\":\"{B}{G}{G}\",\"typeLine\":\"Legendary Creature — Phyrexian Zombie Elf\",\"text\":\"First strike, deathtouch\\nWhenever a creature an opponent controls dies, you may return target artifact card from your graveyard to your hand.\"},{\"id\":22,\"name\":\"Tezzeret, Agent of Bolas\",\"manaCost\":\"{2}{U}{B}\",\"typeLine\":\"Legendary Planeswalker — Tezzeret\",\"text\":\"+1: Look at the top five cards of your library. You may reveal an artifact card from among them and put it into your hand. Put the rest on the bottom of your library in any order.\\n−1: Target artifact becomes an artifact creature with base power and toughness 5/5.\\n−4: Target player loses X life and you gain X life, where X is twice the number of artifacts you control.\"},{\"id\":23,\"name\":\"Bladed Sentinel\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{W}: This creature gains vigilance until end of turn.\"},{\"id\":24,\"name\":\"Blightsteel Colossus\",\"manaCost\":\"{12}\",\"typeLine\":\"Artifact Creature — Phyrexian Golem\",\"text\":\"Trample, infect, indestructible\\nIf Blightsteel Colossus would be put into a graveyard from anywhere, reveal Blightsteel Colossus and shuffle it into its owner's library instead.\"},{\"id\":25,\"name\":\"Bonehoard\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +X/+X, where X is the number of creature cards in all graveyards.\\nEquip {2}\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"fixing\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1313,
+      "cacheCreationInputTokens": 32685,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7734989999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7734989999999999,
+      "pricedUsd": 0.773499,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773499 and its own usage prices at $0.773499"
+    }
+  }
+}

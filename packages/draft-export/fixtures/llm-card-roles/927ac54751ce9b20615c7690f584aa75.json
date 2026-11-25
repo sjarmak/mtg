@@ -1,0 +1,161 @@
+{
+  "key": "927ac54751ce9b20615c7690f584aa75",
+  "recordedAt": "2026-11-22T22:31:46.012Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Angel of Despair\",\"manaCost\":\"{3}{W}{W}{B}{B}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nWhen this creature enters, destroy target permanent.\"},{\"id\":2,\"name\":\"Blind Hunter\",\"manaCost\":\"{2}{W}{B}\",\"typeLine\":\"Creature — Bat\",\"text\":\"Flying\\nHaunt (When this creature dies, exile it haunting target creature.)\\nWhen this creature enters or the creature it haunts dies, target player loses 2 life and you gain 2 life.\"},{\"id\":3,\"name\":\"Borborygmos\",\"manaCost\":\"{3}{R}{R}{G}{G}\",\"typeLine\":\"Legendary Creature — Cyclops\",\"text\":\"Trample\\nWhenever Borborygmos deals combat damage to a player, put a +1/+1 counter on each creature you control.\"},{\"id\":4,\"name\":\"Burning-Tree Bloodscale\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Creature — Lizard Berserker\",\"text\":\"Bloodthirst 1 (If an opponent was dealt damage this turn, this creature enters with a +1/+1 counter on it.)\\n{2}{R}: Target creature can't block this creature this turn.\\n{2}{G}: Target creature blocks this creature this turn if able.\"},{\"id\":5,\"name\":\"Burning-Tree Shaman\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Centaur Shaman\",\"text\":\"Whenever a player activates an ability that isn't a mana ability, this creature deals 1 damage to that player.\"},{\"id\":6,\"name\":\"Castigate\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a nonland card from it and exile that card.\"},{\"id\":7,\"name\":\"Cerebral Vortex\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target player draws two cards, then Cerebral Vortex deals damage to that player equal to the number of cards they've drawn this turn.\"},{\"id\":8,\"name\":\"Conjurer's Ban\",\"manaCost\":\"{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose a card name. Until your next turn, spells with the chosen name can't be cast and lands with the chosen name can't be played.\\nDraw a card.\"},{\"id\":9,\"name\":\"Culling Sun\",\"manaCost\":\"{2}{W}{W}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy each creature with mana value 3 or less.\"},{\"id\":10,\"name\":\"Dune-Brood Nephilim\",\"manaCost\":\"{B}{R}{G}{W}\",\"typeLine\":\"Creature — Nephilim\",\"text\":\"Whenever this creature deals combat damage to a player, create a 1/1 colorless Sand creature token for each land you control.\"},{\"id\":11,\"name\":\"Electrolyze\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Electrolyze deals 2 damage divided as you choose among one or two targets.\\nDraw a card.\"},{\"id\":12,\"name\":\"Feral Animist\",\"manaCost\":\"{1}{R}{G}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"{3}: This creature gets +X/+0 until end of turn, where X is its power.\"},{\"id\":13,\"name\":\"Gelectrode\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Weird\",\"text\":\"{T}: This creature deals 1 damage to any target.\\nWhenever you cast an instant or sorcery spell, you may untap this creature.\"},{\"id\":14,\"name\":\"Ghost Council of Orzhova\",\"manaCost\":\"{W}{W}{B}{B}\",\"typeLine\":\"Legendary Creature — Spirit\",\"text\":\"When Ghost Council of Orzhova enters, target opponent loses 1 life and you gain 1 life.\\n{1}, Sacrifice a creature: Exile Ghost Council of Orzhova. Return it to the battlefield under its owner's control at the beginning of the next end step.\"},{\"id\":15,\"name\":\"Glint-Eye Nephilim\",\"manaCost\":\"{U}{B}{R}{G}\",\"typeLine\":\"Creature — Nephilim\",\"text\":\"Whenever this creature deals combat damage to a player, draw that many cards.\\n{1}, Discard a card: This creature gets +1/+1 until end of turn.\"},{\"id\":16,\"name\":\"Goblin Flectomancer\",\"manaCost\":\"{U}{R}{R}\",\"typeLine\":\"Creature — Goblin Wizard\",\"text\":\"Sacrifice this creature: You may change the targets of target instant or sorcery spell.\"},{\"id\":17,\"name\":\"Ink-Treader Nephilim\",\"manaCost\":\"{R}{G}{W}{U}\",\"typeLine\":\"Creature — Nephilim\",\"text\":\"Whenever a player casts an instant or sorcery spell, if that spell targets only this creature, copy the spell for each other creature that spell could target. Each copy targets a different one of those creatures.\"},{\"id\":18,\"name\":\"Invoke the Firemind\",\"manaCost\":\"{X}{U}{U}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Draw X cards.\\n• Invoke the Firemind deals X damage to any target.\"},{\"id\":19,\"name\":\"Izzet Chronarch\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, return target instant or sorcery card from your graveyard to your hand.\"},{\"id\":20,\"name\":\"Killer Instinct\",\"manaCost\":\"{4}{R}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, reveal the top card of your library. If it's a creature card, put it onto the battlefield. That creature gains haste until end of turn. Sacrifice it at the beginning of the next end step.\"},{\"id\":21,\"name\":\"Leap of Flame\",\"manaCost\":\"{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Replicate {U}{R} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\\nTarget creature gets +1/+0 and gains flying and first strike until end of turn.\"},{\"id\":22,\"name\":\"Mortify\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature or enchantment.\"},{\"id\":23,\"name\":\"Niv-Mizzet, the Firemind\",\"manaCost\":\"{2}{U}{U}{R}{R}\",\"typeLine\":\"Legendary Creature — Dragon Wizard\",\"text\":\"Flying\\nWhenever you draw a card, Niv-Mizzet deals 1 damage to any target.\\n{T}: Draw a card.\"},{\"id\":24,\"name\":\"Orzhov Pontiff\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"Haunt (When this creature dies, exile it haunting target creature.)\\nWhen this creature enters or the creature it haunts dies, choose one —\\n• Creatures you control get +1/+1 until end of turn.\\n• Creatures you don't control get -1/-1 until end of turn.\"},{\"id\":25,\"name\":\"Pillory of the Sleepless\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block.\\nEnchanted creature has \\\"At the beginning of your upkeep, you lose 1 life.\\\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\",\"draw\"]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\",\"draw\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 437,
+      "cacheCreationInputTokens": 32737,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7307390000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7307390000000001,
+      "pricedUsd": 0.730739,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.730739 and its own usage prices at $0.730739"
+    }
+  }
+}

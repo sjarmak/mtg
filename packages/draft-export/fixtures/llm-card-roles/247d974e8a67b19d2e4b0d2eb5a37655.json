@@ -1,0 +1,161 @@
+{
+  "key": "247d974e8a67b19d2e4b0d2eb5a37655",
+  "recordedAt": "2026-11-22T21:39:41.436Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Merfolk Observer\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Merfolk Rogue\",\"text\":\"When this creature enters, look at the top card of target player's library.\"},{\"id\":2,\"name\":\"Merfolk Skyscout\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Merfolk Scout\",\"text\":\"Flying\\nWhenever this creature attacks or blocks, untap target permanent.\"},{\"id\":3,\"name\":\"Mnemonic Wall\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\nWhen this creature enters, you may return target instant or sorcery card from your graveyard to your hand.\"},{\"id\":4,\"name\":\"Narcolepsy\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of each upkeep, if enchanted creature is untapped, tap it.\"},{\"id\":5,\"name\":\"Phantasmal Abomination\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Illusion\",\"text\":\"Defender\\nWhen this creature becomes the target of a spell or ability, sacrifice it.\"},{\"id\":6,\"name\":\"Reality Spasm\",\"manaCost\":\"{X}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Tap X target permanents.\\n• Untap X target permanents.\"},{\"id\":7,\"name\":\"Recurring Insight\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw cards equal to the number of cards in target opponent's hand.\\nRebound (If you cast this spell from your hand, exile it as it resolves. At the beginning of your next upkeep, you may cast this card from exile without paying its mana cost.)\"},{\"id\":8,\"name\":\"Regress\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target permanent to its owner's hand.\"},{\"id\":9,\"name\":\"Renegade Doppelganger\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Whenever another creature you control enters, you may have this creature become a copy of that creature until end of turn. (If it does, it loses this ability for the rest of the turn.)\"},{\"id\":10,\"name\":\"Sea Gate Oracle\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, look at the top two cards of your library. Put one of them into your hand and the other on the bottom of your library.\"},{\"id\":11,\"name\":\"See Beyond\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw two cards, then shuffle a card from your hand into your library.\"},{\"id\":12,\"name\":\"Shared Discovery\",\"manaCost\":\"{U}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, tap four untapped creatures you control.\\nDraw three cards.\"},{\"id\":13,\"name\":\"Skywatcher Adept\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Merfolk Wizard\",\"text\":\"Level up {3} ({3}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-2\\n2/2\\nFlying\\nLEVEL 3+\\n4/2\\nFlying\"},{\"id\":14,\"name\":\"Sphinx of Magosi\",\"manaCost\":\"{3}{U}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\n{2}{U}: Draw a card, then put a +1/+1 counter on this creature.\"},{\"id\":15,\"name\":\"Surrakar Spellblade\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Surrakar\",\"text\":\"Whenever you cast an instant or sorcery spell, you may put a charge counter on this creature.\\nWhenever this creature deals combat damage to a player, you may draw X cards, where X is the number of charge counters on it.\"},{\"id\":16,\"name\":\"Training Grounds\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Activated abilities of creatures you control cost {2} less to activate. This effect can't reduce the mana in that cost to less than one mana.\"},{\"id\":17,\"name\":\"Unified Will\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell if you control more creatures than that spell's controller.\"},{\"id\":18,\"name\":\"Venerated Teacher\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, put two level counters on each creature you control with level up.\"},{\"id\":19,\"name\":\"Arrogant Bloodlord\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Vampire Knight\",\"text\":\"Whenever this creature blocks or becomes blocked by a creature with power 1 or less, destroy this creature at end of combat.\"},{\"id\":20,\"name\":\"Bala Ged Scorpion\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Scorpion\",\"text\":\"When this creature enters, you may destroy target creature with power 1 or less.\"},{\"id\":21,\"name\":\"Baneful Omen\",\"manaCost\":\"{4}{B}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your end step, you may reveal the top card of your library. If you do, each opponent loses life equal to that card's mana value.\"},{\"id\":22,\"name\":\"Bloodrite Invoker\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire Shaman\",\"text\":\"{8}: Target player loses 3 life and you gain 3 life.\"},{\"id\":23,\"name\":\"Bloodthrone Vampire\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Sacrifice a creature: This creature gets +2/+2 until end of turn.\"},{\"id\":24,\"name\":\"Cadaver Imp\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\nWhen this creature enters, you may return target creature card from your graveyard to your hand.\"},{\"id\":25,\"name\":\"Consume the Meek\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy each creature with mana value 3 or less. They can't be regenerated.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1226,
+      "cacheCreationInputTokens": 32352,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.762489,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.762489,
+      "pricedUsd": 0.762489,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.762489 and its own usage prices at $0.762489"
+    }
+  }
+}

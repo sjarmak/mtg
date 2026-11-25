@@ -1,0 +1,161 @@
+{
+  "key": "cd292db9cf6c0b83069028792c6efb1c",
+  "recordedAt": "2026-11-22T21:27:31.467Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Abbey Griffin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying, vigilance\"},{\"id\":2,\"name\":\"Angel of Flight Alabaster\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nAt the beginning of your upkeep, return target Spirit card from your graveyard to your hand.\"},{\"id\":3,\"name\":\"Angelic Overseer\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nAs long as you control a Human, this creature has hexproof and indestructible.\"},{\"id\":4,\"name\":\"Avacynian Priest\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{1}, {T}: Tap target non-Human creature.\"},{\"id\":5,\"name\":\"Bonds of Faith\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 as long as it's a Human. Otherwise, it can't attack or block.\"},{\"id\":6,\"name\":\"Champion of the Parish\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever another Human you control enters, put a +1/+1 counter on this creature.\"},{\"id\":7,\"name\":\"Chapel Geist\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\"},{\"id\":8,\"name\":\"Cloistered Youth\",\"manaCost\":null,\"typeLine\":\"Creature — Human // Creature — Horror\",\"text\":null,\"faces\":[{\"name\":\"Cloistered Youth\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human\",\"text\":\"At the beginning of your upkeep, you may transform this creature.\"},{\"name\":\"Unholy Fiend\",\"manaCost\":\"\",\"typeLine\":\"Creature — Horror\",\"text\":\"At the beginning of your end step, you lose 1 life.\"}]},{\"id\":9,\"name\":\"Dearly Departed\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nAs long as this creature is in your graveyard, each Human creature you control enters with an additional +1/+1 counter on it.\"},{\"id\":10,\"name\":\"Divine Reckoning\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player chooses a creature they control. Destroy the rest.\\nFlashback {5}{W}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":11,\"name\":\"Doomed Traveler\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature dies, create a 1/1 white Spirit creature token with flying.\"},{\"id\":12,\"name\":\"Elder Cathar\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature dies, put a +1/+1 counter on target creature you control. If that creature is a Human, put two +1/+1 counters on it instead.\"},{\"id\":13,\"name\":\"Elite Inquisitor\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"First strike, vigilance\\nProtection from Vampires, from Werewolves, and from Zombies\"},{\"id\":14,\"name\":\"Feeling of Dread\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Tap up to two target creatures.\\nFlashback {1}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":15,\"name\":\"Fiend Hunter\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"When this creature enters, you may exile another target creature.\\nWhen this creature leaves the battlefield, return the exiled card to the battlefield under its owner's control.\"},{\"id\":16,\"name\":\"Gallows Warden\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nOther Spirit creatures you control get +0/+1.\"},{\"id\":17,\"name\":\"Geist-Honored Monk\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Human Monk\",\"text\":\"Vigilance\\nGeist-Honored Monk's power and toughness are each equal to the number of creatures you control.\\nWhen this creature enters, create two 1/1 white Spirit creature tokens with flying.\"},{\"id\":18,\"name\":\"Ghostly Possession\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has flying.\\nPrevent all combat damage that would be dealt to and dealt by enchanted creature.\"},{\"id\":19,\"name\":\"Intangible Virtue\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Creature tokens you control get +1/+1 and have vigilance.\"},{\"id\":20,\"name\":\"Mausoleum Guard\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"When this creature dies, create two 1/1 white Spirit creature tokens with flying.\"},{\"id\":21,\"name\":\"Mentor of the Meek\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever another creature you control with power 2 or less enters, you may pay {1}. If you do, draw a card.\"},{\"id\":22,\"name\":\"Midnight Haunting\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Create two 1/1 white Spirit creature tokens with flying.\"},{\"id\":23,\"name\":\"Mikaeus, the Lunarch\",\"manaCost\":\"{X}{W}\",\"typeLine\":\"Legendary Creature — Human Cleric\",\"text\":\"Mikaeus enters with X +1/+1 counters on it.\\n{T}: Put a +1/+1 counter on Mikaeus.\\n{T}, Remove a +1/+1 counter from Mikaeus: Put a +1/+1 counter on each other creature you control.\"},{\"id\":24,\"name\":\"Moment of Heroism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 and gains lifelink until end of turn. (Damage dealt by the creature also causes its controller to gain that much life.)\"},{\"id\":25,\"name\":\"Nevermore\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"As this enchantment enters, choose a nonland card name.\\nSpells with the chosen name can't be cast.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1004,
+      "cacheCreationInputTokens": 32477,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.753889,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.753889,
+      "pricedUsd": 0.753889,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.753889 and its own usage prices at $0.753889"
+    }
+  }
+}

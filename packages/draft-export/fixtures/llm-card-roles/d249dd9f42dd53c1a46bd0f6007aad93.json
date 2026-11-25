@@ -1,0 +1,161 @@
+{
+  "key": "d249dd9f42dd53c1a46bd0f6007aad93",
+  "recordedAt": "2026-11-22T21:24:29.067Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Scrounger of Souls\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":2,\"name\":\"Torment of Hailfire\",\"manaCost\":\"{X}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Repeat the following process X times. Each opponent loses 3 life unless that player sacrifices a nonland permanent of their choice or discards a card.\"},{\"id\":3,\"name\":\"Torment of Scarabs\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of enchanted player's upkeep, that player loses 3 life unless they sacrifice a nonland permanent of their choice or discard a card.\"},{\"id\":4,\"name\":\"Torment of Venom\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Put three -1/-1 counters on target creature. Its controller loses 3 life unless they sacrifice another nonland permanent of their choice or discard a card.\"},{\"id\":5,\"name\":\"Vile Manifestation\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"This creature gets +1/+0 for each card with cycling in your graveyard.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":6,\"name\":\"Without Weakness\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature you control gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it. If its toughness is 0 or less, it still dies.)\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":7,\"name\":\"Wretched Camel\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Zombie Camel\",\"text\":\"When this creature dies, if you control a Desert or there is a Desert card in your graveyard, target player discards a card.\"},{\"id\":8,\"name\":\"Abrade\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Abrade deals 3 damage to target creature.\\n• Destroy target artifact.\"},{\"id\":9,\"name\":\"Blur of Blades\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Put a -1/-1 counter on target creature. Blur of Blades deals 2 damage to that creature's controller.\"},{\"id\":10,\"name\":\"Burning-Fist Minotaur\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Minotaur Wizard\",\"text\":\"First strike\\n{1}{R}, Discard a card: This creature gets +2/+0 until end of turn.\"},{\"id\":11,\"name\":\"Chandra's Defeat\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Chandra's Defeat deals 5 damage to target red creature or red planeswalker. If that permanent is a Chandra planeswalker, you may discard a card. If you do, draw a card.\"},{\"id\":12,\"name\":\"Chaos Maw\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Creature — Hellion\",\"text\":\"When this creature enters, it deals 3 damage to each other creature.\"},{\"id\":13,\"name\":\"Crash Through\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Creatures you control gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.)\\nDraw a card.\"},{\"id\":14,\"name\":\"Defiant Khenra\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"\"},{\"id\":15,\"name\":\"Earthshaker Khenra\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"Haste\\nWhen this creature enters, target creature with power less than or equal to this creature's power can't block this turn.\\nEternalize {4}{R}{R} ({4}{R}{R}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Jackal Warrior with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":16,\"name\":\"Fervent Paincaster\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{T}: This creature deals 1 damage to target player or planeswalker.\\n{T}, Exert this creature: It deals 1 damage to target creature. (An exerted creature won't untap during your next untap step.)\"},{\"id\":17,\"name\":\"Firebrand Archer\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Archer\",\"text\":\"Whenever you cast a noncreature spell, this creature deals 1 damage to each opponent.\"},{\"id\":18,\"name\":\"Frontline Devastator\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Zombie Minotaur Warrior\",\"text\":\"Afflict 2 (Whenever this creature becomes blocked, defending player loses 2 life.)\\n{1}{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":19,\"name\":\"Gilded Cerodon\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"Whenever this creature attacks, if you control a Desert or there is a Desert card in your graveyard, target creature can't block this turn.\"},{\"id\":20,\"name\":\"Granitic Titan\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Menace\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":21,\"name\":\"Hazoret's Undying Fury\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Shuffle your library, then exile the top four cards. You may cast any number of spells with mana value 5 or less from among them without paying their mana costs. Lands you control don't untap during your next untap step.\"},{\"id\":22,\"name\":\"Hour of Devastation\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures lose indestructible until end of turn. Hour of Devastation deals 5 damage to each creature and each non-Bolas planeswalker.\"},{\"id\":23,\"name\":\"Imminent Doom\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"This enchantment enters with a doom counter on it.\\nWhenever you cast a spell with mana value equal to the number of doom counters on this enchantment, this enchantment deals that much damage to any target. Then put a doom counter on this enchantment.\"},{\"id\":24,\"name\":\"Inferno Jet\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Inferno Jet deals 6 damage to target opponent or planeswalker.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":25,\"name\":\"Khenra Scrapper\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Jackal Warrior\",\"text\":\"Menace\\nYou may exert this creature as it attacks. When you do, it gets +2/+0 until end of turn. (An exerted creature won't untap during your next untap step.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1563,
+      "cacheCreationInputTokens": 32691,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.786119,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.786119,
+      "pricedUsd": 0.786119,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786119 and its own usage prices at $0.786119"
+    }
+  }
+}

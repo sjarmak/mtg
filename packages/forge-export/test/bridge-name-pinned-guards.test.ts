@@ -73,7 +73,7 @@ function reviewedCards(): readonly ReviewedCard[] {
       }
     }
     const admissionDir = readdirSync(dir, { withFileTypes: true }).find(
-      (entry) => entry.isDirectory() && entry.name.startsWith('play-admission-v'),
+      (entry) => entry.isDirectory() && entry.name === 'play-admission',
     );
     if (admissionDir === undefined) continue;
     const admissionFile = new URL(`${admissionDir.name}/admission.json`, dir);

@@ -1,0 +1,161 @@
+{
+  "key": "dad6bfddb255832340f3020561983c64",
+  "recordedAt": "2026-11-22T22:14:27.271Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Kheru Dreadmaw\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie Crocodile\",\"text\":\"Defender\\n{1}{G}, Sacrifice another creature: You gain life equal to the sacrificed creature's toughness.\"},{\"id\":2,\"name\":\"Krumar Bond-Kin\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Orc Warrior\",\"text\":\"Morph {4}{B} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":3,\"name\":\"Mardu Skullhunter\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"This creature enters tapped.\\nRaid — When this creature enters, if you attacked this turn, target opponent discards a card.\"},{\"id\":4,\"name\":\"Mer-Ek Nightblade\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Orc Assassin\",\"text\":\"Outlast {B} ({B}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has deathtouch.\"},{\"id\":5,\"name\":\"Molting Snakeskin\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+0 and has \\\"{2}{B}: Regenerate this creature.\\\"\"},{\"id\":6,\"name\":\"Murderous Cut\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nDestroy target creature.\"},{\"id\":7,\"name\":\"Necropolis Fiend\",\"manaCost\":\"{7}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nFlying\\n{X}, {T}, Exile X cards from your graveyard: Target creature gets -X/-X until end of turn.\"},{\"id\":8,\"name\":\"Raiders' Spoils\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures you control get +1/+0.\\nWhenever a Warrior you control deals combat damage to a player, you may pay 1 life. If you do, draw a card.\"},{\"id\":9,\"name\":\"Rakshasa's Secret\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent discards two cards. You mill two cards.\"},{\"id\":10,\"name\":\"Retribution of the Ancients\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment\",\"text\":\"{B}, Remove X +1/+1 counters from among creatures you control: Target creature gets -X/-X until end of turn.\"},{\"id\":11,\"name\":\"Rite of the Serpent\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature. If that creature had a +1/+1 counter on it, create a 1/1 green Snake creature token.\"},{\"id\":12,\"name\":\"Rotting Mastodon\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie Elephant\",\"text\":\"\"},{\"id\":13,\"name\":\"Ruthless Ripper\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Human Assassin\",\"text\":\"Deathtouch\\nMorph—Reveal a black card in your hand. (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, target player loses 2 life.\"},{\"id\":14,\"name\":\"Shambling Attendants\",\"manaCost\":\"{7}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nDeathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":15,\"name\":\"Sidisi's Pet\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie Ape\",\"text\":\"Lifelink (Damage dealt by this creature also causes you to gain that much life.)\\nMorph {1}{B} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":16,\"name\":\"Sultai Scavenger\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Bird Warrior\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nFlying\"},{\"id\":17,\"name\":\"Swarm of Bloodflies\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Flying\\nThis creature enters with two +1/+1 counters on it.\\nWhenever another creature dies, put a +1/+1 counter on this creature.\"},{\"id\":18,\"name\":\"Throttle\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets -4/-4 until end of turn.\"},{\"id\":19,\"name\":\"Unyielding Krumar\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Orc Warrior\",\"text\":\"{1}{W}: This creature gains first strike until end of turn.\"},{\"id\":20,\"name\":\"Act of Treason\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature until end of turn. Untap that creature. It gains haste until end of turn. (It can attack and {T} this turn.)\"},{\"id\":21,\"name\":\"Ainok Tracker\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Dog Scout\",\"text\":\"First strike\\nMorph {4}{R} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":22,\"name\":\"Arc Lightning\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Arc Lightning deals 3 damage divided as you choose among one, two, or three targets.\"},{\"id\":23,\"name\":\"Arrow Storm\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Arrow Storm deals 4 damage to any target.\\nRaid — If you attacked this turn, instead Arrow Storm deals 5 damage to that permanent or player and the damage can't be prevented.\"},{\"id\":24,\"name\":\"Ashcloud Phoenix\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying\\nWhen this creature dies, return it to the battlefield face down under your control.\\nMorph {4}{R}{R} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, it deals 2 damage to each player.\"},{\"id\":25,\"name\":\"Barrage of Boulders\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Barrage of Boulders deals 1 damage to each creature you don't control.\\nFerocious — If you control a creature with power 4 or greater, creatures can't block this turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1116,
+      "cacheCreationInputTokens": 32676,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7634689999999998,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7634689999999998,
+      "pricedUsd": 0.763469,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.763469 and its own usage prices at $0.763469"
+    }
+  }
+}

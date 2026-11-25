@@ -1,0 +1,161 @@
+{
+  "key": "8941f5e76a804145412d7a03479277e2",
+  "recordedAt": "2026-11-22T21:22:21.372Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Naga Vitalist\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Snake Druid\",\"text\":\"{T}: Add one mana of any type that a land you control could produce.\"},{\"id\":2,\"name\":\"Oashra Cultivator\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"{2}{G}, {T}, Sacrifice this creature: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":3,\"name\":\"Ornery Kudu\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Antelope\",\"text\":\"When this creature enters, put a -1/-1 counter on target creature you control.\"},{\"id\":4,\"name\":\"Pouncing Cheetah\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Flash\"},{\"id\":5,\"name\":\"Prowling Serpopard\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Cat Snake\",\"text\":\"This spell can't be countered.\\nCreature spells you control can't be countered.\"},{\"id\":6,\"name\":\"Quarry Hauler\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Camel\",\"text\":\"When this creature enters, for each kind of counter on target permanent, put another counter of that kind on it or remove one from it.\"},{\"id\":7,\"name\":\"Rhonas the Indomitable\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Creature — God\",\"text\":\"Deathtouch, indestructible\\nRhonas can't attack or block unless you control another creature with power 4 or greater.\\n{2}{G}: Another target creature gets +2/+0 and gains trample until end of turn.\"},{\"id\":8,\"name\":\"Sandwurm Convergence\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Creatures with flying can't attack you or planeswalkers you control.\\nAt the beginning of your end step, create a 5/5 green Wurm creature token.\"},{\"id\":9,\"name\":\"Scaled Behemoth\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Crocodile\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\"},{\"id\":10,\"name\":\"Shed Weakness\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. You may remove a -1/-1 counter from it.\"},{\"id\":11,\"name\":\"Shefet Monitor\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"Cycling {3}{G} ({3}{G}, Discard this card: Draw a card.)\\nWhen you cycle this card, you may search your library for a basic land card or a Desert card, put it onto the battlefield, then shuffle. (Do this before you draw.)\"},{\"id\":12,\"name\":\"Sixth Sense\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has \\\"Whenever this creature deals combat damage to a player, you may draw a card.\\\"\"},{\"id\":13,\"name\":\"Spidery Grasp\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature. It gets +2/+4 and gains reach until end of turn. (It can block creatures with flying.)\"},{\"id\":14,\"name\":\"Stinging Shot\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Put three -1/-1 counters on target creature with flying.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":15,\"name\":\"Synchronized Strike\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Untap up to two target creatures. They each get +2/+2 until end of turn.\"},{\"id\":16,\"name\":\"Trial of Strength\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"When this enchantment enters, create a 4/2 green Beast creature token.\\nWhen a Cartouche you control enters, return this enchantment to its owner's hand.\"},{\"id\":17,\"name\":\"Vizier of the Menagerie\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Snake Cleric\",\"text\":\"You may look at the top card of your library any time.\\nYou may cast creature spells from the top of your library.\\nYou can spend mana of any type to cast creature spells.\"},{\"id\":18,\"name\":\"Watchful Naga\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Snake Wizard\",\"text\":\"You may exert this creature as it attacks. When you do, draw a card. (An exerted creature won't untap during your next untap step.)\"},{\"id\":19,\"name\":\"Ahn-Crop Champion\",\"manaCost\":\"{2}{G}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"You may exert this creature as it attacks. When you do, untap all other creatures you control. (An exerted creature won't untap during your next untap step.)\"},{\"id\":20,\"name\":\"Aven Wind Guide\",\"manaCost\":\"{2}{W}{U}\",\"typeLine\":\"Creature — Bird Warrior\",\"text\":\"Flying, vigilance\\nCreature tokens you control have flying and vigilance.\\nEmbalm {4}{W}{U} ({4}{W}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a white Zombie Bird Warrior with no mana cost. Embalm only as a sorcery.)\"},{\"id\":21,\"name\":\"Bounty of the Luxa\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your first main phase, remove all flood counters from this enchantment. If no counters were removed this way, put a flood counter on this enchantment and draw a card. Otherwise, add {C}{G}{U}.\"},{\"id\":22,\"name\":\"Decimator Beetle\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"When this creature enters, put a -1/-1 counter on target creature you control.\\nWhenever this creature attacks, remove a -1/-1 counter from target creature you control and put a -1/-1 counter on up to one target creature defending player controls.\"},{\"id\":23,\"name\":\"Enigma Drake\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nEnigma Drake's power is equal to the number of instant and sorcery cards in your graveyard.\"},{\"id\":24,\"name\":\"Hapatra, Vizier of Poisons\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Legendary Creature — Human Cleric\",\"text\":\"Whenever Hapatra deals combat damage to a player, you may put a -1/-1 counter on target creature.\\nWhenever you put one or more -1/-1 counters on a creature, create a 1/1 green Snake creature token with deathtouch.\"},{\"id\":25,\"name\":\"Honored Crop-Captain\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever this creature attacks, other attacking creatures get +1/+0 until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"draw\",\"fixing\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["draw", "fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 423,
+      "cacheCreationInputTokens": 32650,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.728299,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.728299,
+      "pricedUsd": 0.728299,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728299 and its own usage prices at $0.728299"
+    }
+  }
+}

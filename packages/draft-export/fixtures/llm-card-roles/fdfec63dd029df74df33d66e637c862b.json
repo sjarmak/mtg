@@ -1,0 +1,161 @@
+{
+  "key": "fdfec63dd029df74df33d66e637c862b",
+  "recordedAt": "2026-11-22T22:21:10.642Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Makeshift Munitions\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"{1}, Sacrifice an artifact or creature: This enchantment deals 1 damage to any target.\"},{\"id\":2,\"name\":\"Nest Robber\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Haste\"},{\"id\":3,\"name\":\"Otepec Huntmaster\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Dinosaur spells you cast cost {1} less to cast.\\n{T}: Target Dinosaur gains haste until end of turn.\"},{\"id\":4,\"name\":\"Rampaging Ferocidon\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Menace\\nPlayers can't gain life.\\nWhenever another creature enters, this creature deals 1 damage to that creature's controller.\"},{\"id\":5,\"name\":\"Raptor Hatchling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, create a 3/3 green Dinosaur creature token with trample.\"},{\"id\":6,\"name\":\"Repeating Barrage\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Repeating Barrage deals 3 damage to any target.\\nRaid — {3}{R}{R}: Return this card from your graveyard to your hand. Activate only if you attacked this turn.\"},{\"id\":7,\"name\":\"Rigging Runner\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Pirate\",\"text\":\"First strike\\nRaid — This creature enters with a +1/+1 counter on it if you attacked this turn.\"},{\"id\":8,\"name\":\"Rile\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Rile deals 1 damage to target creature you control. That creature gains trample until end of turn.\\nDraw a card.\"},{\"id\":9,\"name\":\"Rowdy Crew\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Trample\\nWhen this creature enters, draw three cards, then discard two cards at random. If two cards that share a card type are discarded this way, put two +1/+1 counters on this creature.\"},{\"id\":10,\"name\":\"Rummaging Goblin\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{T}, Discard a card: Draw a card.\"},{\"id\":11,\"name\":\"Star of Extinction\",\"manaCost\":\"{5}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Star of Extinction deals 20 damage to each creature and each planeswalker.\"},{\"id\":12,\"name\":\"Storm Fleet Arsonist\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Orc Pirate\",\"text\":\"Raid — When this creature enters, if you attacked this turn, target opponent sacrifices a permanent of their choice.\"},{\"id\":13,\"name\":\"Storm Fleet Pyromancer\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Human Pirate Wizard\",\"text\":\"Raid — When this creature enters, if you attacked this turn, this creature deals 2 damage to any target.\"},{\"id\":14,\"name\":\"Sun-Crowned Hunters\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"Enrage — Whenever this creature is dealt damage, it deals 3 damage to target opponent or planeswalker.\"},{\"id\":15,\"name\":\"Sunbird's Invocation\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a spell from your hand, reveal the top X cards of your library, where X is that spell's mana value. You may cast a spell with mana value X or less from among cards revealed this way without paying its mana cost. Put the rest on the bottom of your library in a random order.\"},{\"id\":16,\"name\":\"Sure Strike\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)\"},{\"id\":17,\"name\":\"Swashbuckling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has haste.\"},{\"id\":18,\"name\":\"Thrash of Raptors\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"As long as you control another Dinosaur, this creature gets +2/+0 and has trample.\"},{\"id\":19,\"name\":\"Tilonalli's Knight\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"Whenever this creature attacks, if you control a Dinosaur, this creature gets +1/+1 until end of turn.\"},{\"id\":20,\"name\":\"Tilonalli's Skinshifter\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Haste\\nWhenever this creature attacks, it becomes a copy of another target nonlegendary attacking creature until end of turn.\"},{\"id\":21,\"name\":\"Trove of Temptation\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Each opponent must attack you or a planeswalker you control with at least one creature each combat if able.\\nAt the beginning of your end step, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":22,\"name\":\"Unfriendly Fire\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Instant\",\"text\":\"Unfriendly Fire deals 4 damage to any target.\"},{\"id\":23,\"name\":\"Vance's Blasting Cannons\",\"manaCost\":null,\"typeLine\":\"Legendary Enchantment // Legendary Land\",\"text\":null,\"faces\":[{\"name\":\"Vance's Blasting Cannons\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Legendary Enchantment\",\"text\":\"At the beginning of your upkeep, exile the top card of your library. If it's a nonland card, you may cast that card this turn.\\nWhenever you cast your third spell in a turn, you may transform Vance's Blasting Cannons.\"},{\"name\":\"Spitfire Bastion\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"(Transforms from Vance's Blasting Cannons.)\\n{T}: Add {R}.\\n{2}{R}, {T}: Spitfire Bastion deals 3 damage to any target.\"}]},{\"id\":24,\"name\":\"Wily Goblin\",\"manaCost\":\"{R}{R}\",\"typeLine\":\"Creature — Goblin Pirate\",\"text\":\"When this creature enters, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":25,\"name\":\"Ancient Brontodon\",\"manaCost\":\"{6}{G}{G}\",\"typeLine\":\"Creature — Dinosaur\",\"text\":\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\",\"draw\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\",\"draw\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1637,
+      "cacheCreationInputTokens": 32645,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.788899,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.788899,
+      "pricedUsd": 0.788899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.788899 and its own usage prices at $0.788899"
+    }
+  }
+}

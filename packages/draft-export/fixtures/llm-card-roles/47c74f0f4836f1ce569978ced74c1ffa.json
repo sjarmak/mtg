@@ -1,0 +1,161 @@
+{
+  "key": "47c74f0f4836f1ce569978ced74c1ffa",
+  "recordedAt": "2026-11-22T22:38:04.535Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Cloudcrown Oak\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Reach (This creature can block creatures with flying.)\"},{\"id\":2,\"name\":\"Cloudthresher\",\"manaCost\":\"{2}{G}{G}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flash\\nReach\\nWhen this creature enters, it deals 2 damage to each creature with flying and each player.\\nEvoke {2}{G}{G} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":3,\"name\":\"Dauntless Dourbark\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Dauntless Dourbark's power and toughness are each equal to the number of Forests you control plus the number of Treefolk you control.\\nThis creature has trample as long as you control another Treefolk.\"},{\"id\":4,\"name\":\"Elvish Branchbender\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Until end of turn, target Forest becomes an X/X Treefolk creature in addition to its other types, where X is the number of Elves you control.\"},{\"id\":5,\"name\":\"Elvish Eulogist\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"Sacrifice this creature: You gain 1 life for each Elf card in your graveyard.\"},{\"id\":6,\"name\":\"Elvish Handservant\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Whenever a player casts a Giant spell, you may put a +1/+1 counter on this creature.\"},{\"id\":7,\"name\":\"Elvish Harbinger\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, you may search your library for an Elf card, reveal it, then shuffle and put that card on top.\\n{T}: Add one mana of any color.\"},{\"id\":8,\"name\":\"Elvish Promenade\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Kindred Sorcery — Elf\",\"text\":\"Create a 1/1 green Elf Warrior creature token for each Elf you control.\"},{\"id\":9,\"name\":\"Epic Proportions\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash\\nEnchant creature\\nEnchanted creature gets +5/+5 and has trample.\"},{\"id\":10,\"name\":\"Eyes of the Wisent\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Kindred Enchantment — Elemental\",\"text\":\"Whenever an opponent casts a blue spell during your turn, you may create a 4/4 green Elemental creature token.\"},{\"id\":11,\"name\":\"Fertile Ground\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nWhenever enchanted land is tapped for mana, its controller adds an additional one mana of any color.\"},{\"id\":12,\"name\":\"Fistful of Force\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. Clash with an opponent. If you win, that creature gets an additional +2/+2 and gains trample until end of turn. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":13,\"name\":\"Garruk Wildspeaker\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Garruk\",\"text\":\"+1: Untap two target lands.\\n−1: Create a 3/3 green Beast creature token.\\n−4: Creatures you control get +3/+3 and gain trample until end of turn.\"},{\"id\":14,\"name\":\"Gilt-Leaf Ambush\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Kindred Instant — Elf\",\"text\":\"Create two 1/1 green Elf Warrior creature tokens. Clash with an opponent. If you win, those creatures gain deathtouch until end of turn. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value. Any amount of damage a creature with deathtouch deals to a creature is enough to destroy it.)\"},{\"id\":15,\"name\":\"Gilt-Leaf Seer\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{G}, {T}: Look at the top two cards of your library, then put them back in any order.\"},{\"id\":16,\"name\":\"Guardian of Cloverdell\",\"manaCost\":\"{5}{G}{G}\",\"typeLine\":\"Creature — Treefolk Shaman\",\"text\":\"When this creature enters, create three 1/1 white Kithkin Soldier creature tokens.\\n{G}, Sacrifice a Kithkin: You gain 1 life.\"},{\"id\":17,\"name\":\"Heal the Scars\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Regenerate target creature. You gain life equal to that creature's toughness.\"},{\"id\":18,\"name\":\"Hunt Down\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature blocks target creature this turn if able.\"},{\"id\":19,\"name\":\"Immaculate Magistrate\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{T}: Put a +1/+1 counter on target creature for each Elf you control.\"},{\"id\":20,\"name\":\"Imperious Perfect\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Other Elves you control get +1/+1.\\n{G}, {T}: Create a 1/1 green Elf Warrior creature token.\"},{\"id\":21,\"name\":\"Incremental Growth\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on target creature, two +1/+1 counters on another target creature, and three +1/+1 counters on a third target creature.\"},{\"id\":22,\"name\":\"Jagged-Scar Archers\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Elf Archer\",\"text\":\"Jagged-Scar Archers's power and toughness are each equal to the number of Elves you control.\\n{T}: This creature deals damage equal to its power to target creature with flying.\"},{\"id\":23,\"name\":\"Kithkin Daggerdare\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Kithkin Soldier\",\"text\":\"{G}, {T}: Target attacking creature gets +2/+2 until end of turn.\"},{\"id\":24,\"name\":\"Kithkin Mourncaller\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Kithkin Scout\",\"text\":\"Whenever an attacking Kithkin or Elf is put into your graveyard from the battlefield, you may draw a card.\"},{\"id\":25,\"name\":\"Lace with Moonglove\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy that creature.)\\nDraw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1623,
+      "cacheCreationInputTokens": 32704,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.789379,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.789379,
+      "pricedUsd": 0.789379,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.789379 and its own usage prices at $0.789379"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "13137e37b5359169cd9ea2e9d7610f72",
+  "recordedAt": "2026-11-22T22:37:42.715Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Hostility\",\"manaCost\":\"{3}{R}{R}{R}\",\"typeLine\":\"Creature — Elemental Incarnation\",\"text\":\"Haste\\nIf a spell you control would deal damage to an opponent, prevent that damage. Create a 3/1 red Elemental Shaman creature token with haste for each 1 damage prevented this way.\\nWhen Hostility is put into a graveyard from anywhere, shuffle it into its owner's library.\"},{\"id\":2,\"name\":\"Hurly-Burly\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Hurly-Burly deals 1 damage to each creature without flying.\\n• Hurly-Burly deals 1 damage to each creature with flying.\"},{\"id\":3,\"name\":\"Incandescent Soulstoke\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"Other Elemental creatures you control get +1/+1.\\n{1}{R}, {T}: You may put an Elemental creature card from your hand onto the battlefield. That creature gains haste until end of turn. Sacrifice it at the beginning of the next end step.\"},{\"id\":4,\"name\":\"Incendiary Command\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose two —\\n• Incendiary Command deals 4 damage to target player or planeswalker.\\n• Incendiary Command deals 2 damage to each creature.\\n• Destroy target nonbasic land.\\n• Each player discards all the cards in their hand, then draws that many cards.\"},{\"id\":5,\"name\":\"Ingot Chewer\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"When this creature enters, destroy target artifact.\\nEvoke {R} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":6,\"name\":\"Inner-Flame Acolyte\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"When this creature enters, target creature gets +2/+0 and gains haste until end of turn.\\nEvoke {R} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":7,\"name\":\"Inner-Flame Igniter\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"{2}{R}: Creatures you control get +1/+0 until end of turn. If this is the third time this ability has resolved this turn, creatures you control gain first strike until end of turn.\"},{\"id\":8,\"name\":\"Lash Out\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Instant\",\"text\":\"Lash Out deals 3 damage to target creature. Clash with an opponent. If you win, Lash Out deals 3 damage to that creature's controller. (Each clashing player reveals the top card of their library, then puts that card on their choice of the top or bottom. A player wins if their card had a greater mana value.)\"},{\"id\":9,\"name\":\"Lowland Oaf\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"{T}: Target Goblin creature you control gets +1/+0 and gains flying until end of turn. Sacrifice that creature at the beginning of the next end step.\"},{\"id\":10,\"name\":\"Mudbutton Torchrunner\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"When this creature dies, it deals 3 damage to any target.\"},{\"id\":11,\"name\":\"Needle Drop\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Needle Drop deals 1 damage to any target that was dealt damage this turn.\\nDraw a card.\"},{\"id\":12,\"name\":\"Nova Chaser\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"Trample\\nChampion an Elemental (When this enters, sacrifice it unless you exile another Elemental you control. When this leaves the battlefield, that card returns to the battlefield.)\"},{\"id\":13,\"name\":\"Rebellion of the Flamekin\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Kindred Enchantment — Elemental\",\"text\":\"Whenever you clash, you may pay {1}. If you do, create a 3/1 red Elemental Shaman creature token. If you won, that token gains haste until end of turn. (This ability triggers after the clash ends.)\"},{\"id\":14,\"name\":\"Smokebraider\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"{T}: Add two mana in any combination of colors. Spend this mana only to cast Elemental spells or activate abilities of Elementals.\"},{\"id\":15,\"name\":\"Soulbright Flamekin\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"{2}: Target creature gains trample until end of turn. If this is the third time this ability has resolved this turn, you may add {R}{R}{R}{R}{R}{R}{R}{R}.\"},{\"id\":16,\"name\":\"Stinkdrinker Daredevil\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"Giant spells you cast cost {2} less to cast.\"},{\"id\":17,\"name\":\"Sunrise Sovereign\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"Other Giant creatures you control get +2/+2 and have trample.\"},{\"id\":18,\"name\":\"Tar Pitcher\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"{T}, Sacrifice a Goblin: This creature deals 2 damage to any target.\"},{\"id\":19,\"name\":\"Tarfire\",\"manaCost\":\"{R}\",\"typeLine\":\"Kindred Instant — Goblin\",\"text\":\"Tarfire deals 2 damage to any target.\"},{\"id\":20,\"name\":\"Thundercloud Shaman\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Giant Shaman\",\"text\":\"When this creature enters, it deals damage equal to the number of Giants you control to each non-Giant creature.\"},{\"id\":21,\"name\":\"Wild Ricochet\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"You may choose new targets for target instant or sorcery spell. Then copy that spell. You may choose new targets for the copy.\"},{\"id\":22,\"name\":\"Battlewand Oak\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Treefolk Warrior\",\"text\":\"Whenever a Forest you control enters, this creature gets +2/+2 until end of turn.\\nWhenever you cast a Treefolk spell, this creature gets +2/+2 until end of turn.\"},{\"id\":23,\"name\":\"Bog-Strider Ash\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Treefolk Shaman\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\\nWhenever a player casts a Goblin spell, you may pay {G}. If you do, you gain 2 life.\"},{\"id\":24,\"name\":\"Briarhorn\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Flash\\nWhen this creature enters, target creature gets +3/+3 until end of turn.\\nEvoke {1}{G} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":25,\"name\":\"Changeling Titan\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nChampion a creature (When this enters, sacrifice it unless you exile another creature you control. When this leaves the battlefield, that card returns to the battlefield.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\",\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 425,
+      "cacheCreationInputTokens": 32896,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.733319,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.733319,
+      "pricedUsd": 0.733319,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.733319 and its own usage prices at $0.733319"
+    }
+  }
+}

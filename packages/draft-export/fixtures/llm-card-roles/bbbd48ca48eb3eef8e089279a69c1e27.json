@@ -1,0 +1,141 @@
+{
+  "key": "bbbd48ca48eb3eef8e089279a69c1e27",
+  "recordedAt": "2026-11-22T21:45:18.334Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Kitesail\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0 and has flying.\\nEquip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":2,\"name\":\"Lodestone Golem\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Nonartifact spells cost {1} more to cast.\"},{\"id\":3,\"name\":\"Pilgrim's Eye\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Thopter\",\"text\":\"Flying\\nWhen this creature enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.\"},{\"id\":4,\"name\":\"Razor Boomerang\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature has \\\"{T}, Unattach Razor Boomerang: It deals 1 damage to any target. Return Razor Boomerang to its owner's hand.\\\"\\nEquip {2}\"},{\"id\":5,\"name\":\"Seer's Sundial\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Landfall — Whenever a land you control enters, you may pay {2}. If you do, draw a card.\"},{\"id\":6,\"name\":\"Walking Atlas\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{T}: You may put a land card from your hand onto the battlefield.\"},{\"id\":7,\"name\":\"Bojuka Bog\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, exile target player's graveyard.\\n{T}: Add {B}.\"},{\"id\":8,\"name\":\"Celestial Colonnade\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {W} or {U}.\\n{3}{W}{U}: Until end of turn, this land becomes a 4/4 white and blue Elemental creature with flying and vigilance. It's still a land.\"},{\"id\":9,\"name\":\"Creeping Tar Pit\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {U} or {B}.\\n{1}{U}{B}: Until end of turn, this land becomes a 3/2 blue and black Elemental creature. It's still a land. It can't be blocked this turn.\"},{\"id\":10,\"name\":\"Dread Statuary\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{4}: This land becomes a 4/2 Golem artifact creature until end of turn. It's still a land.\"},{\"id\":11,\"name\":\"Eye of Ugin\",\"manaCost\":\"\",\"typeLine\":\"Legendary Land\",\"text\":\"Colorless Eldrazi spells you cast cost {2} less to cast.\\n{7}, {T}: Search your library for a colorless creature card, reveal it, put it into your hand, then shuffle.\"},{\"id\":12,\"name\":\"Halimar Depths\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, look at the top three cards of your library, then put them back in any order.\\n{T}: Add {U}.\"},{\"id\":13,\"name\":\"Khalni Garden\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, create a 0/1 green Plant creature token.\\n{T}: Add {G}.\"},{\"id\":14,\"name\":\"Lavaclaw Reaches\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {B} or {R}.\\n{1}{B}{R}: Until end of turn, this land becomes a 2/2 black and red Elemental creature with \\\"{X}: This creature gets +X/+0 until end of turn.\\\" It's still a land.\"},{\"id\":15,\"name\":\"Quicksand\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{T}, Sacrifice this land: Target attacking creature without flying gets -1/-2 until end of turn.\"},{\"id\":16,\"name\":\"Raging Ravine\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {R} or {G}.\\n{2}{R}{G}: Until end of turn, this land becomes a 3/3 red and green Elemental creature with \\\"Whenever this creature attacks, put a +1/+1 counter on it.\\\" It's still a land.\"},{\"id\":17,\"name\":\"Sejiri Steppe\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, target creature you control gains protection from the color of your choice until end of turn.\\n{T}: Add {W}.\"},{\"id\":18,\"name\":\"Smoldering Spires\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, target creature can't block this turn.\\n{T}: Add {R}.\"},{\"id\":19,\"name\":\"Stirring Wildwood\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G} or {W}.\\n{1}{G}{W}: Until end of turn, this land becomes a 3/4 green and white Elemental creature with reach. It's still a land.\"},{\"id\":20,\"name\":\"Tectonic Edge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{1}, {T}, Sacrifice this land: Destroy target nonbasic land. Activate only if an opponent controls four or more lands.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"fixing\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1308,
+      "cacheCreationInputTokens": 32108,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.761709,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.761709,
+      "pricedUsd": 0.761709,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.761709 and its own usage prices at $0.761709"
+    }
+  }
+}

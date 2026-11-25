@@ -41,7 +41,16 @@ export interface ForgeObservedBackendOptions extends Omit<BridgeLaunch, 'timeout
   readonly acquireProfile?: () => Promise<() => void>;
   /** Complete printed-card name inventory for the pinned Forge installation. */
   readonly printedCardNames?: ReadonlySet<string>;
+  /**
+   * `computer` lets Forge's AI answer an unreviewed local-seat choice and log it
+   * rather than end the game (#66). It reaches the bridge only on Commander and
+   * Momir Basic tables; every other table, and every caller that omits it, stops.
+   */
+  readonly unreviewedChoices?: 'stop' | 'computer';
 }
+
+/** The game variants where an unreviewed choice is answered by the computer when the caller asks (#66). */
+const COMPUTER_ANSWERED_VARIANTS: ReadonlySet<string> = new Set(['commander', 'momir']);
 
 export type ForgeCustomSetResolver = (
   setCode: string,
@@ -1652,6 +1661,9 @@ function createForgeObservedBackend(
           seed: table.seed,
           maximumTurns: table.maximumTurns,
           ...(validationPurpose === undefined ? {} : { validationPurpose }),
+          ...(options.unreviewedChoices === 'computer' && COMPUTER_ANSWERED_VARIANTS.has(rules.variant)
+            ? { unreviewedChoices: 'computer' as const }
+            : {}),
           seats: [
             {
               name: table.seats[0].name,

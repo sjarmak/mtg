@@ -12,7 +12,7 @@ import { PrintedSelectionRoute } from '../../src/routes/printed/PrintedSelection
 
 const data = 'packages/data/data/ktk';
 const fixture = 'packages/ui/test/fixtures/ktk-constructed-format-v1.json';
-const admission = JSON.parse(readFileSync(`${data}/play-admission-v24/admission.json`, 'utf8')) as {
+const admission = JSON.parse(readFileSync(`${data}/play-admission/admission.json`, 'utf8')) as {
   cards: { id: string; review: string }[];
   subject: { formatId: string; formatSha256: string };
 };

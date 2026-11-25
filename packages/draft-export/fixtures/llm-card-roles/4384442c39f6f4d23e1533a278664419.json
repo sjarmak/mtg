@@ -1,0 +1,161 @@
+{
+  "key": "4384442c39f6f4d23e1533a278664419",
+  "recordedAt": "2026-11-22T22:26:01.424Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Cultivator of Blades\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elf Artificer\",\"text\":\"Fabricate 2 (When this creature enters, put two +1/+1 counters on it or create two 1/1 colorless Servo artifact creature tokens.)\\nWhenever this creature attacks, you may have other attacking creatures get +X/+X until end of turn, where X is this creature's power.\"},{\"id\":2,\"name\":\"Dubious Challenge\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top ten cards of your library, exile up to two creature cards from among them, then shuffle. Target opponent may choose one of the exiled cards and put it onto the battlefield under their control. Put the rest onto the battlefield under your control.\"},{\"id\":3,\"name\":\"Durable Handicraft\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control enters, you may pay {1}. If you do, put a +1/+1 counter on that creature.\\n{5}{G}, Sacrifice this enchantment: Put a +1/+1 counter on each creature you control.\"},{\"id\":4,\"name\":\"Elegant Edgecrafters\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Elf Artificer\",\"text\":\"This creature can't be blocked by creatures with power 2 or less.\\nFabricate 2 (When this creature enters, put two +1/+1 counters on it or create two 1/1 colorless Servo artifact creature tokens.)\"},{\"id\":5,\"name\":\"Fairgrounds Trumpeter\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"At the beginning of each end step, if a +1/+1 counter was put on a permanent under your control this turn, put a +1/+1 counter on this creature.\"},{\"id\":6,\"name\":\"Ghirapur Guide\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Scout\",\"text\":\"{2}{G}: Target creature you control can't be blocked by creatures with power 2 or less this turn.\"},{\"id\":7,\"name\":\"Highspire Artisan\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Artificer\",\"text\":\"Reach (This creature can block creatures with flying.)\\nFabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":8,\"name\":\"Hunt the Weak\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on target creature you control. Then that creature fights target creature you don't control. (Each deals damage equal to its power to the other.)\"},{\"id\":9,\"name\":\"Kujar Seedsculptor\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, put a +1/+1 counter on target creature you control.\"},{\"id\":10,\"name\":\"Larger Than Life\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gets +4/+4 and gains trample until end of turn.\"},{\"id\":11,\"name\":\"Longtusk Cub\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Whenever this creature deals combat damage to a player, you get {E}{E} (two energy counters).\\nPay {E}{E}: Put a +1/+1 counter on this creature.\"},{\"id\":12,\"name\":\"Nature's Way\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control gains vigilance and trample until end of turn. It deals damage equal to its power to target creature you don't control.\"},{\"id\":13,\"name\":\"Nissa, Vital Force\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Legendary Planeswalker — Nissa\",\"text\":\"+1: Untap target land you control. Until your next turn, it becomes a 5/5 Elemental creature with haste. It's still a land.\\n−3: Return target permanent card from your graveyard to your hand.\\n−6: You get an emblem with \\\"Whenever a land you control enters, you may draw a card.\\\"\"},{\"id\":14,\"name\":\"Ornamental Courage\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Untap target creature. It gets +1/+3 until end of turn.\"},{\"id\":15,\"name\":\"Oviya Pashiri, Sage Lifecrafter\",\"manaCost\":\"{G}\",\"typeLine\":\"Legendary Creature — Human Artificer\",\"text\":\"{2}{G}, {T}: Create a 1/1 colorless Servo artifact creature token.\\n{4}{G}, {T}: Create an X/X colorless Construct artifact creature token, where X is the number of creatures you control.\"},{\"id\":16,\"name\":\"Peema Outrider\",\"manaCost\":\"{2}{G}{G}\",\"typeLine\":\"Creature — Elf Artificer\",\"text\":\"Trample\\nFabricate 1 (When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)\"},{\"id\":17,\"name\":\"Riparian Tiger\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Trample\\nWhen this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, it gets +2/+2 until end of turn.\"},{\"id\":18,\"name\":\"Sage of Shaila's Claim\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, you get {E}{E}{E} (three energy counters).\"},{\"id\":19,\"name\":\"Servant of the Conduit\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\n{T}, Pay {E}: Add one mana of any color.\"},{\"id\":20,\"name\":\"Take Down\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Take Down deals 4 damage to target creature with flying.\\n• Take Down deals 1 damage to each creature with flying.\"},{\"id\":21,\"name\":\"Thriving Rhino\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Rhino\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, put a +1/+1 counter on it.\"},{\"id\":22,\"name\":\"Verdurous Gearhulk\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Trample\\nWhen this creature enters, distribute four +1/+1 counters among any number of target creatures you control.\"},{\"id\":23,\"name\":\"Wild Wanderer\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\"},{\"id\":24,\"name\":\"Wildest Dreams\",\"manaCost\":\"{X}{X}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return X target cards from your graveyard to your hand. Exile Wildest Dreams.\"},{\"id\":25,\"name\":\"Wily Bandar\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Cat Monkey\",\"text\":\"{2}{G}: This creature gains indestructible until end of turn. (Damage and effects that say \\\"destroy\\\" don't destroy it.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 932,
+      "cacheCreationInputTokens": 32803,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.756809,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.756809,
+      "pricedUsd": 0.756809,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.756809 and its own usage prices at $0.756809"
+    }
+  }
+}

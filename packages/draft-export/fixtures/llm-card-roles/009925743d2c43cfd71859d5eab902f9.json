@@ -1,0 +1,161 @@
+{
+  "key": "009925743d2c43cfd71859d5eab902f9",
+  "recordedAt": "2026-11-22T22:20:36.692Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Desperate Castaways\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"This creature can't attack unless you control an artifact.\"},{\"id\":2,\"name\":\"Dire Fleet Hoarder\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature dies, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":3,\"name\":\"Dire Fleet Interloper\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Menace\\nWhen this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":4,\"name\":\"Dire Fleet Ravager\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Orc Pirate Wizard\",\"text\":\"Menace, deathtouch\\nWhen this creature enters, each player loses a third of their life, rounded up.\"},{\"id\":5,\"name\":\"Duress\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card.\"},{\"id\":6,\"name\":\"Fathom Fleet Captain\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Menace\\nWhenever this creature attacks, if you control another nontoken Pirate, you may pay {2}. If you do, create a 2/2 black Pirate creature token with menace.\"},{\"id\":7,\"name\":\"Fathom Fleet Cutthroat\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"When this creature enters, destroy target creature an opponent controls that was dealt damage this turn.\"},{\"id\":8,\"name\":\"Grim Captain's Call\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return a Pirate card from your graveyard to your hand, then do the same for Vampire, Dinosaur, and Merfolk.\"},{\"id\":9,\"name\":\"Heartless Pillage\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent discards two cards.\\nRaid — If you attacked this turn, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\"},{\"id\":10,\"name\":\"Kitesail Freebooter\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Pirate\",\"text\":\"Flying\\nWhen this creature enters, target opponent reveals their hand. You choose a noncreature, nonland card from it. Exile that card until this creature leaves the battlefield.\"},{\"id\":11,\"name\":\"Lurking Chupacabra\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Beast Horror\",\"text\":\"Whenever a creature you control explores, target creature an opponent controls gets -2/-2 until end of turn.\"},{\"id\":12,\"name\":\"March of the Drowned\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose one —\\n• Return target creature card from your graveyard to your hand.\\n• Return two target Pirate cards from your graveyard to your hand.\"},{\"id\":13,\"name\":\"Mark of the Vampire\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has lifelink.\"},{\"id\":14,\"name\":\"Queen's Agent\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Vampire Scout\",\"text\":\"Lifelink\\nWhen this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":15,\"name\":\"Queen's Bay Soldier\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"\"},{\"id\":16,\"name\":\"Raiders' Wake\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent discards a card, that player loses 2 life.\\nRaid — At the beginning of your end step, if you attacked this turn, target opponent discards a card.\"},{\"id\":17,\"name\":\"Revel in Riches\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature an opponent controls dies, create a Treasure token. (It's an artifact with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\\nAt the beginning of your upkeep, if you control ten or more Treasures, you win the game.\"},{\"id\":18,\"name\":\"Ruin Raider\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Orc Pirate\",\"text\":\"Raid — At the beginning of your end step, if you attacked this turn, reveal the top card of your library and put that card into your hand. You lose life equal to the card's mana value.\"},{\"id\":19,\"name\":\"Ruthless Knave\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Orc Pirate\",\"text\":\"{2}{B}, Sacrifice a creature: Create two Treasure tokens. (They're artifacts with \\\"{T}, Sacrifice this token: Add one mana of any color.\\\")\\nSacrifice three Treasures: Draw a card.\"},{\"id\":20,\"name\":\"Sanctum Seeker\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Vampire Knight\",\"text\":\"Whenever a Vampire you control attacks, each opponent loses 1 life and you gain 1 life.\"},{\"id\":21,\"name\":\"Seekers' Squire\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"When this creature enters, it explores. (Reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)\"},{\"id\":22,\"name\":\"Skittering Heartstopper\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"{B}: This creature gains deathtouch until end of turn.\"},{\"id\":23,\"name\":\"Skulduggery\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature you control gets +1/+1 and target creature an opponent controls gets -1/-1.\"},{\"id\":24,\"name\":\"Skymarch Bloodletter\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Vampire Soldier\",\"text\":\"Flying\\nWhen this creature enters, target opponent loses 1 life and you gain 1 life.\"},{\"id\":25,\"name\":\"Spreading Rot\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Its controller loses 2 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"fixing\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"draw\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"draw\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["draw"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["draw"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 431,
+      "cacheCreationInputTokens": 32636,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7284189999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7284189999999999,
+      "pricedUsd": 0.728419,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.728419 and its own usage prices at $0.728419"
+    }
+  }
+}

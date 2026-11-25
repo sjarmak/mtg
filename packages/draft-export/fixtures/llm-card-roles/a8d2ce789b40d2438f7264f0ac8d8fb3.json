@@ -1,0 +1,161 @@
+{
+  "key": "a8d2ce789b40d2438f7264f0ac8d8fb3",
+  "recordedAt": "2026-11-22T21:45:32.168Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Ajani Goldmane\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Legendary Planeswalker — Ajani\",\"text\":\"+1: You gain 2 life.\\n−1: Put a +1/+1 counter on each creature you control. Those creatures gain vigilance until end of turn.\\n−6: Create a white Avatar creature token. It has \\\"This token's power and toughness are each equal to your life total.\\\"\"},{\"id\":2,\"name\":\"Angel's Mercy\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Instant\",\"text\":\"You gain 7 life.\"},{\"id\":3,\"name\":\"Armored Ascension\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+1 for each Plains you control and has flying.\"},{\"id\":4,\"name\":\"Baneslayer Angel\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying, first strike, lifelink, protection from Demons and from Dragons\"},{\"id\":5,\"name\":\"Blinding Mage\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{W}, {T}: Tap target creature.\"},{\"id\":6,\"name\":\"Captain of the Watch\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance (Attacking doesn't cause this creature to tap.)\\nOther Soldier creatures you control get +1/+1 and have vigilance.\\nWhen this creature enters, create three 1/1 white Soldier creature tokens.\"},{\"id\":7,\"name\":\"Celestial Purge\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target black or red permanent.\"},{\"id\":8,\"name\":\"Divine Verdict\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking or blocking creature.\"},{\"id\":9,\"name\":\"Elite Vanguard\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"\"},{\"id\":10,\"name\":\"Excommunicate\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Put target creature on top of its owner's library.\"},{\"id\":11,\"name\":\"Glorious Charge\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +1/+1 until end of turn.\"},{\"id\":12,\"name\":\"Griffin Sentinel\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying\\nVigilance (Attacking doesn't cause this creature to tap.)\"},{\"id\":13,\"name\":\"Guardian Seraph\",\"manaCost\":\"{2}{W}{W}\",\"typeLine\":\"Creature — Angel\",\"text\":\"Flying\\nIf a source an opponent controls would deal damage to you, prevent 1 of that damage.\"},{\"id\":14,\"name\":\"Harm's Way\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"The next 2 damage that a source of your choice would deal to you and/or permanents you control this turn is dealt to any target instead.\"},{\"id\":15,\"name\":\"Holy Strength\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +1/+2.\"},{\"id\":16,\"name\":\"Honor of the Pure\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"White creatures you control get +1/+1.\"},{\"id\":17,\"name\":\"Indestructibility\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant permanent\\nEnchanted permanent has indestructible. (Effects that say \\\"destroy\\\" don't destroy that permanent. A creature with indestructible can't be destroyed by damage.)\"},{\"id\":18,\"name\":\"Lifelink\",\"manaCost\":\"{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has lifelink. (Damage dealt by the creature also causes its controller to gain that much life.)\"},{\"id\":19,\"name\":\"Lightwielder Paladin\",\"manaCost\":\"{3}{W}{W}\",\"typeLine\":\"Creature — Human Knight\",\"text\":\"First strike (This creature deals combat damage before creatures without first strike.)\\nWhenever this creature deals combat damage to a player, you may exile target black or red permanent that player controls.\"},{\"id\":20,\"name\":\"Mesa Enchantress\",\"manaCost\":\"{1}{W}{W}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Whenever you cast an enchantment spell, you may draw a card.\"},{\"id\":21,\"name\":\"Open the Vaults\",\"manaCost\":\"{4}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Return all artifact and enchantment cards from all graveyards to the battlefield under their owners' control. (Auras with nothing to enchant remain in graveyards.)\"},{\"id\":22,\"name\":\"Pacifism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature can't attack or block.\"},{\"id\":23,\"name\":\"Palace Guard\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"This creature can block any number of creatures.\"},{\"id\":24,\"name\":\"Planar Cleansing\",\"manaCost\":\"{3}{W}{W}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all nonland permanents.\"},{\"id\":25,\"name\":\"Razorfoot Griffin\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Griffin\",\"text\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\nFirst strike (This creature deals combat damage before creatures without first strike.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[\"draw\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": ["draw"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1024,
+      "cacheCreationInputTokens": 32205,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7494489999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7494489999999999,
+      "pricedUsd": 0.749449,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.749449 and its own usage prices at $0.749449"
+    }
+  }
+}

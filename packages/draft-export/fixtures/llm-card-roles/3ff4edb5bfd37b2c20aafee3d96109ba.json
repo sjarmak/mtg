@@ -1,0 +1,161 @@
+{
+  "key": "3ff4edb5bfd37b2c20aafee3d96109ba",
+  "recordedAt": "2026-11-22T22:32:02.371Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Rumbling Slum\",\"manaCost\":\"{1}{R}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"At the beginning of your upkeep, this creature deals 1 damage to each player.\"},{\"id\":2,\"name\":\"Savage Twister\",\"manaCost\":\"{X}{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Savage Twister deals X damage to each creature.\"},{\"id\":3,\"name\":\"Scab-Clan Mauler\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Bloodthirst 2 (If an opponent was dealt damage this turn, this creature enters with two +1/+1 counters on it.)\\nTrample\"},{\"id\":4,\"name\":\"Schismotivate\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +4/+0 until end of turn. Another target creature gets -4/-0 until end of turn.\"},{\"id\":5,\"name\":\"Skarrgan Skybreaker\",\"manaCost\":\"{4}{R}{R}{G}\",\"typeLine\":\"Creature — Giant Shaman\",\"text\":\"Bloodthirst 3 (If an opponent was dealt damage this turn, this creature enters with three +1/+1 counters on it.)\\n{1}, Sacrifice this creature: It deals damage equal to its power to any target.\"},{\"id\":6,\"name\":\"Souls of the Faultless\",\"manaCost\":\"{W}{B}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Defender (This creature can't attack.)\\nWhenever this creature is dealt combat damage, you gain that much life and attacking player loses that much life.\"},{\"id\":7,\"name\":\"Stitch in Time\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Flip a coin. If you win the flip, take an extra turn after this one.\"},{\"id\":8,\"name\":\"Streetbreaker Wurm\",\"manaCost\":\"{3}{R}{G}\",\"typeLine\":\"Creature — Wurm\",\"text\":\"\"},{\"id\":9,\"name\":\"Teysa, Orzhov Scion\",\"manaCost\":\"{1}{W}{B}\",\"typeLine\":\"Legendary Creature — Human Advisor\",\"text\":\"Sacrifice three white creatures: Exile target creature.\\nWhenever another black creature you control dies, create a 1/1 white Spirit creature token with flying.\"},{\"id\":10,\"name\":\"Tibor and Lumia\",\"manaCost\":\"{2}{U}{R}\",\"typeLine\":\"Legendary Creature — Human Wizard\",\"text\":\"Whenever you cast a blue spell, target creature gains flying until end of turn.\\nWhenever you cast a red spell, Tibor and Lumia deals 1 damage to each creature without flying.\"},{\"id\":11,\"name\":\"Ulasht, the Hate Seed\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Legendary Creature — Hellion Hydra\",\"text\":\"Ulasht enters with a +1/+1 counter on it for each other red creature you control and a +1/+1 counter on it for each other green creature you control.\\n{1}, Remove a +1/+1 counter from Ulasht: Choose one —\\n• Ulasht deals 1 damage to target creature.\\n• Create a 1/1 green Saproling creature token.\"},{\"id\":12,\"name\":\"Wee Dragonauts\",\"manaCost\":\"{1}{U}{R}\",\"typeLine\":\"Creature — Faerie Wizard\",\"text\":\"Flying\\nWhenever you cast an instant or sorcery spell, this creature gets +2/+0 until end of turn.\"},{\"id\":13,\"name\":\"Witch-Maw Nephilim\",\"manaCost\":\"{G}{W}{U}{B}\",\"typeLine\":\"Creature — Nephilim\",\"text\":\"Whenever you cast a spell, you may put two +1/+1 counters on this creature.\\nWhenever this creature attacks, it gains trample until end of turn if its power is 10 or greater.\"},{\"id\":14,\"name\":\"Wreak Havoc\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell can't be countered.\\nDestroy target artifact or land.\"},{\"id\":15,\"name\":\"Yore-Tiller Nephilim\",\"manaCost\":\"{W}{U}{B}{R}\",\"typeLine\":\"Creature — Nephilim\",\"text\":\"Whenever this creature attacks, return target creature card from your graveyard to the battlefield tapped and attacking.\"},{\"id\":16,\"name\":\"Debtors' Knell\",\"manaCost\":\"{4}{W/B}{W/B}{W/B}\",\"typeLine\":\"Enchantment\",\"text\":\"({W/B} can be paid with either {W} or {B}.)\\nAt the beginning of your upkeep, put target creature card from a graveyard onto the battlefield under your control.\"},{\"id\":17,\"name\":\"Djinn Illuminatus\",\"manaCost\":\"{5}{U/R}{U/R}\",\"typeLine\":\"Creature — Djinn\",\"text\":\"({U/R} can be paid with either {U} or {R}.)\\nFlying\\nEach instant and sorcery spell you cast has replicate. The replicate cost is equal to its mana cost. (When you cast it, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\"},{\"id\":18,\"name\":\"Giant Solifuge\",\"manaCost\":\"{2}{R/G}{R/G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"({R/G} can be paid with either {R} or {G}.)\\nTrample; haste; shroud (This creature can't be the target of spells or abilities.)\"},{\"id\":19,\"name\":\"Gruul Guildmage\",\"manaCost\":\"{R/G}{R/G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"({R/G} can be paid with either {R} or {G}.)\\n{3}{R}, Sacrifice a land: This creature deals 2 damage to target player or planeswalker.\\n{3}{G}: Target creature gets +2/+2 until end of turn.\"},{\"id\":20,\"name\":\"Izzet Guildmage\",\"manaCost\":\"{U/R}{U/R}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"({U/R} can be paid with either {U} or {R}.)\\n{2}{U}: Copy target instant spell you control with mana value 2 or less. You may choose new targets for the copy.\\n{2}{R}: Copy target sorcery spell you control with mana value 2 or less. You may choose new targets for the copy.\"},{\"id\":21,\"name\":\"Mourning Thrull\",\"manaCost\":\"{1}{W/B}\",\"typeLine\":\"Creature — Thrull\",\"text\":\"({W/B} can be paid with either {W} or {B}.)\\nFlying\\nWhenever this creature deals damage, you gain that much life.\"},{\"id\":22,\"name\":\"Orzhov Guildmage\",\"manaCost\":\"{W/B}{W/B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"{2}{W}: Target player gains 1 life.\\n{2}{B}: Each player loses 1 life.\"},{\"id\":23,\"name\":\"Petrahydrox\",\"manaCost\":\"{3}{U/R}\",\"typeLine\":\"Creature — Weird\",\"text\":\"({U/R} can be paid with either {U} or {R}.)\\nWhen this creature becomes the target of a spell or ability, return this creature to its owner's hand.\"},{\"id\":24,\"name\":\"Wild Cantor\",\"manaCost\":\"{R/G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"({R/G} can be paid with either {R} or {G}.)\\nSacrifice this creature: Add one mana of any color.\"},{\"id\":25,\"name\":\"Gruul Signet\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{1}, {T}: Add {R}{G}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[\"draw\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": ["draw"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1290,
+      "cacheCreationInputTokens": 32811,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.774869,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.774869,
+      "pricedUsd": 0.774869,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.774869 and its own usage prices at $0.774869"
+    }
+  }
+}

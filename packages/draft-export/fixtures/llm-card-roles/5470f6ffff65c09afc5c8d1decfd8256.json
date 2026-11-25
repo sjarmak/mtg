@@ -1,0 +1,161 @@
+{
+  "key": "5470f6ffff65c09afc5c8d1decfd8256",
+  "recordedAt": "2026-11-22T22:23:06.663Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Wrangle\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target creature with power 4 or less until end of turn. Untap that creature. It gains haste until end of turn.\"},{\"id\":2,\"name\":\"Aether Herder\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Artificer Druid\",\"text\":\"When this creature enters, you get {E}{E} (two energy counters).\\nWhenever this creature attacks, you may pay {E}{E}. If you do, create a 1/1 colorless Servo artifact creature token.\"},{\"id\":3,\"name\":\"Aetherstream Leopard\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Cat\",\"text\":\"Trample\\nWhen this creature enters, you get {E} (an energy counter).\\nWhenever this creature attacks, you may pay {E}. If you do, it gets +2/+0 until end of turn.\"},{\"id\":4,\"name\":\"Aetherwind Basker\",\"manaCost\":\"{4}{G}{G}{G}\",\"typeLine\":\"Creature — Lizard\",\"text\":\"Trample\\nWhenever this creature enters or attacks, you get {E} (an energy counter) for each creature you control.\\nPay {E}: This creature gets +1/+1 until end of turn.\"},{\"id\":5,\"name\":\"Aid from the Cowl\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Enchantment\",\"text\":\"Revolt — At the beginning of your end step, if a permanent left the battlefield under your control this turn, reveal the top card of your library. If it's a permanent card, you may put it onto the battlefield. Otherwise, you may put it on the bottom of your library.\"},{\"id\":6,\"name\":\"Druid of the Cowl\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}: Add {G}.\"},{\"id\":7,\"name\":\"Greenbelt Rampager\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elephant\",\"text\":\"When this creature enters, pay {E}{E} (two energy counters). If you can't, return this creature to its owner's hand and you get {E}.\"},{\"id\":8,\"name\":\"Greenwheel Liberator\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Revolt — This creature enters with two +1/+1 counters on it if a permanent left the battlefield under your control this turn.\"},{\"id\":9,\"name\":\"Heroic Intervention\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Permanents you control gain hexproof and indestructible until end of turn.\"},{\"id\":10,\"name\":\"Hidden Herbalists\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Druid\",\"text\":\"Revolt — When this creature enters, if a permanent left the battlefield under your control this turn, add {G}{G}.\"},{\"id\":11,\"name\":\"Highspire Infusion\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 until end of turn. You get {E}{E} (two energy counters).\"},{\"id\":12,\"name\":\"Lifecraft Awakening\",\"manaCost\":\"{X}{G}\",\"typeLine\":\"Instant\",\"text\":\"Put X +1/+1 counters on target artifact you control. If it isn't a creature or Vehicle, it becomes a 0/0 Construct artifact creature.\"},{\"id\":13,\"name\":\"Lifecraft Cavalry\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Trample\\nRevolt — This creature enters with two +1/+1 counters on it if a permanent left the battlefield under your control this turn.\"},{\"id\":14,\"name\":\"Lifecrafter's Gift\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Put a +1/+1 counter on target creature, then put a +1/+1 counter on each creature you control with a +1/+1 counter on it.\"},{\"id\":15,\"name\":\"Maulfist Revolutionary\",\"manaCost\":\"{1}{G}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Trample\\nWhen this creature enters or dies, for each kind of counter on target permanent or player, give that permanent or player another counter of that kind.\"},{\"id\":16,\"name\":\"Monstrous Onslaught\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Monstrous Onslaught deals X damage divided as you choose among any number of target creatures, where X is the greatest power among creatures you control as you cast this spell.\"},{\"id\":17,\"name\":\"Narnam Renegade\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Deathtouch\\nRevolt — This creature enters with a +1/+1 counter on it if a permanent left the battlefield under your control this turn.\"},{\"id\":18,\"name\":\"Natural Obsolescence\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Put target artifact on the bottom of its owner's library.\"},{\"id\":19,\"name\":\"Peema Aether-Seer\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"When this creature enters, you get an amount of {E} (energy counters) equal to the greatest power among creatures you control.\\nPay {E}{E}{E}: Target creature blocks this turn if able.\"},{\"id\":20,\"name\":\"Prey Upon\",\"manaCost\":\"{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control fights target creature you don't control. (Each deals damage equal to its power to the other.)\"},{\"id\":21,\"name\":\"Ridgescale Tusker\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Pangolin Beast\",\"text\":\"When this creature enters, put a +1/+1 counter on each other creature you control.\"},{\"id\":22,\"name\":\"Rishkar, Peema Renegade\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Legendary Creature — Elf Druid\",\"text\":\"When Rishkar enters, put a +1/+1 counter on each of up to two target creatures.\\nEach creature you control with a counter on it has \\\"{T}: Add {G}.\\\"\"},{\"id\":23,\"name\":\"Rishkar's Expertise\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Draw cards equal to the greatest power among creatures you control.\\nYou may cast a spell with mana value 5 or less from your hand without paying its mana cost.\"},{\"id\":24,\"name\":\"Scrounging Bandar\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Cat Monkey\",\"text\":\"This creature enters with two +1/+1 counters on it.\\nAt the beginning of your upkeep, you may move any number of +1/+1 counters from this creature onto another target creature.\"},{\"id\":25,\"name\":\"Silkweaver Elite\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Elf Archer\",\"text\":\"Reach (This creature can block creatures with flying.)\\nRevolt — When this creature enters, if a permanent left the battlefield under your control this turn, draw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"draw\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["draw"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1457,
+      "cacheCreationInputTokens": 32619,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.779379,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.779379,
+      "pricedUsd": 0.779379,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.779379 and its own usage prices at $0.779379"
+    }
+  }
+}

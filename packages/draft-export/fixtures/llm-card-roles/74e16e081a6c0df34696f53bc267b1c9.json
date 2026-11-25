@@ -1,0 +1,161 @@
+{
+  "key": "74e16e081a6c0df34696f53bc267b1c9",
+  "recordedAt": "2026-11-22T22:09:27.714Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Savage Surge\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +2/+2 until end of turn. Untap that creature.\"},{\"id\":2,\"name\":\"Sedge Scorpion\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Scorpion\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\"},{\"id\":3,\"name\":\"Shredding Winds\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Shredding Winds deals 7 damage to target creature with flying.\"},{\"id\":4,\"name\":\"Staunch-Hearted Warrior\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put two +1/+1 counters on this creature.\"},{\"id\":5,\"name\":\"Sylvan Caryatid\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Plant\",\"text\":\"Defender, hexproof\\n{T}: Add one mana of any color.\"},{\"id\":6,\"name\":\"Time to Feed\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Choose target creature an opponent controls. When that creature dies this turn, you gain 3 life. Target creature you control fights that creature. (Each deals damage equal to its power to the other.)\"},{\"id\":7,\"name\":\"Voyaging Satyr\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Satyr Druid\",\"text\":\"{T}: Untap target land.\"},{\"id\":8,\"name\":\"Vulpine Goliath\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Creature — Fox\",\"text\":\"Trample\"},{\"id\":9,\"name\":\"Warriors' Lesson\",\"manaCost\":\"{G}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, up to two target creatures you control each gain \\\"Whenever this creature deals combat damage to a player, draw a card.\\\"\"},{\"id\":10,\"name\":\"Akroan Hoplite\",\"manaCost\":\"{R}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Whenever this creature attacks, it gets +X/+0 until end of turn, where X is the number of attacking creatures you control.\"},{\"id\":11,\"name\":\"Anax and Cymede\",\"manaCost\":\"{1}{R}{W}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"First strike, vigilance\\nHeroic — Whenever you cast a spell that targets Anax and Cymede, creatures you control get +1/+1 and gain trample until end of turn.\"},{\"id\":12,\"name\":\"Ashen Rider\",\"manaCost\":\"{4}{W}{W}{B}{B}\",\"typeLine\":\"Creature — Archon\",\"text\":\"Flying\\nWhen this creature enters or dies, exile target permanent.\"},{\"id\":13,\"name\":\"Ashiok, Nightmare Weaver\",\"manaCost\":\"{1}{U}{B}\",\"typeLine\":\"Legendary Planeswalker — Ashiok\",\"text\":\"+2: Exile the top three cards of target opponent's library.\\n−X: Put a creature card with mana value X exiled with Ashiok onto the battlefield under your control. That creature is a Nightmare in addition to its other types.\\n−10: Exile all cards from all opponents' hands and graveyards.\"},{\"id\":14,\"name\":\"Battlewise Hoplite\",\"manaCost\":\"{W}{U}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Heroic — Whenever you cast a spell that targets this creature, put a +1/+1 counter on this creature, then scry 1. (To scry 1, look at the top card of your library, then you may put that card on the bottom.)\"},{\"id\":15,\"name\":\"Chronicler of Heroes\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Creature — Centaur Wizard\",\"text\":\"When this creature enters, draw a card if you control a creature with a +1/+1 counter on it.\"},{\"id\":16,\"name\":\"Daxos of Meletis\",\"manaCost\":\"{1}{W}{U}\",\"typeLine\":\"Legendary Creature — Human Soldier\",\"text\":\"Daxos can't be blocked by creatures with power 3 or greater.\\nWhenever Daxos deals combat damage to a player, exile the top card of that player's library. You gain life equal to that card's mana value. Until end of turn, you may cast that card and you may spend mana as though it were mana of any color to cast that spell.\"},{\"id\":17,\"name\":\"Destructive Revelry\",\"manaCost\":\"{R}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment. Destructive Revelry deals 2 damage to that permanent's controller.\"},{\"id\":18,\"name\":\"Fleecemane Lion\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Creature — Cat\",\"text\":\"{3}{G}{W}: Monstrosity 1. (If this creature isn't monstrous, put a +1/+1 counter on it and it becomes monstrous.)\\nAs long as this creature is monstrous, it has hexproof and indestructible.\"},{\"id\":19,\"name\":\"Horizon Chimera\",\"manaCost\":\"{2}{G}{U}\",\"typeLine\":\"Creature — Chimera\",\"text\":\"Flash\\nFlying, trample\\nWhenever you draw a card, you gain 1 life.\"},{\"id\":20,\"name\":\"Kragma Warcaller\",\"manaCost\":\"{3}{B}{R}\",\"typeLine\":\"Creature — Minotaur Warrior\",\"text\":\"Minotaur creatures you control have haste.\\nWhenever a Minotaur you control attacks, it gets +2/+0 until end of turn.\"},{\"id\":21,\"name\":\"Medomai the Ageless\",\"manaCost\":\"{4}{W}{U}\",\"typeLine\":\"Legendary Creature — Sphinx\",\"text\":\"Flying\\nWhenever Medomai deals combat damage to a player, take an extra turn after this one.\\nMedomai can't attack during extra turns.\"},{\"id\":22,\"name\":\"Pharika's Mender\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Creature — Gorgon\",\"text\":\"When this creature enters, you may return target creature or enchantment card from your graveyard to your hand.\"},{\"id\":23,\"name\":\"Polis Crusher\",\"manaCost\":\"{2}{R}{G}\",\"typeLine\":\"Creature — Cyclops\",\"text\":\"Trample, protection from enchantments\\n{4}{R}{G}: Monstrosity 3. (If this creature isn't monstrous, put three +1/+1 counters on it and it becomes monstrous.)\\nWhenever this creature deals combat damage to a player, if this creature is monstrous, destroy target enchantment that player controls.\"},{\"id\":24,\"name\":\"Prophet of Kruphix\",\"manaCost\":\"{3}{G}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Untap all creatures and lands you control during each other player's untap step.\\nYou may cast creature spells as though they had flash.\"},{\"id\":25,\"name\":\"Psychic Intrusion\",\"manaCost\":\"{3}{U}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a nonland card from that player's graveyard or hand and exile it. You may cast that card for as long as it remains exiled, and you may spend mana as though it were mana of any color to cast that spell.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"draw\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"draw\"]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["draw"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["draw"]
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1612,
+      "cacheCreationInputTokens": 32688,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.788509,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.788509,
+      "pricedUsd": 0.788509,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.788509 and its own usage prices at $0.788509"
+    }
+  }
+}

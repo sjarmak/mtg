@@ -1,6 +1,6 @@
 import { createElement as h, Fragment, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { PreparedPrintedLimitedFormat, PrintedBoosterCopy } from '@mtg/draft-export';
+import type { PreparedPrintedLimitedFormat, PrintedBoosterCopy, PrintedCardRoles } from '@mtg/draft-export';
 import { communityPickOrderRating, ratingValueOf, resolveCardRating } from '@mtg/draft-export';
 import type { GameBackend } from '@mtg/engine';
 import type { PrintedFormatRow } from '../../lab/printed-format';
@@ -36,6 +36,8 @@ interface Props {
   readonly tokens?: readonly PrintedTokenPrinting[];
   readonly playAvailability: PrintedFormatRow['availability']['play'];
   readonly draftRatings?: PrintedDraftRatings;
+  /** Only a saved role-aware policy reads these; a new draft's bot does not. */
+  readonly cardRoles?: PrintedCardRoles;
 }
 const storageKey = (props: Props): string => `mtg.printed.draft:${props.prepared.format.id}:${props.seed}`;
 /** The source label a staged Forge Limited ranking is shown under — never a bare number. */
@@ -152,6 +154,7 @@ function initialState(props: Props): State {
     const bot = createPrintedReplayBot(
       input.mode === 'draft' ? input.transcript.botPolicy : undefined,
       props.draftRatings,
+      props.cardRoles,
     );
     const restored = restorePrintedSession(props.prepared, input, bot);
     if (restored.session.mode !== 'draft' || restored.session.transcript.seed !== props.seed)

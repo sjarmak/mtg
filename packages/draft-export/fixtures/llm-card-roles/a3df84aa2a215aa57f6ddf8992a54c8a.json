@@ -1,0 +1,161 @@
+{
+  "key": "a3df84aa2a215aa57f6ddf8992a54c8a",
+  "recordedAt": "2026-11-22T21:35:09.567Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Semblance Anvil\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"Imprint — When this artifact enters, you may exile a nonland card from your hand.\\nSpells you cast that share a card type with the exiled card cost {2} less to cast.\"},{\"id\":2,\"name\":\"Silver Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Add {U}.\"},{\"id\":3,\"name\":\"Snapsail Glider\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"Metalcraft — This creature has flying as long as you control three or more artifacts.\"},{\"id\":4,\"name\":\"Soliton\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"{U}: Untap this creature.\"},{\"id\":5,\"name\":\"Steel Hellkite\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Dragon\",\"text\":\"Flying\\n{2}: This creature gets +1/+0 until end of turn.\\n{X}: Destroy each nonland permanent with mana value X whose controller was dealt combat damage by this creature this turn. Activate only once each turn.\"},{\"id\":6,\"name\":\"Strata Scythe\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Imprint — When this Equipment enters, search your library for a land card, exile it, then shuffle.\\nEquipped creature gets +1/+1 for each land on the battlefield with the same name as the exiled card.\\nEquip {3}\"},{\"id\":7,\"name\":\"Strider Harness\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+1 and has haste.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":8,\"name\":\"Sword of Body and Mind\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and has protection from green and from blue.\\nWhenever equipped creature deals combat damage to a player, you create a 2/2 green Wolf creature token and that player mills ten cards.\\nEquip {2}\"},{\"id\":9,\"name\":\"Sylvok Lifestaff\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +1/+0.\\nWhenever equipped creature dies, you gain 3 life.\\nEquip {1}\"},{\"id\":10,\"name\":\"Sylvok Replica\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Shaman\",\"text\":\"{G}, Sacrifice this creature: Destroy target artifact or enchantment.\"},{\"id\":11,\"name\":\"Throne of Geth\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"{T}, Sacrifice an artifact: Proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":12,\"name\":\"Tower of Calamities\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{8}, {T}: This artifact deals 12 damage to target creature.\"},{\"id\":13,\"name\":\"Trigon of Corruption\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{B}{B}, {T}: Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Put a -1/-1 counter on target creature.\"},{\"id\":14,\"name\":\"Trigon of Infestation\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{G}{G}, {T}: Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Create a 1/1 green Phyrexian Insect creature token with infect.\"},{\"id\":15,\"name\":\"Trigon of Mending\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{W}{W}, {T}: Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Target player gains 3 life.\"},{\"id\":16,\"name\":\"Trigon of Rage\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{R}{R}, {T}: Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Target creature gets +3/+0 until end of turn.\"},{\"id\":17,\"name\":\"Trigon of Thought\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{U}{U}, {T}: Put a charge counter on this artifact.\\n{2}, {T}, Remove a charge counter from this artifact: Draw a card.\"},{\"id\":18,\"name\":\"Tumble Magnet\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"This artifact enters with three charge counters on it.\\n{T}, Remove a charge counter from this artifact: Tap target artifact or creature.\"},{\"id\":19,\"name\":\"Vector Asp\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact Creature — Phyrexian Snake\",\"text\":\"{B}: This creature gains infect until end of turn. (It deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":20,\"name\":\"Venser's Journal\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact — Book\",\"text\":\"You have no maximum hand size.\\nAt the beginning of your upkeep, you gain 1 life for each card in your hand.\"},{\"id\":21,\"name\":\"Vulshok Replica\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Berserker\",\"text\":\"{1}{R}, Sacrifice this creature: It deals 3 damage to target player or planeswalker.\"},{\"id\":22,\"name\":\"Wall of Tanglecord\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Wall\",\"text\":\"Defender\\n{G}: This creature gains reach until end of turn. (It can block creatures with flying.)\"},{\"id\":23,\"name\":\"Wurmcoil Engine\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Phyrexian Wurm\",\"text\":\"Deathtouch, lifelink\\nWhen this creature dies, create a 3/3 colorless Phyrexian Wurm artifact creature token with deathtouch and a 3/3 colorless Phyrexian Wurm artifact creature token with lifelink.\"},{\"id\":24,\"name\":\"Blackcleave Cliffs\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {B} or {R}.\"},{\"id\":25,\"name\":\"Copperline Gorge\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped unless you control two or fewer other lands.\\n{T}: Add {R} or {G}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1115,
+      "cacheCreationInputTokens": 32638,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.762659,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.762659,
+      "pricedUsd": 0.762659,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.762659 and its own usage prices at $0.762659"
+    }
+  }
+}

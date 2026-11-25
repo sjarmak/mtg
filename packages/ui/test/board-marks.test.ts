@@ -448,11 +448,10 @@ describe('where the marks row sits', () => {
     // Scoped to the slot, or a slot's badges would resolve against the last
     // card in the document rather than their own. Both names are scoped: the
     // row ends where the mana cost begins, so it reads the cost's anchor too.
-    expect(sheet).toContain('.mtg-slot { anchor-scope: --mtg-art-anchor, --mtg-cost-anchor; }');
+    expect(sheet).toContain('anchor-scope: --mtg-art-anchor, --mtg-cost-anchor;');
     expect(sheet).toContain('inset-inline-end: anchor(--mtg-cost-anchor start);');
-    // And the guard tests the scope rather than the name, for that reason.
-    expect(sheet).toContain('@supports (anchor-scope: --mtg-art-anchor) {');
-    expect(sheet).toContain('@supports not (anchor-scope: --mtg-art-anchor) {');
+    // Unguarded: every target browser has anchor-scope (mtg-9edk.1).
+    expect(sheet).not.toContain('@supports (anchor-scope: --mtg-art-anchor) {');
   });
 
   it('lets a badge break its text only where the picture is a rotated strip', () => {
@@ -469,14 +468,5 @@ describe('where the marks row sits', () => {
     const badge = sheet.indexOf('.mtg-mark {');
     expect(badge).toBeGreaterThan(-1);
     expect(sheet.slice(badge, sheet.indexOf('}', badge))).not.toContain('white-space');
-  });
-
-  it('leaves the corner placement as the floor, so an unsupporting browser is where it was', () => {
-    const sheet = uiStyleSheet();
-    const row = sheet.indexOf('.mtg-slot__marks {');
-    expect(row).toBeGreaterThan(-1);
-    const declared = sheet.slice(row, sheet.indexOf('}', row));
-    expect(declared).toContain('inset-inline-start: var(--mtg-space-1)');
-    expect(declared).toContain('inset-block-start: var(--mtg-space-1)');
   });
 });

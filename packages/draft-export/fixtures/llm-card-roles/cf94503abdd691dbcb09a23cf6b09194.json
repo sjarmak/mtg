@@ -1,0 +1,161 @@
+{
+  "key": "cf94503abdd691dbcb09a23cf6b09194",
+  "recordedAt": "2026-11-22T22:15:37.612Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Temur Banner\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {G}, {U}, or {R}.\\n{G}{U}{R}, {T}, Sacrifice this artifact: Draw a card.\"},{\"id\":2,\"name\":\"Ugin's Nexus\",\"manaCost\":\"{5}\",\"typeLine\":\"Legendary Artifact\",\"text\":\"If a player would begin an extra turn, that player skips that turn instead.\\nIf Ugin's Nexus would be put into a graveyard from the battlefield, instead exile it and take an extra turn after this one.\"},{\"id\":3,\"name\":\"Witness of the Ages\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"Morph {5} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":4,\"name\":\"Bloodfell Caves\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {B} or {R}.\"},{\"id\":5,\"name\":\"Bloodstained Mire\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life, Sacrifice this land: Search your library for a Swamp or Mountain card, put it onto the battlefield, then shuffle.\"},{\"id\":6,\"name\":\"Blossoming Sands\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {G} or {W}.\"},{\"id\":7,\"name\":\"Dismal Backwater\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {U} or {B}.\"},{\"id\":8,\"name\":\"Flooded Strand\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life, Sacrifice this land: Search your library for a Plains or Island card, put it onto the battlefield, then shuffle.\"},{\"id\":9,\"name\":\"Frontier Bivouac\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {G}, {U}, or {R}.\"},{\"id\":10,\"name\":\"Jungle Hollow\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {B} or {G}.\"},{\"id\":11,\"name\":\"Mystic Monastery\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {U}, {R}, or {W}.\"},{\"id\":12,\"name\":\"Nomad Outpost\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {R}, {W}, or {B}.\"},{\"id\":13,\"name\":\"Opulent Palace\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {B}, {G}, or {U}.\"},{\"id\":14,\"name\":\"Polluted Delta\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life, Sacrifice this land: Search your library for an Island or Swamp card, put it onto the battlefield, then shuffle.\"},{\"id\":15,\"name\":\"Rugged Highlands\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {R} or {G}.\"},{\"id\":16,\"name\":\"Sandsteppe Citadel\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\n{T}: Add {W}, {B}, or {G}.\"},{\"id\":17,\"name\":\"Scoured Barrens\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {W} or {B}.\"},{\"id\":18,\"name\":\"Swiftwater Cliffs\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {U} or {R}.\"},{\"id\":19,\"name\":\"Thornwood Falls\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {G} or {U}.\"},{\"id\":20,\"name\":\"Tomb of the Spirit Dragon\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}: Add {C}.\\n{2}, {T}: You gain 1 life for each colorless creature you control.\"},{\"id\":21,\"name\":\"Tranquil Cove\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {W} or {U}.\"},{\"id\":22,\"name\":\"Wind-Scarred Crag\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"This land enters tapped.\\nWhen this land enters, you gain 1 life.\\n{T}: Add {R} or {W}.\"},{\"id\":23,\"name\":\"Windswept Heath\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life, Sacrifice this land: Search your library for a Forest or Plains card, put it onto the battlefield, then shuffle.\"},{\"id\":24,\"name\":\"Wooded Foothills\",\"manaCost\":\"\",\"typeLine\":\"Land\",\"text\":\"{T}, Pay 1 life, Sacrifice this land: Search your library for a Mountain or Forest card, put it onto the battlefield, then shuffle.\"},{\"id\":25,\"name\":\"Plains\",\"manaCost\":\"\",\"typeLine\":\"Basic Land — Plains\",\"text\":\"({T}: Add {W}.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"fixing\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"fixing\"]},{\"id\":5,\"roles\":[\"fixing\"]},{\"id\":6,\"roles\":[\"fixing\"]},{\"id\":7,\"roles\":[\"fixing\"]},{\"id\":8,\"roles\":[\"fixing\"]},{\"id\":9,\"roles\":[\"fixing\"]},{\"id\":10,\"roles\":[\"fixing\"]},{\"id\":11,\"roles\":[\"fixing\"]},{\"id\":12,\"roles\":[\"fixing\"]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[\"fixing\"]},{\"id\":15,\"roles\":[\"fixing\"]},{\"id\":16,\"roles\":[\"fixing\"]},{\"id\":17,\"roles\":[\"fixing\"]},{\"id\":18,\"roles\":[\"fixing\"]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"fixing\"]},{\"id\":22,\"roles\":[\"fixing\"]},{\"id\":23,\"roles\":[\"fixing\"]},{\"id\":24,\"roles\":[\"fixing\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 5,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 6,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 7,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 8,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 9,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 10,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 11,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 12,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 15,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 16,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 17,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 18,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 22,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 23,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 24,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 462,
+      "cacheCreationInputTokens": 32209,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.721429,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.721429,
+      "pricedUsd": 0.721429,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.721429 and its own usage prices at $0.721429"
+    }
+  }
+}

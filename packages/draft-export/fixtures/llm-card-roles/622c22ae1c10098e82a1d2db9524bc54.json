@@ -1,0 +1,161 @@
+{
+  "key": "622c22ae1c10098e82a1d2db9524bc54",
+  "recordedAt": "2026-11-22T21:23:48.241Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Sunscourge Champion\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you gain life equal to its power.\\nEternalize—{2}{W}{W}, Discard a card. ({2}{W}{W}, Discard a card, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Human Wizard with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":2,\"name\":\"Unconventional Tactics\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gets +3/+3 and gains flying until end of turn.\\nWhenever a Zombie you control enters, you may pay {W}. If you do, return this card from your graveyard to your hand.\"},{\"id\":3,\"name\":\"Vizier of the True\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"You may exert this creature as it attacks. (It won't untap during your next untap step.)\\nWhenever you exert a creature, tap target creature an opponent controls.\"},{\"id\":4,\"name\":\"Aerial Guide\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nWhenever this creature attacks, another target attacking creature gains flying until end of turn.\"},{\"id\":5,\"name\":\"Aven Reedstalker\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Bird Warrior\",\"text\":\"Flash\\nFlying\"},{\"id\":6,\"name\":\"Champion of Wits\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Snake Wizard\",\"text\":\"When this creature enters, you may draw cards equal to its power. If you do, discard two cards.\\nEternalize {5}{U}{U} ({5}{U}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Snake Wizard with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":7,\"name\":\"Countervailing Winds\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {1} for each card in your graveyard.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":8,\"name\":\"Cunning Survivor\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Whenever you cycle or discard a card, this creature gets +1/+0 until end of turn and can't be blocked this turn.\"},{\"id\":9,\"name\":\"Eternal of Harsh Truths\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Zombie Cleric\",\"text\":\"Afflict 2 (Whenever this creature becomes blocked, defending player loses 2 life.)\\nWhenever this creature attacks and isn't blocked, draw a card.\"},{\"id\":10,\"name\":\"Fraying Sanity\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of each end step, enchanted player mills X cards, where X is the number of cards put into their graveyard from anywhere this turn.\"},{\"id\":11,\"name\":\"Hour of Eternity\",\"manaCost\":\"{X}{X}{U}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Exile X target creature cards from your graveyard. For each card exiled this way, create a token that's a copy of that card, except it's a 4/4 black Zombie.\"},{\"id\":12,\"name\":\"Imaginary Threats\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Creatures target opponent controls attack this turn if able. During that player's next untap step, creatures they control don't untap.\\nCycling {2} ({2}, Discard this card: Draw a card.)\"},{\"id\":13,\"name\":\"Jace's Defeat\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target blue spell. If it was a Jace planeswalker spell, scry 2.\"},{\"id\":14,\"name\":\"Kefnet's Last Word\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Gain control of target artifact, creature, or enchantment. Lands you control don't untap during your next untap step.\"},{\"id\":15,\"name\":\"Nimble Obstructionist\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Bird Wizard\",\"text\":\"Flash\\nFlying\\nCycling {2}{U} ({2}{U}, Discard this card: Draw a card.)\\nWhen you cycle this card, counter target activated or triggered ability you don't control.\"},{\"id\":16,\"name\":\"Ominous Sphinx\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nWhenever you cycle or discard a card, target creature an opponent controls gets -2/-0 until end of turn.\"},{\"id\":17,\"name\":\"Proven Combatant\",\"manaCost\":\"{U}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Eternalize {4}{U}{U} ({4}{U}{U}, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Human Warrior with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":18,\"name\":\"Riddleform\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a noncreature spell, you may have this enchantment become a 3/3 Sphinx creature with flying in addition to its other types until end of turn.\\n{2}{U}: Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\"},{\"id\":19,\"name\":\"Seer of the Last Tomorrow\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Snake Cleric\",\"text\":\"{U}, {T}, Discard a card: Target player mills three cards.\"},{\"id\":20,\"name\":\"Sinuous Striker\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Snake Warrior\",\"text\":\"{U}: This creature gets +1/-1 until end of turn.\\nEternalize—{3}{U}{U}, Discard a card. ({3}{U}{U}, Discard a card, Exile this card from your graveyard: Create a token that's a copy of it, except it's a 4/4 black Zombie Snake Warrior with no mana cost. Eternalize only as a sorcery.)\"},{\"id\":21,\"name\":\"Spellweaver Eternal\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Zombie Snake Wizard\",\"text\":\"Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\\nAfflict 2 (Whenever this creature becomes blocked, defending player loses 2 life.)\"},{\"id\":22,\"name\":\"Strategic Planning\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Look at the top three cards of your library. Put one of them into your hand and the rest into your graveyard.\"},{\"id\":23,\"name\":\"Striped Riverwinder\",\"manaCost\":\"{6}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"Hexproof (This creature can't be the target of spells or abilities your opponents control.)\\nCycling {U} ({U}, Discard this card: Draw a card.)\"},{\"id\":24,\"name\":\"Supreme Will\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Choose one —\\n• Counter target spell unless its controller pays {3}.\\n• Look at the top four cards of your library. Put one of them into your hand and the rest on the bottom of your library in any order.\"},{\"id\":25,\"name\":\"Swarm Intelligence\",\"manaCost\":\"{6}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast an instant or sorcery spell, you may copy that spell. You may choose new targets for the copy.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1509,
+      "cacheCreationInputTokens": 32944,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.788479,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.788479,
+      "pricedUsd": 0.788479,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.788479 and its own usage prices at $0.788479"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "509d0a5fc2dc346653b81a8efd73130b",
+  "recordedAt": "2026-11-22T21:59:07.157Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Evernight Shade\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Shade\",\"text\":\"{B}: This creature gets +1/+1 until end of turn.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":2,\"name\":\"Exquisite Blood\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever an opponent loses life, you gain that much life.\"},{\"id\":3,\"name\":\"Ghoulflesh\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -1/-1 and is a black Zombie in addition to its other colors and types.\"},{\"id\":4,\"name\":\"Gloom Surgeon\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"If combat damage would be dealt to this creature, prevent that damage and exile that many cards from the top of your library.\"},{\"id\":5,\"name\":\"Grave Exchange\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target creature card from your graveyard to your hand. Target player sacrifices a creature of their choice.\"},{\"id\":6,\"name\":\"Griselbrand\",\"manaCost\":\"{4}{B}{B}{B}{B}\",\"typeLine\":\"Legendary Creature — Demon\",\"text\":\"Flying, lifelink\\nPay 7 life: Draw seven cards.\"},{\"id\":7,\"name\":\"Harvester of Souls\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\\nWhenever another nontoken creature dies, you may draw a card.\"},{\"id\":8,\"name\":\"Homicidal Seclusion\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"As long as you control exactly one creature, that creature gets +3/+1 and has lifelink.\"},{\"id\":9,\"name\":\"Human Frailty\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target Human creature.\"},{\"id\":10,\"name\":\"Hunted Ghoul\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature can't block Humans.\"},{\"id\":11,\"name\":\"Killing Wave\",\"manaCost\":\"{X}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"For each creature, its controller sacrifices it unless they pay X life.\"},{\"id\":12,\"name\":\"Maalfeld Twins\",\"manaCost\":\"{5}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, create two 2/2 black Zombie creature tokens.\"},{\"id\":13,\"name\":\"Marrow Bats\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Bat Skeleton\",\"text\":\"Flying\\nPay 4 life: Regenerate this creature.\"},{\"id\":14,\"name\":\"Mental Agony\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards and loses 2 life.\"},{\"id\":15,\"name\":\"Necrobite\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gains deathtouch until end of turn. Regenerate it. (The next time that creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":16,\"name\":\"Polluted Dead\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, destroy target land.\"},{\"id\":17,\"name\":\"Predator's Gambit\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+1.\\nEnchanted creature has intimidate as long as its controller controls no other creatures. (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":18,\"name\":\"Renegade Demon\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"\"},{\"id\":19,\"name\":\"Searchlight Geist\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\n{3}{B}: This creature gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":20,\"name\":\"Soulcage Fiend\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"When this creature dies, each player loses 3 life.\"},{\"id\":21,\"name\":\"Treacherous Pit-Dweller\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"When this creature enters from a graveyard, target opponent gains control of it.\\nUndying (When this creature dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.)\"},{\"id\":22,\"name\":\"Triumph of Cruelty\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, target opponent discards a card if you control the creature with the greatest power or tied for the greatest power.\"},{\"id\":23,\"name\":\"Undead Executioner\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"When this creature dies, you may have target creature get -2/-2 until end of turn.\"},{\"id\":24,\"name\":\"Unhallowed Pact\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen enchanted creature dies, return that card to the battlefield under your control.\"},{\"id\":25,\"name\":\"Aggravate\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Instant\",\"text\":\"Aggravate deals 1 damage to each creature target player controls. Each creature dealt damage this way attacks this turn if able.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\",\"draw\"]},{\"id\":6,\"roles\":[\"draw\"]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["draw"]
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1387,
+      "cacheCreationInputTokens": 32272,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.768939,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.768939,
+      "pricedUsd": 0.768939,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.768939 and its own usage prices at $0.768939"
+    }
+  }
+}

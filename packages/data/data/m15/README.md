@@ -112,7 +112,7 @@ Run with the CLI's actual contract:
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/m15/probes/m15-scenario-probes-v1-config.json --out out/m15/scenario-probes-v1 --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/m15/scenario-probes-v1 --inventory out/m15/decision-inventory-v2/inventory.json --out out/m15/script-qualifications-v1
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/m15/probes/m15-match-probes-v1-config.json --out out/m15/match-probes-v1 --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/m15/m15-limited-format-v1.json --catalog packages/data/data/m15/m15-printed-catalog-v1.json --qualifications out/m15/script-qualifications-v1 --match-probes out/m15/match-probes-v1 --out packages/data/data/m15/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/m15/m15-limited-format-v1.json --catalog packages/data/data/m15/m15-printed-catalog-v1.json --qualifications out/m15/script-qualifications-v1 --match-probes out/m15/match-probes-v1 --out packages/data/data/m15/play-admission
 ```
 
 The qualification bundle reports `qualified: 269, residual: 0`.
@@ -196,7 +196,7 @@ change, use output `play-admission-v9/`.
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `m15` entry with
-`play.status: supported` and `admissionDirectory: play-admission-v8`. The
+`play.status: supported` and `admissionDirectory: play-admission`. The
 launcher (`packages/ui/tools/play.ts`) reads every supported entry at boot and
 `startBackendService` admits all of them behind one Forge identity, so M15
 sits alongside the nine other registered sets, including sibling lanes

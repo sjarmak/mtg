@@ -1,0 +1,161 @@
+{
+  "key": "a323edd6fb4559901f0164257664a761",
+  "recordedAt": "2026-11-22T22:02:09.518Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Supreme Verdict\",\"manaCost\":\"{1}{W}{W}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"This spell can't be countered.\\nDestroy all creatures.\"},{\"id\":2,\"name\":\"Teleportal\",\"manaCost\":\"{U}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control gets +1/+0 until end of turn and can't be blocked this turn.\\nOverload {3}{U}{R} (You may cast this spell for its overload cost. If you do, change \\\"target\\\" in its text to \\\"each.\\\")\"},{\"id\":3,\"name\":\"Thoughtflare\",\"manaCost\":\"{3}{U}{R}\",\"typeLine\":\"Instant\",\"text\":\"Draw four cards, then discard two cards.\"},{\"id\":4,\"name\":\"Treasured Find\",\"manaCost\":\"{B}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Return target card from your graveyard to your hand. Exile Treasured Find.\"},{\"id\":5,\"name\":\"Trestle Troll\",\"manaCost\":\"{1}{B}{G}\",\"typeLine\":\"Creature — Troll\",\"text\":\"Defender\\nReach (This creature can block creatures with flying.)\\n{1}{B}{G}: Regenerate this creature.\"},{\"id\":6,\"name\":\"Trostani, Selesnya's Voice\",\"manaCost\":\"{G}{G}{W}{W}\",\"typeLine\":\"Legendary Creature — Dryad\",\"text\":\"Whenever another creature you control enters, you gain life equal to that creature's toughness.\\n{1}{G}{W}, {T}: Populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":7,\"name\":\"Vitu-Ghazi Guildmage\",\"manaCost\":\"{G}{W}\",\"typeLine\":\"Creature — Dryad Shaman\",\"text\":\"{4}{G}{W}: Create a 3/3 green Centaur creature token.\\n{2}{G}{W}: Populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":8,\"name\":\"Vraska the Unseen\",\"manaCost\":\"{3}{B}{G}\",\"typeLine\":\"Legendary Planeswalker — Vraska\",\"text\":\"+1: Until your next turn, whenever a creature deals combat damage to Vraska, destroy that creature.\\n−3: Destroy target nonland permanent.\\n−7: Create three 1/1 black Assassin creature tokens with \\\"Whenever this token deals combat damage to a player, that player loses the game.\\\"\"},{\"id\":9,\"name\":\"Wayfaring Temple\",\"manaCost\":\"{1}{G}{W}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Wayfaring Temple's power and toughness are each equal to the number of creatures you control.\\nWhenever this creature deals combat damage to a player, populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":10,\"name\":\"Azor's Elocutors\",\"manaCost\":\"{3}{W/U}{W/U}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"At the beginning of your upkeep, put a filibuster counter on this creature. Then if this creature has five or more filibuster counters on it, you win the game.\\nWhenever a source deals damage to you, remove a filibuster counter from this creature.\"},{\"id\":11,\"name\":\"Blistercoil Weird\",\"manaCost\":\"{U/R}\",\"typeLine\":\"Creature — Weird\",\"text\":\"Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. Untap it.\"},{\"id\":12,\"name\":\"Cryptborn Horror\",\"manaCost\":\"{1}{B/R}{B/R}\",\"typeLine\":\"Creature — Horror\",\"text\":\"Trample\\nThis creature enters with X +1/+1 counters on it, where X is the total life lost by your opponents this turn.\"},{\"id\":13,\"name\":\"Deathrite Shaman\",\"manaCost\":\"{B/G}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"{T}: Exile target land card from a graveyard. Add one mana of any color. (Activate only as an instant.)\\n{B}, {T}: Exile target instant or sorcery card from a graveyard. Each opponent loses 2 life.\\n{G}, {T}: Exile target creature card from a graveyard. You gain 2 life.\"},{\"id\":14,\"name\":\"Dryad Militant\",\"manaCost\":\"{G/W}\",\"typeLine\":\"Creature — Dryad Soldier\",\"text\":\"({G/W} can be paid with either {G} or {W}.)\\nIf an instant or sorcery card would be put into a graveyard from anywhere, exile it instead.\"},{\"id\":15,\"name\":\"Frostburn Weird\",\"manaCost\":\"{U/R}{U/R}\",\"typeLine\":\"Creature — Weird\",\"text\":\"{U/R}: This creature gets +1/-1 until end of turn.\"},{\"id\":16,\"name\":\"Golgari Longlegs\",\"manaCost\":\"{3}{B/G}{B/G}\",\"typeLine\":\"Creature — Insect\",\"text\":\"\"},{\"id\":17,\"name\":\"Growing Ranks\",\"manaCost\":\"{2}{G/W}{G/W}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":18,\"name\":\"Judge's Familiar\",\"manaCost\":\"{W/U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nSacrifice this creature: Counter target instant or sorcery spell unless its controller pays {1}.\"},{\"id\":19,\"name\":\"Nivmagus Elemental\",\"manaCost\":\"{U/R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Exile an instant or sorcery spell you control: Put two +1/+1 counters on this creature. (That spell won't resolve.)\"},{\"id\":20,\"name\":\"Rakdos Cackler\",\"manaCost\":\"{B/R}\",\"typeLine\":\"Creature — Devil\",\"text\":\"Unleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":21,\"name\":\"Rakdos Shred-Freak\",\"manaCost\":\"{B/R}{B/R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Haste\"},{\"id\":22,\"name\":\"Slitherhead\",\"manaCost\":\"{B/G}\",\"typeLine\":\"Creature — Plant Zombie\",\"text\":\"Scavenge {0} ({0}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"},{\"id\":23,\"name\":\"Sundering Growth\",\"manaCost\":\"{G/W}{G/W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment, then populate. (Create a token that's a copy of a creature token you control.)\"},{\"id\":24,\"name\":\"Vassal Soul\",\"manaCost\":\"{1}{W/U}{W/U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\"},{\"id\":25,\"name\":\"Azorius Keyrune\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Add {W} or {U}.\\n{W}{U}: This artifact becomes a 2/2 white and blue Bird artifact creature with flying until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"fixing\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 958,
+      "cacheCreationInputTokens": 32652,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7550890000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7550890000000001,
+      "pricedUsd": 0.755089,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.755089 and its own usage prices at $0.755089"
+    }
+  }
+}

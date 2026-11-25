@@ -1,0 +1,161 @@
+{
+  "key": "892358925daf0e709d4828931c0decd1",
+  "recordedAt": "2026-11-22T22:00:55.513Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Soulsworn Spirit\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"This creature can't be blocked.\\nWhen this creature enters, detain target creature an opponent controls. (Until your next turn, that creature can't attack or block and its activated abilities can't be activated.)\"},{\"id\":2,\"name\":\"Sphinx of the Chimes\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nDiscard two nonland cards with the same name: Draw four cards.\"},{\"id\":3,\"name\":\"Stealer of Secrets\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Rogue\",\"text\":\"Whenever this creature deals combat damage to a player, draw a card.\"},{\"id\":4,\"name\":\"Syncopate\",\"manaCost\":\"{X}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell unless its controller pays {X}. If that spell is countered this way, exile it instead of putting it into its owner's graveyard.\"},{\"id\":5,\"name\":\"Tower Drake\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\n{W}: This creature gets +0/+1 until end of turn.\"},{\"id\":6,\"name\":\"Voidwielder\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may return target creature to its owner's hand.\"},{\"id\":7,\"name\":\"Assassin's Strike\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target creature. Its controller discards a card.\"},{\"id\":8,\"name\":\"Catacomb Slug\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Slug\",\"text\":\"\"},{\"id\":9,\"name\":\"Cremate\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Exile target card from a graveyard.\\nDraw a card.\"},{\"id\":10,\"name\":\"Daggerdrome Imp\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\nLifelink (Damage dealt by this creature also causes you to gain that much life.)\"},{\"id\":11,\"name\":\"Dark Revenant\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhen this creature dies, put it on top of its owner's library.\"},{\"id\":12,\"name\":\"Dead Reveler\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Unleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\"},{\"id\":13,\"name\":\"Desecration Demon\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nAt the beginning of each combat, any opponent may sacrifice a creature of their choice. If a player does, tap this creature and put a +1/+1 counter on it.\"},{\"id\":14,\"name\":\"Destroy the Evidence\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Its controller reveals cards from the top of their library until they reveal a land card, then puts those cards into their graveyard.\"},{\"id\":15,\"name\":\"Deviant Glee\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+1 and has \\\"{R}: This creature gains trample until end of turn.\\\"\"},{\"id\":16,\"name\":\"Drainpipe Vermin\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"When this creature dies, you may pay {B}. If you do, target player discards a card.\"},{\"id\":17,\"name\":\"Grave Betrayal\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you don't control dies, return it to the battlefield under your control with an additional +1/+1 counter on it at the beginning of the next end step. That creature is a black Zombie in addition to its other colors and types.\"},{\"id\":18,\"name\":\"Grim Roustabout\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Skeleton Warrior\",\"text\":\"Unleash (You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.)\\n{1}{B}: Regenerate this creature.\"},{\"id\":19,\"name\":\"Launch Party\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nDestroy target creature. Its controller loses 2 life.\"},{\"id\":20,\"name\":\"Mind Rot\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards two cards.\"},{\"id\":21,\"name\":\"Necropolis Regent\",\"manaCost\":\"{3}{B}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying\\nWhenever a creature you control deals combat damage to a player, put that many +1/+1 counters on it.\"},{\"id\":22,\"name\":\"Ogre Jailbreaker\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Ogre Rogue\",\"text\":\"Defender\\nThis creature can attack as though it didn't have defender as long as you control a Gate.\"},{\"id\":23,\"name\":\"Pack Rat\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Rat\",\"text\":\"Pack Rat's power and toughness are each equal to the number of Rats you control.\\n{2}{B}, Discard a card: Create a token that's a copy of this creature.\"},{\"id\":24,\"name\":\"Perilous Shadow\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Insect Shade\",\"text\":\"{1}{B}: This creature gets +2/+2 until end of turn.\"},{\"id\":25,\"name\":\"Sewer Shambler\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\\nScavenge {2}{B} ({2}{B}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[\"draw\"]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": ["draw"]
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1476,
+      "cacheCreationInputTokens": 32370,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7753490000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7753490000000001,
+      "pricedUsd": 0.775349,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.775349 and its own usage prices at $0.775349"
+    }
+  }
+}

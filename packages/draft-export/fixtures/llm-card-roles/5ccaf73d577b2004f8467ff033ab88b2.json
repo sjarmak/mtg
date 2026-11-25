@@ -1,0 +1,161 @@
+{
+  "key": "5ccaf73d577b2004f8467ff033ab88b2",
+  "recordedAt": "2026-11-22T22:37:35.673Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Axegrinder Giant\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"\"},{\"id\":2,\"name\":\"Blades of Velis Vel\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Kindred Instant — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nUp to two target creatures each get +2/+0 and gain all creature types until end of turn.\"},{\"id\":3,\"name\":\"Blind-Spot Giant\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"This creature can't attack or block unless you control another Giant.\"},{\"id\":4,\"name\":\"Boggart Forager\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"{R}, Sacrifice this creature: Target player shuffles their library.\"},{\"id\":5,\"name\":\"Boggart Shenanigans\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Kindred Enchantment — Goblin\",\"text\":\"Whenever another Goblin you control is put into a graveyard from the battlefield, you may have this enchantment deal 1 damage to target player or planeswalker.\"},{\"id\":6,\"name\":\"Boggart Sprite-Chaser\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"As long as you control a Faerie, this creature gets +1/+1 and has flying.\"},{\"id\":7,\"name\":\"Caterwauling Boggart\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Shaman\",\"text\":\"Goblins you control and Elementals you control have menace. (They can't be blocked except by two or more creatures.)\"},{\"id\":8,\"name\":\"Ceaseless Searblades\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"Whenever you activate an ability of an Elemental, this creature gets +1/+0 until end of turn.\"},{\"id\":9,\"name\":\"Chandra Nalaar\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Chandra\",\"text\":\"+1: Chandra Nalaar deals 1 damage to target player or planeswalker.\\n−X: Chandra Nalaar deals X damage to target creature.\\n−8: Chandra Nalaar deals 10 damage to target player or planeswalker and each creature that player or that planeswalker's controller controls.\"},{\"id\":10,\"name\":\"Changeling Berserker\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\nHaste\\nChampion a creature (When this enters, sacrifice it unless you exile another creature you control. When this leaves the battlefield, that card returns to the battlefield.)\"},{\"id\":11,\"name\":\"Consuming Bonfire\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Kindred Sorcery — Elemental\",\"text\":\"Choose one —\\n• Consuming Bonfire deals 4 damage to target non-Elemental creature.\\n• Consuming Bonfire deals 7 damage to target Treefolk creature.\"},{\"id\":12,\"name\":\"Crush Underfoot\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Kindred Instant — Giant\",\"text\":\"Choose a Giant creature you control. It deals damage equal to its power to target creature.\"},{\"id\":13,\"name\":\"Faultgrinder\",\"manaCost\":\"{6}{R}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Trample\\nWhen this creature enters, destroy target land.\\nEvoke {4}{R} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":14,\"name\":\"Fire-Belly Changeling\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"Changeling (This card is every creature type.)\\n{R}: This creature gets +1/+0 until end of turn. Activate no more than twice each turn.\"},{\"id\":15,\"name\":\"Flamekin Bladewhirl\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"As an additional cost to cast this spell, reveal an Elemental card from your hand or pay {3}.\"},{\"id\":16,\"name\":\"Flamekin Brawler\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Elemental Warrior\",\"text\":\"{R}: This creature gets +1/+0 until end of turn.\"},{\"id\":17,\"name\":\"Flamekin Harbinger\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"When this creature enters, you may search your library for an Elemental card, reveal it, then shuffle and put that card on top.\"},{\"id\":18,\"name\":\"Flamekin Spitfire\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"{3}{R}: This creature deals 1 damage to any target.\"},{\"id\":19,\"name\":\"Giant Harbinger\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Giant Shaman\",\"text\":\"When this creature enters, you may search your library for a Giant card, reveal it, then shuffle and put that card on top.\"},{\"id\":20,\"name\":\"Giant's Ire\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Kindred Sorcery — Giant\",\"text\":\"Giant's Ire deals 4 damage to target player or planeswalker. If you control a Giant, draw a card.\"},{\"id\":21,\"name\":\"Glarewielder\",\"manaCost\":\"{4}{R}\",\"typeLine\":\"Creature — Elemental Shaman\",\"text\":\"Haste\\nWhen this creature enters, up to two target creatures can't block this turn.\\nEvoke {1}{R} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)\"},{\"id\":22,\"name\":\"Goatnapper\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Goblin Rogue\",\"text\":\"When this creature enters, untap target Goat and gain control of it until end of turn. It gains haste until end of turn.\"},{\"id\":23,\"name\":\"Hamletback Goliath\",\"manaCost\":\"{6}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"Whenever another creature enters, you may put X +1/+1 counters on this creature, where X is that creature's power.\"},{\"id\":24,\"name\":\"Hearthcage Giant\",\"manaCost\":\"{6}{R}{R}\",\"typeLine\":\"Creature — Giant Warrior\",\"text\":\"When this creature enters, create two 3/1 red Elemental Shaman creature tokens.\\nSacrifice an Elemental: Target Giant creature gets +3/+1 until end of turn.\"},{\"id\":25,\"name\":\"Heat Shimmer\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Create a token that's a copy of target creature, except it has haste and \\\"At the beginning of the end step, exile this token.\\\"\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[\"interaction\"]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1841,
+      "cacheCreationInputTokens": 32592,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.798039,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.798039,
+      "pricedUsd": 0.798039,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.798039 and its own usage prices at $0.798039"
+    }
+  }
+}

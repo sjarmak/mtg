@@ -1,0 +1,161 @@
+{
+  "key": "a595d1f4d5c2c6875b32ca74c78ba8e5",
+  "recordedAt": "2026-11-22T21:33:02.414Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Vigil for the Lost\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a creature you control dies, you may pay {X}. If you do, you gain X life.\"},{\"id\":2,\"name\":\"Whitesun's Passage\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"You gain 5 life.\"},{\"id\":3,\"name\":\"Argent Sphinx\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Sphinx\",\"text\":\"Flying\\nMetalcraft — {U}: Exile this creature. Return it to the battlefield under your control at the beginning of the next end step. Activate only if you control three or more artifacts.\"},{\"id\":4,\"name\":\"Bonds of Quicksilver\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nEnchant creature\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":5,\"name\":\"Darkslick Drake\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Phyrexian Drake\",\"text\":\"Flying\\nWhen this creature dies, draw a card.\"},{\"id\":6,\"name\":\"Disperse\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Return target nonland permanent to its owner's hand.\"},{\"id\":7,\"name\":\"Dissipation Field\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever a permanent deals damage to you, return it to its owner's hand.\"},{\"id\":8,\"name\":\"Grand Architect\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Vedalken Artificer\",\"text\":\"Other blue creatures you control get +1/+1.\\n{U}: Target artifact creature becomes blue until end of turn.\\nTap an untapped blue creature you control: Add {C}{C}. Spend this mana only to cast artifact spells or activate abilities of artifacts.\"},{\"id\":9,\"name\":\"Halt Order\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target artifact spell.\\nDraw a card.\"},{\"id\":10,\"name\":\"Inexorable Tide\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you cast a spell, proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":11,\"name\":\"Lumengrid Drake\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Drake\",\"text\":\"Flying\\nMetalcraft — When this creature enters, if you control three or more artifacts, return target creature to its owner's hand.\"},{\"id\":12,\"name\":\"Neurok Invisimancer\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"This creature can't be blocked.\\nWhen this creature enters, target creature can't be blocked this turn.\"},{\"id\":13,\"name\":\"Plated Seastrider\",\"manaCost\":\"{U}{U}\",\"typeLine\":\"Creature — Beast\",\"text\":\"\"},{\"id\":14,\"name\":\"Quicksilver Gargantuan\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Shapeshifter\",\"text\":\"You may have this creature enter as a copy of any creature on the battlefield, except it's 7/7.\"},{\"id\":15,\"name\":\"Riddlesmith\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever you cast an artifact spell, you may draw a card. If you do, discard a card.\"},{\"id\":16,\"name\":\"Scrapdiver Serpent\",\"manaCost\":\"{5}{U}{U}\",\"typeLine\":\"Creature — Serpent\",\"text\":\"This creature can't be blocked as long as defending player controls an artifact.\"},{\"id\":17,\"name\":\"Screeching Silcaw\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Bird\",\"text\":\"Flying\\nMetalcraft — Whenever this creature deals combat damage to a player, if you control three or more artifacts, that player mills four cards.\"},{\"id\":18,\"name\":\"Shape Anew\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"The controller of target artifact sacrifices it, then reveals cards from the top of their library until they reveal an artifact card. That player puts that card onto the battlefield, then shuffles all other cards revealed this way into their library.\"},{\"id\":19,\"name\":\"Sky-Eel School\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Fish\",\"text\":\"Flying\\nWhen this creature enters, draw a card, then discard a card.\"},{\"id\":20,\"name\":\"Steady Progress\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Instant\",\"text\":\"Proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\\nDraw a card.\"},{\"id\":21,\"name\":\"Stoic Rebuttal\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Metalcraft — This spell costs {1} less to cast if you control three or more artifacts.\\nCounter target spell.\"},{\"id\":22,\"name\":\"Thrummingbird\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Phyrexian Bird Horror\",\"text\":\"Flying\\nWhenever this creature deals combat damage to a player, proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":23,\"name\":\"Trinket Mage\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"When this creature enters, you may search your library for an artifact card with mana value 1 or less, reveal that card, put it into your hand, then shuffle.\"},{\"id\":24,\"name\":\"Turn Aside\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Counter target spell that targets a permanent you control.\"},{\"id\":25,\"name\":\"Twisted Image\",\"manaCost\":\"{U}\",\"typeLine\":\"Instant\",\"text\":\"Switch target creature's power and toughness until end of turn.\\nDraw a card.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"draw\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"interaction\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["draw"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["interaction"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1516,
+      "cacheCreationInputTokens": 32311,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.776169,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.776169,
+      "pricedUsd": 0.776169,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.776169 and its own usage prices at $0.776169"
+    }
+  }
+}

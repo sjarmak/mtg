@@ -1,0 +1,161 @@
+{
+  "key": "68001241a2db377e8f135ad201f80203",
+  "recordedAt": "2026-11-22T21:27:46.872Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Paraselene\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all enchantments. You gain 1 life for each enchantment destroyed this way.\"},{\"id\":2,\"name\":\"Purify the Grave\",\"manaCost\":\"{W}\",\"typeLine\":\"Instant\",\"text\":\"Exile target card from a graveyard.\\nFlashback {W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":3,\"name\":\"Rally the Peasants\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control get +2/+0 until end of turn.\\nFlashback {2}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":4,\"name\":\"Rebuke\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target attacking creature.\"},{\"id\":5,\"name\":\"Selfless Cathar\",\"manaCost\":\"{W}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{1}{W}, Sacrifice this creature: Creatures you control get +1/+1 until end of turn.\"},{\"id\":6,\"name\":\"Silverchase Fox\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Fox\",\"text\":\"{1}{W}, Sacrifice this creature: Exile target enchantment.\"},{\"id\":7,\"name\":\"Slayer of the Wicked\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"When this creature enters, you may destroy target Vampire, Werewolf, or Zombie.\"},{\"id\":8,\"name\":\"Smite the Monstrous\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target creature with power 4 or greater.\"},{\"id\":9,\"name\":\"Spare from Evil\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Creatures you control gain protection from non-Human creatures until end of turn.\"},{\"id\":10,\"name\":\"Spectral Rider\",\"manaCost\":\"{W}{W}\",\"typeLine\":\"Creature — Spirit Knight\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\"},{\"id\":11,\"name\":\"Stony Silence\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Enchantment\",\"text\":\"Activated abilities of artifacts can't be activated.\"},{\"id\":12,\"name\":\"Thraben Purebloods\",\"manaCost\":\"{4}{W}\",\"typeLine\":\"Creature — Dog\",\"text\":\"\"},{\"id\":13,\"name\":\"Thraben Sentry\",\"manaCost\":null,\"typeLine\":\"Creature — Human Soldier // Creature — Human Soldier\",\"text\":null,\"faces\":[{\"name\":\"Thraben Sentry\",\"manaCost\":\"{3}{W}\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Vigilance\\nWhenever another creature you control dies, you may transform this creature.\"},{\"name\":\"Thraben Militia\",\"manaCost\":\"\",\"typeLine\":\"Creature — Human Soldier\",\"text\":\"Trample\"}]},{\"id\":14,\"name\":\"Unruly Mob\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Creature — Human\",\"text\":\"Whenever another creature you control dies, put a +1/+1 counter on this creature.\"},{\"id\":15,\"name\":\"Urgent Exorcism\",\"manaCost\":\"{1}{W}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target Spirit or enchantment.\"},{\"id\":16,\"name\":\"Village Bell-Ringer\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Human Scout\",\"text\":\"Flash (You may cast this spell any time you could cast an instant.)\\nWhen this creature enters, untap all creatures you control.\"},{\"id\":17,\"name\":\"Voiceless Spirit\",\"manaCost\":\"{2}{W}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying, first strike\"},{\"id\":18,\"name\":\"Armored Skaab\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Zombie Warrior\",\"text\":\"When this creature enters, mill four cards.\"},{\"id\":19,\"name\":\"Back from the Brink\",\"manaCost\":\"{4}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Exile a creature card from your graveyard and pay its mana cost: Create a token that's a copy of that card. Activate only as a sorcery.\"},{\"id\":20,\"name\":\"Battleground Geist\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nOther Spirit creatures you control get +1/+0.\"},{\"id\":21,\"name\":\"Cackling Counterpart\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Instant\",\"text\":\"Create a token that's a copy of target creature you control.\\nFlashback {5}{U}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":22,\"name\":\"Civilized Scholar\",\"manaCost\":null,\"typeLine\":\"Creature — Human Advisor // Creature — Human Mutant\",\"text\":null,\"faces\":[{\"name\":\"Civilized Scholar\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Human Advisor\",\"text\":\"{T}: Draw a card, then discard a card. If a creature card is discarded this way, untap this creature, then transform it.\"},{\"name\":\"Homicidal Brute\",\"manaCost\":\"\",\"typeLine\":\"Creature — Human Mutant\",\"text\":\"At the beginning of your end step, if this creature didn't attack this turn, tap this creature, then transform it.\"}]},{\"id\":23,\"name\":\"Claustrophobia\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, tap enchanted creature.\\nEnchanted creature doesn't untap during its controller's untap step.\"},{\"id\":24,\"name\":\"Curiosity\",\"manaCost\":\"{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhenever enchanted creature deals damage to an opponent, you may draw a card.\"},{\"id\":25,\"name\":\"Curse of the Bloody Tome\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of enchanted player's upkeep, that player mills two cards.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[\"interaction\"]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[\"interaction\"]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"draw\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"draw\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["draw"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["draw"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1162,
+      "cacheCreationInputTokens": 32389,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7600290000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7600290000000001,
+      "pricedUsd": 0.760029,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.760029 and its own usage prices at $0.760029"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "key": "80aa51a69d0fed8316c4603a7eed57c7",
+  "recordedAt": "2026-11-22T21:36:03.132Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Brass Squire\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"{T}: Attach target Equipment you control to target creature you control.\"},{\"id\":2,\"name\":\"Copper Carapace\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Equipped creature gets +2/+2 and can't block.\\nEquip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)\"},{\"id\":3,\"name\":\"Core Prowler\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhen this creature dies, proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":4,\"name\":\"Darksteel Plate\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Indestructible\\nEquipped creature has indestructible.\\nEquip {2}\"},{\"id\":5,\"name\":\"Decimator Web\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"{4}, {T}: Target opponent loses 2 life, gets a poison counter, then mills six cards.\"},{\"id\":6,\"name\":\"Dross Ripper\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Dog\",\"text\":\"{2}{B}: This creature gets +1/+1 until end of turn.\"},{\"id\":7,\"name\":\"Flayer Husk\",\"manaCost\":\"{1}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +1/+1.\\nEquip {2}\"},{\"id\":8,\"name\":\"Gust-Skimmer\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Insect\",\"text\":\"{U}: This creature gains flying until end of turn.\"},{\"id\":9,\"name\":\"Hexplate Golem\",\"manaCost\":\"{7}\",\"typeLine\":\"Artifact Creature — Golem\",\"text\":\"\"},{\"id\":10,\"name\":\"Ichor Wellspring\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact\",\"text\":\"When this artifact enters or is put into a graveyard from the battlefield, draw a card.\"},{\"id\":11,\"name\":\"Knowledge Pool\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact\",\"text\":\"Imprint — When this artifact enters, each player exiles the top three cards of their library.\\nWhenever a player casts a spell from their hand, that player exiles it. If the player does, they may cast a spell from among other cards exiled with this artifact without paying its mana cost.\"},{\"id\":12,\"name\":\"Lumengrid Gargoyle\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Gargoyle\",\"text\":\"Flying\"},{\"id\":13,\"name\":\"Magnetic Mine\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever another artifact is put into a graveyard from the battlefield, this artifact deals 2 damage to that artifact's controller.\"},{\"id\":14,\"name\":\"Mirrorworks\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"Whenever another nontoken artifact you control enters, you may pay {2}. If you do, create a token that's a copy of that artifact.\"},{\"id\":15,\"name\":\"Mortarpod\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"Living weapon (When this Equipment enters, create a 0/0 black Phyrexian Germ creature token, then attach this to it.)\\nEquipped creature gets +0/+1 and has \\\"Sacrifice this creature: This creature deals 1 damage to any target.\\\"\\nEquip {2}\"},{\"id\":16,\"name\":\"Myr Sire\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Myr\",\"text\":\"When this creature dies, create a 1/1 colorless Phyrexian Myr artifact creature token.\"},{\"id\":17,\"name\":\"Myr Turbine\",\"manaCost\":\"{5}\",\"typeLine\":\"Artifact\",\"text\":\"{T}: Create a 1/1 colorless Myr artifact creature token.\\n{T}, Tap five untapped Myr you control: Search your library for a Myr creature card, put it onto the battlefield, then shuffle.\"},{\"id\":18,\"name\":\"Myr Welder\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Myr\",\"text\":\"Imprint — {T}: Exile target artifact card from a graveyard.\\nThis creature has all activated abilities of all cards exiled with it.\"},{\"id\":19,\"name\":\"Peace Strider\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Construct\",\"text\":\"When this creature enters, you gain 3 life.\"},{\"id\":20,\"name\":\"Phyrexian Digester\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact Creature — Phyrexian Construct\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":21,\"name\":\"Phyrexian Juggernaut\",\"manaCost\":\"{6}\",\"typeLine\":\"Artifact Creature — Phyrexian Juggernaut\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nThis creature attacks each combat if able.\"},{\"id\":22,\"name\":\"Phyrexian Revoker\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"As this creature enters, choose a nonland card name.\\nActivated abilities of sources with the chosen name can't be activated.\"},{\"id\":23,\"name\":\"Pierce Strider\",\"manaCost\":\"{4}\",\"typeLine\":\"Artifact Creature — Phyrexian Construct\",\"text\":\"When this creature enters, target opponent loses 3 life.\"},{\"id\":24,\"name\":\"Piston Sledge\",\"manaCost\":\"{3}\",\"typeLine\":\"Artifact — Equipment\",\"text\":\"When this Equipment enters, attach it to target creature you control.\\nEquipped creature gets +3/+1.\\nEquip—Sacrifice an artifact.\"},{\"id\":25,\"name\":\"Plague Myr\",\"manaCost\":\"{2}\",\"typeLine\":\"Artifact Creature — Phyrexian Myr\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{T}: Add {C}.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"draw\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["draw"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 389,
+      "cacheCreationInputTokens": 32477,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.723139,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.723139,
+      "pricedUsd": 0.723139,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.723139 and its own usage prices at $0.723139"
+    }
+  }
+}

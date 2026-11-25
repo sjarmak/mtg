@@ -1,0 +1,161 @@
+{
+  "key": "e7c44c096dd6e3a11fe0175e7713ebab",
+  "recordedAt": "2026-11-22T21:37:07.538Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Xenograft\",\"manaCost\":\"{4}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"As this enchantment enters, choose a creature type.\\nEach creature you control is the chosen type in addition to its other types.\"},{\"id\":2,\"name\":\"Blind Zealot\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Human Cleric\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nWhenever this creature deals combat damage to a player, you may sacrifice it. If you do, destroy target creature that player controls.\"},{\"id\":3,\"name\":\"Caress of Phyrexia\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player draws three cards, loses 3 life, and gets three poison counters.\"},{\"id\":4,\"name\":\"Chancellor of the Dross\",\"manaCost\":\"{4}{B}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Vampire\",\"text\":\"You may reveal this card from your opening hand. If you do, at the beginning of the first upkeep, each opponent loses 3 life, then you gain life equal to the life lost this way.\\nFlying, lifelink\"},{\"id\":5,\"name\":\"Dementia Bat\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Phyrexian Bat\",\"text\":\"Flying\\n{4}{B}, Sacrifice this creature: Target player discards two cards.\"},{\"id\":6,\"name\":\"Despise\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals their hand. You choose a creature or planeswalker card from it. That player discards that card.\"},{\"id\":7,\"name\":\"Dismember\",\"manaCost\":\"{1}{B/P}{B/P}\",\"typeLine\":\"Instant\",\"text\":\"({B/P} can be paid with either {B} or 2 life.)\\nTarget creature gets -5/-5 until end of turn.\"},{\"id\":8,\"name\":\"Enslave\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nYou control enchanted creature.\\nAt the beginning of your upkeep, enchanted creature deals 1 damage to its owner.\"},{\"id\":9,\"name\":\"Entomber Exarch\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Cleric\",\"text\":\"When this creature enters, choose one —\\n• Return target creature card from your graveyard to your hand.\\n• Target opponent reveals their hand. You choose a noncreature card from it. That player discards that card.\"},{\"id\":10,\"name\":\"Evil Presence\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant land\\nEnchanted land is a Swamp.\"},{\"id\":11,\"name\":\"Geth's Verdict\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Instant\",\"text\":\"Target player sacrifices a creature of their choice and loses 1 life.\"},{\"id\":12,\"name\":\"Glistening Oil\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature has infect.\\nAt the beginning of your upkeep, put a -1/-1 counter on enchanted creature.\\nWhen this Aura is put into a graveyard from the battlefield, return it to its owner's hand.\"},{\"id\":13,\"name\":\"Grim Affliction\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Put a -1/-1 counter on target creature, then proliferate. (Choose any number of permanents and/or players, then give each another counter of each kind already there.)\"},{\"id\":14,\"name\":\"Ichor Explosion\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nAll creatures get -X/-X until end of turn, where X is the sacrificed creature's power.\"},{\"id\":15,\"name\":\"Life's Finale\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy all creatures, then search target opponent's library for up to three creature cards and put them into their graveyard. Then that player shuffles.\"},{\"id\":16,\"name\":\"Mortis Dogs\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Phyrexian Dog\",\"text\":\"Whenever this creature attacks, it gets +2/+0 until end of turn.\\nWhen this creature dies, target player loses life equal to its power.\"},{\"id\":17,\"name\":\"Parasitic Implant\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nAt the beginning of your upkeep, enchanted creature's controller sacrifices it and you create a 1/1 colorless Phyrexian Myr artifact creature token.\"},{\"id\":18,\"name\":\"Phyrexian Obliterator\",\"manaCost\":\"{B}{B}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Trample\\nWhenever a source deals damage to this creature, that source's controller sacrifices that many permanents of their choice.\"},{\"id\":19,\"name\":\"Pith Driller\",\"manaCost\":\"{4}{B/P}\",\"typeLine\":\"Artifact Creature — Phyrexian Horror\",\"text\":\"({B/P} can be paid with either {B} or 2 life.)\\nWhen this creature enters, put a -1/-1 counter on target creature.\"},{\"id\":20,\"name\":\"Postmortem Lunge\",\"manaCost\":\"{X}{B/P}\",\"typeLine\":\"Sorcery\",\"text\":\"({B/P} can be paid with either {B} or 2 life.)\\nReturn target creature card with mana value X from your graveyard to the battlefield. It gains haste. Exile it at the beginning of the next end step.\"},{\"id\":21,\"name\":\"Praetor's Grasp\",\"manaCost\":\"{1}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search target opponent's library for a card and exile it face down. Then that player shuffles. You may play that card for as long as it remains exiled.\"},{\"id\":22,\"name\":\"Reaper of Sheoldred\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Phyrexian Horror\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\nWhenever a source deals damage to this creature, that source's controller gets a poison counter.\"},{\"id\":23,\"name\":\"Sheoldred, Whispering One\",\"manaCost\":\"{5}{B}{B}\",\"typeLine\":\"Legendary Creature — Phyrexian Praetor\",\"text\":\"Swampwalk (This creature can't be blocked as long as defending player controls a Swamp.)\\nAt the beginning of your upkeep, return target creature card from your graveyard to the battlefield.\\nAt the beginning of each opponent's upkeep, that player sacrifices a creature of their choice.\"},{\"id\":24,\"name\":\"Surgical Extraction\",\"manaCost\":\"{B/P}\",\"typeLine\":\"Instant\",\"text\":\"({B/P} can be paid with either {B} or 2 life.)\\nChoose target card in a graveyard other than a basic land card. Search its owner's graveyard, hand, and library for any number of cards with the same name as that card and exile them. Then that player shuffles.\"},{\"id\":25,\"name\":\"Toxic Nim\",\"manaCost\":\"{4}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Zombie\",\"text\":\"Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{B}: Regenerate this creature.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[\"interaction\"]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"interaction\"]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[\"draw\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[\"interaction\"]},{\"id\":14,\"roles\":[\"interaction\"]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\",\"draw\"]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": ["draw"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 14,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1524,
+      "cacheCreationInputTokens": 32806,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7864690000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7864690000000001,
+      "pricedUsd": 0.786469,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.786469 and its own usage prices at $0.786469"
+    }
+  }
+}

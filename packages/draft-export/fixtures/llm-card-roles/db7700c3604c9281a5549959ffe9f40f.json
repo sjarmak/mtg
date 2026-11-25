@@ -1,0 +1,161 @@
+{
+  "key": "db7700c3604c9281a5549959ffe9f40f",
+  "recordedAt": "2026-11-22T22:16:57.704Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Sphinx's Tutelage\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you draw a card, target opponent mills two cards. If two nonland cards that share a color were milled this way, repeat this process.\\n{5}{U}: Draw a card, then discard a card.\"},{\"id\":2,\"name\":\"Stratus Walk\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nWhen this Aura enters, draw a card.\\nEnchanted creature has flying. (It can't be blocked except by creatures with flying or reach.)\\nEnchanted creature can block only creatures with flying.\"},{\"id\":3,\"name\":\"Talent of the Telepath\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals the top seven cards of their library. You may cast an instant or sorcery spell from among them without paying its mana cost. Then that player puts the rest into their graveyard.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, you may cast up to two instant and/or sorcery spells from among the revealed cards instead of one.\"},{\"id\":4,\"name\":\"Thopter Spy Network\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, if you control an artifact, create a 1/1 colorless Thopter artifact creature token with flying.\\nWhenever one or more artifact creatures you control deal combat damage to a player, draw a card.\"},{\"id\":5,\"name\":\"Tower Geist\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nWhen this creature enters, look at the top two cards of your library. Put one of them into your hand and the other into your graveyard.\"},{\"id\":6,\"name\":\"Turn to Frog\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Until end of turn, target creature loses all abilities and becomes a blue Frog with base power and toughness 1/1.\"},{\"id\":7,\"name\":\"Watercourser\",\"manaCost\":\"{2}{U}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"{U}: This creature gets +1/-1 until end of turn.\"},{\"id\":8,\"name\":\"Whirler Rogue\",\"manaCost\":\"{2}{U}{U}\",\"typeLine\":\"Creature — Human Rogue Artificer\",\"text\":\"When this creature enters, create two 1/1 colorless Thopter artifact creature tokens with flying.\\nTap two untapped artifacts you control: Target creature can't be blocked this turn.\"},{\"id\":9,\"name\":\"Willbreaker\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever a creature an opponent controls becomes the target of a spell or ability you control, gain control of that creature for as long as you control this creature.\"},{\"id\":10,\"name\":\"Blightcaster\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Whenever you cast an enchantment spell, you may have target creature get -2/-2 until end of turn.\"},{\"id\":11,\"name\":\"Catacomb Slug\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Slug\",\"text\":\"\"},{\"id\":12,\"name\":\"Consecrated by Blood\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has flying and \\\"Sacrifice two other creatures: Regenerate this creature.\\\" (The next time the creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\"},{\"id\":13,\"name\":\"Cruel Revival\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target non-Zombie creature. It can't be regenerated. Return up to one target Zombie card from your graveyard to your hand.\"},{\"id\":14,\"name\":\"Dark Dabbling\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"Regenerate target creature. Draw a card. (The next time the creature would be destroyed this turn, instead tap it, remove it from combat, and heal all damage on it.)\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, also regenerate each other creature you control.\"},{\"id\":15,\"name\":\"Dark Petition\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for a card, put that card into your hand, then shuffle.\\nSpell mastery — If there are two or more instant and/or sorcery cards in your graveyard, add {B}{B}{B}.\"},{\"id\":16,\"name\":\"Deadbridge Shaman\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Elf Shaman\",\"text\":\"When this creature dies, target opponent discards a card.\"},{\"id\":17,\"name\":\"Demonic Pact\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, choose one that hasn't been chosen —\\n• This enchantment deals 4 damage to any target and you gain 4 life.\\n• Target opponent discards two cards.\\n• Draw two cards.\\n• You lose the game.\"},{\"id\":18,\"name\":\"Despoiler of Souls\",\"manaCost\":\"{B}{B}\",\"typeLine\":\"Creature — Horror\",\"text\":\"This creature can't block.\\n{B}{B}, Exile two other creature cards from your graveyard: Return this card from your graveyard to the battlefield.\"},{\"id\":19,\"name\":\"Erebos's Titan\",\"manaCost\":\"{1}{B}{B}{B}\",\"typeLine\":\"Creature — Giant\",\"text\":\"As long as your opponents control no creatures, this creature has indestructible. (Damage and effects that say \\\"destroy\\\" don't destroy it.)\\nWhenever a creature card leaves an opponent's graveyard, you may discard a card. If you do, return this card from your graveyard to your hand.\"},{\"id\":20,\"name\":\"Eyeblight Assassin\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Elf Assassin\",\"text\":\"When this creature enters, target creature an opponent controls gets -1/-1 until end of turn.\"},{\"id\":21,\"name\":\"Eyeblight Massacre\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Non-Elf creatures get -2/-2 until end of turn.\"},{\"id\":22,\"name\":\"Fetid Imp\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Imp\",\"text\":\"Flying\\n{B}: This creature gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"},{\"id\":23,\"name\":\"Fleshbag Marauder\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Creature — Zombie Warrior\",\"text\":\"When this creature enters, each player sacrifices a creature of their choice.\"},{\"id\":24,\"name\":\"Gilt-Leaf Winnower\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Elf Warrior\",\"text\":\"Menace (This creature can't be blocked except by two or more creatures.)\\nWhen this creature enters, you may destroy target non-Elf creature whose power and toughness aren't equal.\"},{\"id\":25,\"name\":\"Gnarlroot Trapper\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Elf Druid\",\"text\":\"{T}, Pay 1 life: Add {G}. Spend this mana only to cast an Elf creature spell.\\n{T}: Target attacking Elf you control gains deathtouch until end of turn. (Any amount of damage it deals to a creature is enough to destroy it.)\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[\"draw\"]},{\"id\":5,\"roles\":[\"draw\"]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[\"interaction\"]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[\"interaction\",\"draw\"]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\",\"draw\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[\"interaction\"]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": ["draw"]
+        },
+        {
+          "id": 5,
+          "roles": ["draw"]
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction", "draw"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": []
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2373,
+      "cacheCreationInputTokens": 32855,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.829899,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.829899,
+      "pricedUsd": 0.829899,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.829899 and its own usage prices at $0.829899"
+    }
+  }
+}

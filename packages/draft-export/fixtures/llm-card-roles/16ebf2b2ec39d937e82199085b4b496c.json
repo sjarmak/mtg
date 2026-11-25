@@ -1,0 +1,161 @@
+{
+  "key": "16ebf2b2ec39d937e82199085b4b496c",
+  "recordedAt": "2026-11-22T22:14:51.095Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"War-Name Aspirant\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Raid — This creature enters with a +1/+1 counter on it if you attacked this turn.\\nThis creature can't be blocked by creatures with power 1 or less.\"},{\"id\":2,\"name\":\"Alpine Grizzly\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Creature — Bear\",\"text\":\"\"},{\"id\":3,\"name\":\"Archers' Parapet\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Wall\",\"text\":\"Defender\\n{1}{B}, {T}: Each opponent loses 1 life.\"},{\"id\":4,\"name\":\"Awaken the Bear\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +3/+3 and gains trample until end of turn.\"},{\"id\":5,\"name\":\"Become Immense\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Instant\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nTarget creature gets +6/+6 until end of turn.\"},{\"id\":6,\"name\":\"Dragonscale Boon\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Instant\",\"text\":\"Put two +1/+1 counters on target creature and untap it.\"},{\"id\":7,\"name\":\"Feed the Clan\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"You gain 5 life.\\nFerocious — You gain 10 life instead if you control a creature with power 4 or greater.\"},{\"id\":8,\"name\":\"Hardened Scales\",\"manaCost\":\"{G}\",\"typeLine\":\"Enchantment\",\"text\":\"If one or more +1/+1 counters would be put on a creature you control, that many plus one +1/+1 counters are put on it instead.\"},{\"id\":9,\"name\":\"Heir of the Wilds\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"Deathtouch\\nFerocious — Whenever this creature attacks, if you control a creature with power 4 or greater, this creature gets +1/+1 until end of turn.\"},{\"id\":10,\"name\":\"Highland Game\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Elk\",\"text\":\"When this creature dies, you gain 2 life.\"},{\"id\":11,\"name\":\"Hooded Hydra\",\"manaCost\":\"{X}{G}{G}\",\"typeLine\":\"Creature — Snake Hydra\",\"text\":\"This creature enters with X +1/+1 counters on it.\\nWhen this creature dies, create a 1/1 green Snake creature token for each +1/+1 counter on it.\\nMorph {3}{G}{G}\\nAs this creature is turned face up, put five +1/+1 counters on it.\"},{\"id\":12,\"name\":\"Hooting Mandrills\",\"manaCost\":\"{5}{G}\",\"typeLine\":\"Creature — Ape\",\"text\":\"Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)\\nTrample\"},{\"id\":13,\"name\":\"Incremental Growth\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Put a +1/+1 counter on target creature, two +1/+1 counters on another target creature, and three +1/+1 counters on a third target creature.\"},{\"id\":14,\"name\":\"Kin-Tree Warden\",\"manaCost\":\"{G}\",\"typeLine\":\"Creature — Human Warrior\",\"text\":\"{2}: Regenerate this creature.\\nMorph {G} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":15,\"name\":\"Longshot Squad\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Creature — Dog Archer\",\"text\":\"Outlast {1}{G} ({1}{G}, {T}: Put a +1/+1 counter on this creature. Outlast only as a sorcery.)\\nEach creature you control with a +1/+1 counter on it has reach. (A creature with reach can block creatures with flying.)\"},{\"id\":16,\"name\":\"Meandering Towershell\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Turtle\",\"text\":\"Islandwalk (This creature can't be blocked as long as defending player controls an Island.)\\nWhenever this creature attacks, exile it. Return it to the battlefield under your control tapped and attacking at the beginning of the declare attackers step on your next turn.\"},{\"id\":17,\"name\":\"Naturalize\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Instant\",\"text\":\"Destroy target artifact or enchantment.\"},{\"id\":18,\"name\":\"Pine Walker\",\"manaCost\":\"{3}{G}{G}\",\"typeLine\":\"Creature — Elemental\",\"text\":\"Morph {4}{G} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhenever this creature or another creature you control is turned face up, untap that creature.\"},{\"id\":19,\"name\":\"Rattleclaw Mystic\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"{T}: Add {G}, {U}, or {R}.\\nMorph {2} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\\nWhen this creature is turned face up, add {G}{U}{R}.\"},{\"id\":20,\"name\":\"Roar of Challenge\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"All creatures able to block target creature this turn do so.\\nFerocious — That creature gains indestructible until end of turn if you control a creature with power 4 or greater.\"},{\"id\":21,\"name\":\"Sagu Archer\",\"manaCost\":\"{4}{G}\",\"typeLine\":\"Creature — Snake Archer\",\"text\":\"Reach (This creature can block creatures with flying.)\\nMorph {4}{G} (You may cast this card face down as a 2/2 creature for {3}. Turn it face up any time for its morph cost.)\"},{\"id\":22,\"name\":\"Savage Punch\",\"manaCost\":\"{1}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature you control fights target creature you don't control.\\nFerocious — The creature you control gets +2/+2 until end of turn before it fights if you control a creature with power 4 or greater.\"},{\"id\":23,\"name\":\"Scout the Borders\",\"manaCost\":\"{2}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top five cards of your library. You may put a creature or land card from among them into your hand. Put the rest into your graveyard.\"},{\"id\":24,\"name\":\"See the Unwritten\",\"manaCost\":\"{4}{G}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Reveal the top eight cards of your library. You may put a creature card from among them onto the battlefield. Put the rest into your graveyard.\\nFerocious — If you control a creature with power 4 or greater, you may put two creature cards onto the battlefield instead of one.\"},{\"id\":25,\"name\":\"Seek the Horizon\",\"manaCost\":\"{3}{G}\",\"typeLine\":\"Sorcery\",\"text\":\"Search your library for up to three basic land cards, reveal them, put them into your hand, then shuffle.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[\"interaction\"]},{\"id\":18,\"roles\":[]},{\"id\":19,\"roles\":[\"fixing\"]},{\"id\":20,\"roles\":[\"interaction\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[\"fixing\"]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": []
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": []
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": []
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 18,
+          "roles": []
+        },
+        {
+          "id": 19,
+          "roles": ["fixing"]
+        },
+        {
+          "id": 20,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": ["fixing"]
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1353,
+      "cacheCreationInputTokens": 32656,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7749189999999999,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7749189999999999,
+      "pricedUsd": 0.774919,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.774919 and its own usage prices at $0.774919"
+    }
+  }
+}

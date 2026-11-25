@@ -131,7 +131,7 @@ as-is.
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ktk/probes/ktk-scenario-probes-v1-config.json --out out/ktk/scenario-probes-v1 --timeout-ms 600000
 npx tsx packages/data/tools/build-script-qualification-bundle.ts --evidence out/ktk/scenario-probes-v1 --inventory out/ktk/decision-inventory-v2/inventory.json --out out/ktk/script-qualifications-v1
 npx tsx packages/ui/tools/printed-probe-cli.ts --config out/ktk/probes/ktk-match-probes-v1-config.json --out out/ktk/match-probes-v1 --timeout-ms 600000
-npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ktk/ktk-limited-format-v1.json --catalog packages/data/data/ktk/ktk-printed-catalog-v1.json --qualifications out/ktk/script-qualifications-v1 --match-probes out/ktk/match-probes-v1 --out packages/data/data/ktk/play-admission-v1
+npx tsx packages/data/tools/build-script-qualified-admission.ts --format packages/data/data/ktk/ktk-limited-format-v1.json --catalog packages/data/data/ktk/ktk-printed-catalog-v1.json --qualifications out/ktk/script-qualifications-v1 --match-probes out/ktk/match-probes-v1 --out packages/data/data/ktk/play-admission
 ```
 
 The qualification bundle reports `qualified: 254, residual: 0`.
@@ -247,7 +247,7 @@ registered printed format was re-bound to the same bridge with
 ## Registration
 
 `packages/data/data/printed-formats-v1.json` carries the `ktk` entry with
-`play.status: supported`, `admissionDirectory: play-admission-v9` and the
+`play.status: supported`, `admissionDirectory: play-admission` and the
 constructed sidecar. The
 launcher reads every supported entry at boot and `startBackendService` admits
 all of them behind one Forge identity, so a launcher started before this entry

@@ -1,0 +1,161 @@
+{
+  "key": "76f72cb189991c016b9f035cc3f6b6d9",
+  "recordedAt": "2026-11-22T21:28:24.211Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Skaab Goliath\",\"manaCost\":\"{5}{U}\",\"typeLine\":\"Creature — Zombie Giant\",\"text\":\"As an additional cost to cast this spell, exile two creature cards from your graveyard.\\nTrample\"},{\"id\":2,\"name\":\"Skaab Ruinator\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Zombie Horror\",\"text\":\"As an additional cost to cast this spell, exile three creature cards from your graveyard.\\nFlying\\nYou may cast this card from your graveyard.\"},{\"id\":3,\"name\":\"Snapcaster Mage\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Human Wizard\",\"text\":\"Flash\\nWhen this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":4,\"name\":\"Spectral Flight\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets +2/+2 and has flying.\"},{\"id\":5,\"name\":\"Stitched Drake\",\"manaCost\":\"{1}{U}{U}\",\"typeLine\":\"Creature — Zombie Drake\",\"text\":\"As an additional cost to cast this spell, exile a creature card from your graveyard.\\nFlying\"},{\"id\":6,\"name\":\"Stitcher's Apprentice\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Creature — Homunculus\",\"text\":\"{1}{U}, {T}: Create a 2/2 blue Homunculus creature token, then sacrifice a creature.\"},{\"id\":7,\"name\":\"Sturmgeist\",\"manaCost\":\"{3}{U}{U}\",\"typeLine\":\"Creature — Spirit\",\"text\":\"Flying\\nSturmgeist's power and toughness are each equal to the number of cards in your hand.\\nWhenever this creature deals combat damage to a player, draw a card.\"},{\"id\":8,\"name\":\"Think Twice\",\"manaCost\":\"{1}{U}\",\"typeLine\":\"Instant\",\"text\":\"Draw a card.\\nFlashback {2}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":9,\"name\":\"Undead Alchemist\",\"manaCost\":\"{3}{U}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"If a Zombie you control would deal combat damage to a player, instead that player mills that many cards.\\nWhenever a creature card is put into an opponent's graveyard from their library, exile that card and create a 2/2 black Zombie creature token.\"},{\"id\":10,\"name\":\"Abattoir Ghoul\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"First strike\\nWhenever a creature dealt damage by this creature this turn dies, you gain life equal to that creature's toughness.\"},{\"id\":11,\"name\":\"Altar's Reap\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, sacrifice a creature.\\nDraw two cards.\"},{\"id\":12,\"name\":\"Army of the Damned\",\"manaCost\":\"{5}{B}{B}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Create thirteen tapped 2/2 black Zombie creature tokens.\\nFlashback {7}{B}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":13,\"name\":\"Bitterheart Witch\",\"manaCost\":\"{4}{B}\",\"typeLine\":\"Creature — Human Shaman\",\"text\":\"Deathtouch\\nWhen this creature dies, you may search your library for a Curse card, put it onto the battlefield attached to target player, then shuffle.\"},{\"id\":14,\"name\":\"Bloodgift Demon\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Creature — Demon\",\"text\":\"Flying\\nAt the beginning of your upkeep, target player draws a card and loses 1 life.\"},{\"id\":15,\"name\":\"Bloodline Keeper\",\"manaCost\":null,\"typeLine\":\"Creature — Vampire // Creature — Vampire\",\"text\":null,\"faces\":[{\"name\":\"Bloodline Keeper\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying\\n{T}: Create a 2/2 black Vampire creature token with flying.\\n{B}: Transform this creature. Activate only if you control five or more Vampires.\"},{\"name\":\"Lord of Lineage\",\"manaCost\":\"\",\"typeLine\":\"Creature — Vampire\",\"text\":\"Flying\\nOther Vampire creatures you control get +2/+2.\\n{T}: Create a 2/2 black Vampire creature token with flying.\"}]},{\"id\":16,\"name\":\"Brain Weevil\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Insect\",\"text\":\"Intimidate (This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.)\\nSacrifice this creature: Target player discards two cards. Activate only as a sorcery.\"},{\"id\":17,\"name\":\"Bump in the Night\",\"manaCost\":\"{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent loses 3 life.\\nFlashback {5}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)\"},{\"id\":18,\"name\":\"Corpse Lunge\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Instant\",\"text\":\"As an additional cost to cast this spell, exile a creature card from your graveyard.\\nCorpse Lunge deals damage equal to the exiled card's power to target creature.\"},{\"id\":19,\"name\":\"Curse of Death's Hold\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nCreatures enchanted player controls get -1/-1.\"},{\"id\":20,\"name\":\"Curse of Oblivion\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Enchantment — Aura Curse\",\"text\":\"Enchant player\\nAt the beginning of enchanted player's upkeep, that player exiles two cards from their graveyard.\"},{\"id\":21,\"name\":\"Dead Weight\",\"manaCost\":\"{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant creature\\nEnchanted creature gets -2/-2.\"},{\"id\":22,\"name\":\"Diregraf Ghoul\",\"manaCost\":\"{B}\",\"typeLine\":\"Creature — Zombie\",\"text\":\"This creature enters tapped.\"},{\"id\":23,\"name\":\"Disciple of Griselbrand\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Creature — Human Cleric\",\"text\":\"{1}, Sacrifice a creature: You gain life equal to the sacrificed creature's toughness.\"},{\"id\":24,\"name\":\"Endless Ranks of the Dead\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Enchantment\",\"text\":\"At the beginning of your upkeep, create X 2/2 black Zombie creature tokens, where X is half the number of Zombies you control, rounded down.\"},{\"id\":25,\"name\":\"Falkenrath Noble\",\"manaCost\":\"{3}{B}\",\"typeLine\":\"Creature — Vampire Noble\",\"text\":\"Flying\\nWhenever this creature or another creature dies, target player loses 1 life and you gain 1 life.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"draw\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[]},{\"id\":7,\"roles\":[\"draw\"]},{\"id\":8,\"roles\":[\"draw\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[]},{\"id\":11,\"roles\":[\"draw\"]},{\"id\":12,\"roles\":[]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[\"draw\"]},{\"id\":15,\"roles\":[]},{\"id\":16,\"roles\":[]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[]},{\"id\":21,\"roles\":[\"interaction\"]},{\"id\":22,\"roles\":[]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["draw"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": []
+        },
+        {
+          "id": 7,
+          "roles": ["draw"]
+        },
+        {
+          "id": 8,
+          "roles": ["draw"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": []
+        },
+        {
+          "id": 11,
+          "roles": ["draw"]
+        },
+        {
+          "id": 12,
+          "roles": []
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": ["draw"]
+        },
+        {
+          "id": 15,
+          "roles": []
+        },
+        {
+          "id": 16,
+          "roles": []
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": []
+        },
+        {
+          "id": 21,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 22,
+          "roles": []
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": []
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1301,
+      "cacheCreationInputTokens": 32728,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.7737590000000001,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.7737590000000001,
+      "pricedUsd": 0.773759,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.773759 and its own usage prices at $0.773759"
+    }
+  }
+}

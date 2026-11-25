@@ -1,0 +1,161 @@
+{
+  "key": "98e9db687e6d5152b52c8ef6f78cdbc3",
+  "recordedAt": "2026-11-22T21:33:43.600Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You classify Magic: The Gathering cards for a Limited (draft and sealed) deck evaluator. For each card, list every role it fills from this vocabulary, or none: \"interaction\": the card can remove, neutralize or answer an opposing creature, other permanent or spell. This includes destroying, exiling, dealing damage to or shrinking a target creature or the opposing creatures, fight and bite effects, returning an opposing permanent to hand, countering a spell, stealing a permanent, and Auras or effects that stop a creature attacking and blocking. Narrow or conditional answers still count. Damage only to players, graveyard exile, pump spells and combat tricks that only grant bonuses do not count. \"draw\": the card gains card advantage by drawing more cards than it costs, or by returning cards from a graveyard to hand. Cycling, and drawing that requires discarding as many cards, do not count. \"fixing\": the card produces or fetches mana of more than one color, such as dual lands, mana creatures or artifacts that add any color, and spells that search for basic lands. Judge from the rules text given. Answer for every card, using its id.",
+    "prompt": "<task>\n{\"cards\":[{\"id\":1,\"name\":\"Psychic Miasma\",\"manaCost\":\"{1}{B}\",\"typeLine\":\"Sorcery\",\"text\":\"Target player discards a card. If a land card is discarded this way, return Psychic Miasma to its owner's hand.\"},{\"id\":2,\"name\":\"Relic Putrescence\",\"manaCost\":\"{2}{B}\",\"typeLine\":\"Enchantment — Aura\",\"text\":\"Enchant artifact\\nWhenever enchanted artifact becomes tapped, its controller gets a poison counter.\"},{\"id\":3,\"name\":\"Skinrender\",\"manaCost\":\"{2}{B}{B}\",\"typeLine\":\"Creature — Phyrexian Zombie\",\"text\":\"When this creature enters, put three -1/-1 counters on target creature.\"},{\"id\":4,\"name\":\"Skithiryx, the Blight Dragon\",\"manaCost\":\"{3}{B}{B}\",\"typeLine\":\"Legendary Creature — Phyrexian Dragon Skeleton\",\"text\":\"Flying\\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\\n{B}: Skithiryx gains haste until end of turn.\\n{B}{B}: Regenerate Skithiryx.\"},{\"id\":5,\"name\":\"Tainted Strike\",\"manaCost\":\"{B}\",\"typeLine\":\"Instant\",\"text\":\"Target creature gets +1/+0 and gains infect until end of turn. (It deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)\"},{\"id\":6,\"name\":\"Arc Trail\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Arc Trail deals 2 damage to any target and 1 damage to any other target.\"},{\"id\":7,\"name\":\"Assault Strobe\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target creature gains double strike until end of turn. (It deals both first-strike and regular combat damage.)\"},{\"id\":8,\"name\":\"Barrage Ogre\",\"manaCost\":\"{3}{R}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"{T}, Sacrifice an artifact: This creature deals 2 damage to any target.\"},{\"id\":9,\"name\":\"Blade-Tribe Berserkers\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Human Berserker\",\"text\":\"Metalcraft — When this creature enters, if you control three or more artifacts, this creature gets +3/+3 and gains haste until end of turn.\"},{\"id\":10,\"name\":\"Bloodshot Trainee\",\"manaCost\":\"{3}{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"{T}: This creature deals 4 damage to target creature. Activate only if this creature's power is 4 or greater.\"},{\"id\":11,\"name\":\"Cerebral Eruption\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Target opponent reveals the top card of their library. Cerebral Eruption deals damage equal to the revealed card's mana value to that player and each creature that player controls. If a land card is revealed this way, return Cerebral Eruption to its owner's hand.\"},{\"id\":12,\"name\":\"Embersmith\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Human Artificer\",\"text\":\"Whenever you cast an artifact spell, you may pay {1}. If you do, this creature deals 1 damage to any target.\"},{\"id\":13,\"name\":\"Ferrovore\",\"manaCost\":\"{2}{R}\",\"typeLine\":\"Creature — Beast\",\"text\":\"{R}, Sacrifice an artifact: This creature gets +3/+0 until end of turn.\"},{\"id\":14,\"name\":\"Flameborn Hellion\",\"manaCost\":\"{5}{R}\",\"typeLine\":\"Creature — Hellion\",\"text\":\"Haste\\nThis creature attacks each combat if able.\"},{\"id\":15,\"name\":\"Furnace Celebration\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Enchantment\",\"text\":\"Whenever you sacrifice another permanent, you may pay {2}. If you do, this enchantment deals 2 damage to any target.\"},{\"id\":16,\"name\":\"Galvanic Blast\",\"manaCost\":\"{R}\",\"typeLine\":\"Instant\",\"text\":\"Galvanic Blast deals 2 damage to any target.\\nMetalcraft — Galvanic Blast deals 4 damage instead if you control three or more artifacts.\"},{\"id\":17,\"name\":\"Goblin Gaveleer\",\"manaCost\":\"{R}\",\"typeLine\":\"Creature — Goblin Warrior\",\"text\":\"Trample\\nThis creature gets +2/+0 for each Equipment attached to it.\"},{\"id\":18,\"name\":\"Hoard-Smelter Dragon\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Dragon\",\"text\":\"Flying\\n{3}{R}: Destroy target artifact. This creature gets +X/+0 until end of turn, where X is that artifact's mana value.\"},{\"id\":19,\"name\":\"Koth of the Hammer\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Legendary Planeswalker — Koth\",\"text\":\"+1: Untap target Mountain. It becomes a 4/4 red Elemental creature until end of turn. It's still a land.\\n−2: Add {R} for each Mountain you control.\\n−5: You get an emblem with \\\"Mountains you control have '{T}: This land deals 1 damage to any target.'\\\"\"},{\"id\":20,\"name\":\"Kuldotha Phoenix\",\"manaCost\":\"{2}{R}{R}{R}\",\"typeLine\":\"Creature — Phoenix\",\"text\":\"Flying, haste\\nMetalcraft — {4}: Return this card from your graveyard to the battlefield. Activate only during your upkeep and only if you control three or more artifacts.\"},{\"id\":21,\"name\":\"Kuldotha Rebirth\",\"manaCost\":\"{R}\",\"typeLine\":\"Sorcery\",\"text\":\"As an additional cost to cast this spell, sacrifice an artifact.\\nCreate three 1/1 red Goblin creature tokens.\"},{\"id\":22,\"name\":\"Melt Terrain\",\"manaCost\":\"{2}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Destroy target land. Melt Terrain deals 2 damage to that land's controller.\"},{\"id\":23,\"name\":\"Molten Psyche\",\"manaCost\":\"{1}{R}{R}\",\"typeLine\":\"Sorcery\",\"text\":\"Each player shuffles the cards from their hand into their library, then draws that many cards.\\nMetalcraft — If you control three or more artifacts, Molten Psyche deals damage to each opponent equal to the number of cards that player has drawn this turn.\"},{\"id\":24,\"name\":\"Ogre Geargrabber\",\"manaCost\":\"{4}{R}{R}\",\"typeLine\":\"Creature — Ogre Warrior\",\"text\":\"Whenever this creature attacks, gain control of target Equipment an opponent controls until end of turn. Attach it to this creature. When you lose control of that Equipment, unattach it.\"},{\"id\":25,\"name\":\"Oxidda Daredevil\",\"manaCost\":\"{1}{R}\",\"typeLine\":\"Creature — Goblin Artificer\",\"text\":\"Sacrifice an artifact: This creature gains haste until end of turn.\"}]}\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"id\":{\"exclusiveMinimum\":0,\"maximum\":9007199254740991,\"type\":\"integer\"},\"roles\":{\"items\":{\"enum\":[\"interaction\",\"draw\",\"fixing\"],\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"id\",\"roles\"],\"type\":\"object\"},\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["interaction", "draw", "fixing"]
+                }
+              }
+            },
+            "required": ["id", "roles"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cards"],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"id\":1,\"roles\":[]},{\"id\":2,\"roles\":[]},{\"id\":3,\"roles\":[\"interaction\"]},{\"id\":4,\"roles\":[]},{\"id\":5,\"roles\":[]},{\"id\":6,\"roles\":[\"interaction\"]},{\"id\":7,\"roles\":[]},{\"id\":8,\"roles\":[\"interaction\"]},{\"id\":9,\"roles\":[]},{\"id\":10,\"roles\":[\"interaction\"]},{\"id\":11,\"roles\":[\"interaction\"]},{\"id\":12,\"roles\":[\"interaction\"]},{\"id\":13,\"roles\":[]},{\"id\":14,\"roles\":[]},{\"id\":15,\"roles\":[\"interaction\"]},{\"id\":16,\"roles\":[\"interaction\"]},{\"id\":17,\"roles\":[]},{\"id\":18,\"roles\":[\"interaction\"]},{\"id\":19,\"roles\":[\"interaction\"]},{\"id\":20,\"roles\":[\"draw\"]},{\"id\":21,\"roles\":[]},{\"id\":22,\"roles\":[\"interaction\"]},{\"id\":23,\"roles\":[]},{\"id\":24,\"roles\":[\"interaction\"]},{\"id\":25,\"roles\":[]}]}",
+    "structured": {
+      "cards": [
+        {
+          "id": 1,
+          "roles": []
+        },
+        {
+          "id": 2,
+          "roles": []
+        },
+        {
+          "id": 3,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 4,
+          "roles": []
+        },
+        {
+          "id": 5,
+          "roles": []
+        },
+        {
+          "id": 6,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 7,
+          "roles": []
+        },
+        {
+          "id": 8,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 9,
+          "roles": []
+        },
+        {
+          "id": 10,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 11,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 12,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 13,
+          "roles": []
+        },
+        {
+          "id": 14,
+          "roles": []
+        },
+        {
+          "id": 15,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 16,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 17,
+          "roles": []
+        },
+        {
+          "id": 18,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 19,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 20,
+          "roles": ["draw"]
+        },
+        {
+          "id": 21,
+          "roles": []
+        },
+        {
+          "id": 22,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 23,
+          "roles": []
+        },
+        {
+          "id": 24,
+          "roles": ["interaction"]
+        },
+        {
+          "id": 25,
+          "roles": []
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 1696,
+      "cacheCreationInputTokens": 32642,
+      "cacheReadInputTokens": 54129
+    },
+    "costUsd": 0.791789,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.791789,
+      "pricedUsd": 0.791789,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.791789 and its own usage prices at $0.791789"
+    }
+  }
+}
